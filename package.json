@@ -1,0 +1,36 @@
+{
+  "name": "@ait-co/agent-plugin",
+  "version": "0.1.0",
+  "description": "Community plugin for building Apps in Toss mini-apps from inside Claude Code and OpenAI Codex",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.12",
+    "@changesets/cli": "^2.31.0"
+  },
+  "keywords": [
+    "apps-in-toss",
+    "toss",
+    "mini-app",
+    "claude-code",
+    "codex",
+    "plugin"
+  ],
+  "packageManager": "pnpm@10.33.0",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apps-in-toss-community/agent-plugin"
+  },
+  "bugs": {
+    "url": "https://github.com/apps-in-toss-community/agent-plugin/issues"
+  }
+}
