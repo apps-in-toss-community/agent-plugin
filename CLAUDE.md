@@ -11,7 +11,7 @@
 - **`devtools`** — `/ait new`가 스캐폴딩하는 미니앱 템플릿의 dev 의존성.
 - **`polyfill`** — (선택) `/ait new` 시 표준 Web API 모드로 스캐폴딩할 때 주입.
 - **`docs`** — `/ait docs <topic>`이 세션에 로드하는 문서 소스.
-- **`sdk-example`** — `/ait docs`가 각 SDK 주제에서 live code로 deep-link.
+- **`sdk-example`** (downstream consumer) — `/ait docs`가 각 SDK 주제에서 live code로 deep-link. 더 나아가 **agent-plugin이 완성되면 sdk-example 자체의 유지보수**(새 API 추가, 스크린샷/예제 갱신 등)를 `/ait` 명령으로 자동화한다. 이게 agent-plugin의 주요 dog-fooding 타겟.
 - **`console-cli`** — `/ait deploy`가 내부적으로 호출.
 - **`oidc-bridge`** — `/ait new`에서 Supabase/Firebase 옵션 선택 시 연결.
 
