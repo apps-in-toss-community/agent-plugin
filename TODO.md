@@ -1,13 +1,13 @@
 # TODO
 
 ## High Priority
-- [ ] Scaffold dual structure — `shared/{skills,commands,templates}/` + `.claude-plugin/` manifest. Prove the layout with one end-to-end skill (suggest: `docs <topic>` — lowest dependency, only needs `Read`/`WebFetch`).
+(None)
 
 ## Medium Priority
+- [ ] `docs <topic>` 실제 동작 검증 + 다른 skill 구현 — docs repo에 콘텐츠가 채워지면 실제 토픽으로 로컬/원격 리졸빙 확인, 그 후 `new-miniapp`/`deploy`부터 순차 구현
 - [ ] `new-miniapp` skill + 기본 React+Vite 템플릿 (`templates/react-vite/`) — devtools dev-dep 주입 포함. Requires devtools 0.1.x on npm.
 - [ ] `deploy` skill — `ait-console deploy` wrapping. Requires console-cli `login`+`deploy` 구현 완료.
-- [ ] `docs <topic>` skill — docs repo 경로 리졸버 + `Read`/`WebFetch` 안내. docs 콘텐츠가 의미 있게 채워진 뒤 우선순위 상승.
-- [ ] Claude Code plugin manifest (`.claude-plugin/plugin.json`) + marketplace 등록
+- [ ] Claude Code marketplace 등록 (manifest는 이미 존재)
 
 ## Low Priority
 - [ ] Gemini CLI extension (`gemini-extension.json`) — Phase 2 타겟
