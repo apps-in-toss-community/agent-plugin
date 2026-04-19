@@ -141,6 +141,10 @@ agent-plugin/
 
 ## Status
 
-placeholder 상태. 구조 scaffolding부터 시작.
+Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/plugin.json` 존재.
 
-전체 로드맵은 [landing page](https://apps-in-toss-community.github.io/) 참고. 짝 repo 관계는 상위 `../CLAUDE.md`(umbrella)의 "의존성 지도" 참고.
+- ✅ **작동하는 skill**: `docs` (`/ait docs <topic>` — docs repo에서 주제 페이지 로드, 없으면 graceful fallback)
+- 📝 **Stub skill** (placeholder만, TODO 마커로 의존 repo 표시): `new-miniapp`, `inject-devtools`, `inject-polyfill`, `deploy`, `logs`, `status`, `auth-setup`, `debug`
+- 📁 **Templates**: 디렉토리 생성됨, 실제 템플릿은 의존 repo(devtools/polyfill/oidc-bridge) 준비 후 추가
+
+다음 단계는 `TODO.md`의 Medium Priority 참고. 전체 로드맵은 [landing page](https://apps-in-toss-community.github.io/), 짝 repo 관계는 상위 `../CLAUDE.md`(umbrella)의 "의존성 지도" 참고.

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "ait",
+  "description": "Community plugin for building Apps in Toss mini-apps from inside AI coding agents.",
+  "author": {
+    "name": "apps-in-toss-community"
+  },
+  "homepage": "https://apps-in-toss-community.github.io/",
+  "repository": "https://github.com/apps-in-toss-community/agent-plugin",
+  "license": "BSD-3-Clause",
+  "keywords": ["apps-in-toss", "toss", "mini-app", "claude-code", "community"],
+  "skills": "./shared/skills/",
+  "commands": "./shared/commands/"
+}
