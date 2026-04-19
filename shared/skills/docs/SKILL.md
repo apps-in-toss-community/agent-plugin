@@ -66,13 +66,19 @@ docs/                              # repo root
 
 **리졸빙 순서** (사용자가 `/ait docs <topic>`으로 호출, 슬래시 없는 단일 토픽):
 
-1. `docs/api/<topic>/` — 디렉토리면 그 안의 `.md`/`.mdx` 파일 목록 제공, 사용자에게 정확한 method 선택을 되묻거나 index 파일(`index.md`/`index.mdx`)이 있으면 그것을 로드
+1. `docs/api/<topic>/` — 디렉토리면 다음 우선순위로 해석:
+   1. `index.md` 또는 `index.mdx`가 있으면 **그것을 로드**
+   2. 그 외에 파일이 **정확히 하나**면 그 파일을 로드
+   3. 여러 파일이면 목록을 사용자에게 제시하고 **되묻는다** ("이 중 어느 것을
+      볼까요?")
 2. `docs/api/<topic>.md` / `.mdx` — 단일 파일인 경우
-3. `docs/guides/<topic>.md` / `.mdx`
-4. `docs/getting-started/<topic>.md` / `.mdx`
+3. `docs/getting-started/<topic>.md` / `.mdx` — onboarding용 (quickstart, setup 등)
+4. `docs/guides/<topic>.md` / `.mdx` — "왜/언제"
 5. `docs/recipes/<topic>.md` / `.mdx`
 6. `docs/reference/<topic>.md` / `.mdx`
 7. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
+
+`.md`와 `.mdx`를 시도할 때는 **`.mdx` 먼저**. `api/`는 `.mdx`가 관례.
 
 ## 실행 순서
 
@@ -98,9 +104,9 @@ https://raw.githubusercontent.com/apps-in-toss-community/docs/main/docs/<resolve
 위 "리졸빙 순서"대로 차례로 시도. 첫 hit에서 중단.
 
 예: `/ait docs clipboard`
-- `ls ../docs/docs/api/clipboard/` → 디렉토리 있음, 안의 파일 나열
-  (예: `setClipboardText.mdx`) → index가 없으면 사용자에게 "어떤 method를
-  보여드릴까요?"로 되묻거나, 파일이 하나뿐이면 그대로 로드
+- `ls ../docs/docs/api/clipboard/` → 디렉토리 있음
+- index 파일 없음 → 파일 목록 확인 → `setClipboardText.mdx` 하나뿐이면
+  그대로 로드. 여러 개면 사용자에게 "어떤 method를 보여드릴까요?"로 되묻는다
 - 로컬 없으면 `WebFetch https://api.github.com/repos/apps-in-toss-community/docs/contents/docs/api/clipboard`
   로 디렉토리 목록을 얻고 동일 처리
 
