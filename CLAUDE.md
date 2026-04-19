@@ -99,28 +99,29 @@ templates/
 
 `new-miniapp` skill이 참조. 단순 파일 복사 + 변수 치환으로 동작.
 
-## 디렉토리 구조
+## 디렉토리 구조 (계획 전체 — 현재 일부만 존재)
 
 ```
 agent-plugin/
-├── shared/
-│   ├── skills/                  # SKILL.md + 하위 리소스
-│   ├── commands/                # slash command 진입점
-│   └── templates/               # 스캐폴딩 템플릿
+├── shared/                      # ✅ 존재
+│   ├── skills/                  # ✅ SKILL.md + 하위 리소스
+│   ├── commands/                # ✅ slash command 진입점
+│   └── templates/               # ✅ (README만, 실제 템플릿은 계획)
 │
-├── .claude-plugin/              # Claude Code marketplace manifest
-├── .cursor-plugin/              # Cursor (선택)
-├── gemini-extension.json        # Gemini CLI extension (선택)
-├── .codex-plugin/               # Codex (스펙 확정 후)
+├── .claude-plugin/              # ✅ Claude Code plugin manifest (Phase 1)
+├── gemini-extension.json        # 🔜 Gemini CLI extension (Phase 2)
+├── .codex-plugin/               # 🔜 Codex (Phase 3, 스펙 확정 후)
+├── .cursor-plugin/              # 🔜 Cursor (Phase 4, 번들 포맷 정해지면)
 │
-├── install/                     # 공식 번들 매니페스트 없는 도구용
+├── install/                     # 🔜 공식 번들 매니페스트 없는 도구용 (Phase 4)
 │   ├── cursor.sh
 │   └── windsurf.sh
 │
-└── scripts/build.ts             # shared/ → 각 타겟 생성 (필요 시점에)
+└── scripts/build.ts             # 🔜 shared/ → 각 타겟 생성 (필요 시점에)
 ```
 
-`shared/`가 source of truth. 각 도구별 어댑터 디렉토리는 파일명/경로만 다름.
+✅ = 존재, 🔜 = 계획. `shared/`가 source of truth. 각 도구별 어댑터
+디렉토리는 파일명/경로만 다름. 현재 상태는 아래 "Status" 섹션 참고.
 
 ## 배포 전략
 

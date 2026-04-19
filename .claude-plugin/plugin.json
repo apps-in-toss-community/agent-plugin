@@ -1,6 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
   "name": "ait",
+  "version": "0.1.0",
   "description": "Community plugin for building Apps in Toss mini-apps from inside AI coding agents.",
   "author": {
     "name": "apps-in-toss-community"
