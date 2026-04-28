@@ -48,6 +48,20 @@ agent-plugin/
 
 Codex / Gemini CLI / Cursor / Windsurf는 Phase 2+ 예정입니다. [`CLAUDE.md`](./CLAUDE.md)의 "배포 전략" 참고.
 
+## Development / 개발 환경
+
+### Pre-commit hook
+
+Optional but recommended. After cloning, activate the standard pre-commit hook (runs `biome check` on staged files):
+
+```sh
+git config core.hooksPath .githooks
+```
+
+This is a developer convenience for fast feedback before push. CI runs the same checks as the enforcement layer, so contributors who don't activate the hook will still see lint failures in their PR.
+
+clone 후 위 한 줄을 실행하면 staged 파일에 `biome check`이 자동으로 돌아 push 전에 lint 문제를 잡아줍니다. 활성화는 선택이지만 권장합니다 — 활성화하지 않아도 CI에서 동일한 검사가 enforcement layer로 동작합니다.
+
 ## Status
 
 See the [organization landing page](https://apps-in-toss-community.github.io/) for the full roadmap.
