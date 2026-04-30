@@ -1,5 +1,5 @@
 ---
-description: Fetch recent runtime logs from the console.
+description: '(stub) Fetch recent runtime logs from the console.'
 ---
 
 Load the `logs` skill.
