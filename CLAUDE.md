@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-## 프로젝트 성격
+## 프로젝트 성격 (중요)
 
 비공식(unofficial) 오픈소스 커뮤니티. "공식/official/토스가 제공하는/powered by Toss" 등 제휴·후원·인증 암시 표현 금지. 상세는 umbrella `../CLAUDE.md`의 "프로젝트 성격" 참조.
 
