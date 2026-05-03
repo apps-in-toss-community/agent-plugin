@@ -78,4 +78,4 @@ Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/plugin.
 
 ## 공통 규칙
 
-공통 스택(Node 24 / pnpm 10.33.0 / Biome / pre-commit hook), `gw` 사용법, commit 스타일은 umbrella [`CLAUDE.md`](https://github.com/apps-in-toss-community/umbrella/blob/main/CLAUDE.md) 참조. TODO는 umbrella [`TODO.md`](https://github.com/apps-in-toss-community/umbrella/blob/main/TODO.md)가 single source of truth — 이 repo의 `TODO.md`는 stub.
+공통 스택(Node 24 / pnpm 10.33.0 / Biome / pre-commit hook), `gw` 사용법, commit 스타일은 umbrella [`CLAUDE.md`](https://github.com/apps-in-toss-community/umbrella/blob/main/CLAUDE.md) 참조. TODO는 umbrella [`TODO.md`](https://github.com/apps-in-toss-community/umbrella/blob/main/TODO.md)가 single source of truth — 이 repo의 `TODO.md`는 stub. PR 머지 시 작성자가 관련 항목 close + 새 follow-up 추가 — 상세는 umbrella [`CLAUDE.md` "TODO 관리"](https://github.com/apps-in-toss-community/umbrella/blob/main/CLAUDE.md#todo-관리--umbrella가-single-source-of-truth).
