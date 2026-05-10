@@ -29,32 +29,26 @@ source of truth. 이 skill은 "어디를 어떻게 읽을지"만 안내한다.
 ## 대상 문서 구조 (Docusaurus 3)
 
 docs repo는 Docusaurus 3 기반. 콘텐츠 루트는 **`docs/docs/`** (repo 이름과
-동일한 이름의 하위 디렉토리 — Docusaurus 관례):
+동일한 이름의 하위 디렉토리 — Docusaurus 관례). 현재 실제 구조:
 
 ```
 docs/                              # repo root
 └── docs/                          # Docusaurus content root
-    ├── intro.md
-    ├── getting-started/
-    │   ├── what-is-apps-in-toss.md
-    │   ├── quickstart.md
-    │   └── ...
-    ├── guides/                    # "왜/언제" 중심
-    │   ├── auth-flow.md
-    │   ├── iap-workflow.md
-    │   └── ...
+    ├── intro.md                   # 랜딩 (slug: /)
     ├── api/                       # "무엇/어떻게" 레퍼런스
-    │   └── <group>/
+    │   └── <group>/               # clipboard, location, storage
+    │       ├── index.mdx          # 그룹 개요
     │       └── <method>.mdx       # 예: api/clipboard/setClipboardText.mdx
-    ├── recipes/
-    └── reference/
-        ├── changelog.md
-        ├── community-projects.md
-        └── glossary.md
+    └── guides/                    # "왜/언제" 패턴
+        └── permissions-pattern.mdx
 ```
 
 파일 확장자는 `.md` 또는 `.mdx` 혼용(특히 `api/`는 `.mdx`가 흔하다). 리졸버는
-둘 다 시도한다.
+둘 다 시도하며, **`.mdx` 먼저** (`api/` 관례).
+
+> docs repo는 작성 중이라 위 구조는 시간에 따라 확장된다 (`recipes/`,
+> `reference/`, `getting-started/`는 아직 없음 — 향후 추가될 수 있다).
+> 토픽이 안 잡히면 graceful fallback으로 안내한다.
 
 ## 토픽 → 경로 리졸빙
 
@@ -66,19 +60,29 @@ docs/                              # repo root
 
 **리졸빙 순서** (사용자가 `/ait docs <topic>`으로 호출, 슬래시 없는 단일 토픽):
 
-1. `docs/api/<topic>/` — 디렉토리면 다음 우선순위로 해석:
-   1. `index.md` 또는 `index.mdx`가 있으면 **그것을 로드**
-   2. 그 외에 파일이 **정확히 하나**면 그 파일을 로드
+1. **Root 단발 페이지** — `intro` 같은 짧은 토픽은 `docs/<topic>.md` /
+   `.mdx`를 먼저 시도 (현재 `docs/intro.md` 하나만 해당).
+2. `docs/api/<topic>/` — 디렉토리면 다음 우선순위로 해석:
+   1. `index.md` 또는 `index.mdx`가 있으면 **그것을 로드** (그룹 개요 페이지)
+   2. 그 외에 파일이 **정확히 하나**면 그 파일을 로드 (현재는 모든 그룹이
+      `index.mdx`를 가지므로 도달하지 않지만, 신규 그룹이 index 없이
+      method 단일 파일로 추가될 가능성을 위한 safety net)
    3. 여러 파일이면 목록을 사용자에게 제시하고 **되묻는다** ("이 중 어느 것을
       볼까요?")
-2. `docs/api/<topic>.md` / `.mdx` — 단일 파일인 경우
-3. `docs/getting-started/<topic>.md` / `.mdx` — onboarding용 (quickstart, setup 등)
-4. `docs/guides/<topic>.md` / `.mdx` — "왜/언제"
-5. `docs/recipes/<topic>.md` / `.mdx`
-6. `docs/reference/<topic>.md` / `.mdx`
-7. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
+3. `docs/guides/<topic>.md` / `.mdx` — "왜/언제" 패턴 (예:
+   `permissions-pattern`)
+4. (향후 확장) `docs/getting-started/`, `docs/recipes/`, `docs/reference/` —
+   현재 미존재. 디렉토리가 추가되면 같은 `<topic>.{md,mdx}` 패턴으로 시도.
+5. (드물다) `docs/api/<topic>.md` / `.mdx` — 현재 모든 `api/` 항목이
+   디렉토리 구조라 거의 안 맞지만, 단일 파일 컨벤션이 들어올 수 있어 후순위
+   safety net.
+6. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
 
 `.md`와 `.mdx`를 시도할 때는 **`.mdx` 먼저**. `api/`는 `.mdx`가 관례.
+
+**Method-only 토픽 처리**: 사용자가 group 없이 method 이름만 주면
+(예: `setClipboardText`) — root/api/guides에 단일 파일이 없으면 fallback에서
+"`api/<group>/<method>` 형태로 다시 시도해보세요" 힌트를 보여준다.
 
 ## 실행 순서
 
@@ -105,18 +109,23 @@ https://raw.githubusercontent.com/apps-in-toss-community/docs/main/docs/<resolve
 
 예: `/ait docs clipboard`
 - `ls ../docs/docs/api/clipboard/` → 디렉토리 있음
-- index 파일 없음 → 파일 목록 확인 → `setClipboardText.mdx` 하나뿐이면
-  그대로 로드. 여러 개면 사용자에게 "어떤 method를 보여드릴까요?"로 되묻는다
+- `index.mdx` 발견 → 그것을 로드 (그룹 개요 페이지). 사용자가 method 단위가
+  필요하면 개요의 method 표를 따라 `/ait docs api/clipboard/setClipboardText`
+  같은 슬래시 경로로 다시 호출
 - 로컬 없으면 `WebFetch https://api.github.com/repos/apps-in-toss-community/docs/contents/docs/api/clipboard`
-  로 디렉토리 목록을 얻고 동일 처리
+  로 디렉토리 목록 → 동일 처리
 
 예: `/ait docs api/clipboard/setClipboardText`
 - `Read ../docs/docs/api/clipboard/setClipboardText.mdx` → 로드
 - 로컬 실패 시 `Read ../docs/docs/api/clipboard/setClipboardText.md`로 확장자 변경 재시도
 - 여전히 실패 시 원격 WebFetch (`.mdx` → `.md` 순)
 
-예: `/ait docs auth-flow`
-- `api/auth-flow/` 없음 → `api/auth-flow.mdx` 없음 → `guides/auth-flow.md` 발견 → 로드
+예: `/ait docs permissions-pattern`
+- `docs/permissions-pattern.*` 없음 → `api/permissions-pattern/` 없음 →
+  `api/permissions-pattern.*` 없음 → `guides/permissions-pattern.mdx` 발견 → 로드
+
+예: `/ait docs intro`
+- `../docs/docs/intro.md` 발견 → 로드 (root 단발 페이지)
 
 ### 3. 로드한 내용을 사용자 컨텍스트로 요약
 
@@ -147,6 +156,8 @@ deep-link한다. 관련 카드가 있으면 링크로 제안:
 - docs가 아직 해당 주제를 다루지 않음 (docs repo는 현재 작성 중입니다)
 - 토픽 이름이 다를 수 있음 — 다음 경로에서 직접 탐색해보세요:
   https://github.com/apps-in-toss-community/docs/tree/main/docs
+- method 이름만 줬다면 `api/<group>/<method>` 형태로 다시 시도해보세요
+  (예: `setClipboardText` → `/ait docs api/clipboard/setClipboardText`)
 
 대안으로:
 - 앱인토스 공식 문서를 `WebFetch`로 조회해볼 수 있습니다
