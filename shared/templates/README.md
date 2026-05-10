@@ -1,16 +1,14 @@
 # templates/
 
-`new-miniapp` skill이 참조할 스캐폴딩 템플릿이 들어갈 디렉토리.
+`new-miniapp` skill이 참조할 스캐폴딩 템플릿 디렉토리.
 
-아직 템플릿은 없음 — 구조만 준비.
+## 현재 상태
 
-## 계획
-
-| 템플릿 | 설명 | 의존 |
-|---|---|---|
-| `react-vite/` | 기본 React + Vite + `@ait-co/devtools` dev-dep | `devtools` 0.1.x npm |
-| `react-vite-polyfill/` | 위 + `@ait-co/polyfill` 모드 | `polyfill` |
-| `react-vite-supabase/` | 위 + oidc-bridge + Supabase Auth | `oidc-bridge` M1 |
+| 템플릿 | 설명 | 의존 | 상태 |
+|---|---|---|---|
+| `react-vite/` | 기본 React 19 + Vite + `@ait-co/devtools` dev-dep | `devtools` 0.1.x npm | ✅ 사용 가능 |
+| `react-vite-polyfill/` | 위 + `@ait-co/polyfill` 모드 | `polyfill` | 📝 미작성 |
+| `react-vite-supabase/` | 위 + oidc-bridge + Supabase Auth | `oidc-bridge` M1 | 📝 미작성 |
 
 ## 원칙
 

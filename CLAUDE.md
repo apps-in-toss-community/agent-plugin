@@ -72,9 +72,9 @@ agent-plugin/
 
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/plugin.json` 존재.
 
-- ✅ **작동**: `docs` skill (`/ait docs <topic>` — docs repo에서 주제 페이지 로드, 없으면 graceful fallback), `status` skill (`/ait status` — `aitcc whoami` / `app ls` / `app status` 묶어서 console 상태 요약)
-- 📝 **Stub**: `new-miniapp`, `inject-devtools`, `inject-polyfill`, `deploy`, `logs`, `auth-setup`, `debug` (placeholder + TODO 마커)
-- 📁 **Templates**: 디렉토리만, 실제 템플릿은 의존 repo 준비 후 추가
+- ✅ **작동**: `docs` skill (`/ait docs <topic>` — docs repo에서 주제 페이지 로드, 없으면 graceful fallback), `status` skill (`/ait status` — `aitcc whoami` / `app ls` / `app status` 묶어서 console 상태 요약), `new-miniapp` skill (`/ait new <app-name>` — `react-vite` 템플릿에서 빈 프로젝트 스캐폴드 + `pnpm install`)
+- 📝 **Stub**: `inject-devtools`, `inject-polyfill`, `deploy`, `logs`, `auth-setup`, `debug` (placeholder + TODO 마커)
+- 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
 
 ## 공통 스택
 
