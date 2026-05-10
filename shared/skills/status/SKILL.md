@@ -1,13 +1,134 @@
 ---
 name: status
 description: |
-  Show console state (build, deployment, review) for the current mini-app via
-  `ait-console status`. Triggered by `/ait status`.
+  Show Apps in Toss console state for the current workspace and mini-app(s)
+  via the community `aitcc` CLI. User invokes `/ait status`. Reports
+  authenticated user/workspace, mini-apps in the workspace, and (when an
+  `aitcc.yaml` is present in cwd) the review state of the current app.
+  Triggered by `/ait status`. Read-only — does not modify any console state.
 ---
 
-# status skill (stub)
+# status skill
 
-> TODO: implement when `console-cli` `status` command is complete. Blocked
-> by: `console-cli`.
+## 목적
 
-See CLAUDE.md "Skills" table for the intended responsibility.
+`/ait status` 한 번으로 사용자가 묻기 전에 답해야 하는 것:
+
+- 누가 로그인되어 있는가? (계정 + workspace)
+- 이 workspace에 등록된 미니앱이 있는가?
+- (cwd에 `aitcc.yaml`이 있으면) **이 프로젝트**의 미니앱은 지금 console에서
+  어떤 상태인가? (review, rejected, approved)
+
+이 skill은 [`@ait-co/console-cli`](https://github.com/apps-in-toss-community/console-cli)
+의 `aitcc` CLI를 Bash로 호출만 한다 — 자체 API 호출 없음.
+
+## 의존
+
+- `aitcc` CLI가 PATH에 있어야 함 (npm: `@ait-co/console-cli`).
+  - 없으면 graceful fallback (아래 "CLI 미설치" 참고).
+- 사용자가 한 번 이상 `aitcc login` 해서 세션이 캐시되어 있어야 함.
+  - 미인증이면 `aitcc whoami`가 비워진 상태로 응답 — 그것도 status의 답이다.
+
+> 이 skill은 **read-only**다. login/logout/deploy/register 같은 변경 명령을
+> 부르지 않는다 (그건 다른 skill의 책임).
+
+## 실행 순서
+
+### 1. CLI 가용성 확인
+
+```bash
+command -v aitcc
+```
+
+없으면 "CLI 미설치" fallback으로 분기.
+
+### 2. 인증 + workspace 확인
+
+```bash
+aitcc whoami --json
+```
+
+JSON shape는 console-cli가 제공한다. 핵심 필드만 사용자에게 보여준다 —
+이메일, workspaceId, workspaceName 등 (정확한 키는 호출 시 응답을 보고
+취사). 미인증이면 stdout이 비거나 에러로 나온다 — 그 상태를 그대로 알리고
+`aitcc login` 안내.
+
+### 3. Workspace의 미니앱 목록
+
+```bash
+aitcc app ls --json
+```
+
+목록을 사용자에게 보여준다 (id, 이름, 마지막 상태 정도면 충분 — 다 펼치지
+말 것). 항목이 없으면 "이 workspace에 미니앱이 없습니다" + `aitcc app
+register` 안내.
+
+### 4. 현재 프로젝트의 앱 상태 (있으면)
+
+cwd에 `aitcc.yaml` 또는 `aitcc/aitcc.yaml`이 있으면 다음을 호출한다.
+**`aitcc app status` / `service-status`는 ID 인자가 optional**이며, 같은
+디렉토리의 `aitcc.yaml`에서 `miniAppId`를 자동으로 읽는다 — 별도 YAML
+파싱 불필요:
+
+```bash
+aitcc app status --json
+aitcc app service-status --json
+```
+
+두 결과를 묶어서 보여준다:
+
+- **review state** (`under-review` / `rejected` / `approved`) — `app status`
+- **runtime state** (`serviceStatus`, shutdown 일정) — `app service-status`
+
+`aitcc.yaml`이 없으면 이 step은 skip하고, "이 디렉토리는 등록된 미니앱이
+아닙니다 — `aitcc app init`으로 시작하세요"로 끝낸다.
+
+> `aitcc.yaml` 위치 탐색은 CLI에 위임한다 (cwd 기준). parent 디렉토리를
+> 거슬러 올라갈지 여부도 CLI가 결정 — skill에서 별도 로직 없음.
+
+### 5. 요약
+
+마지막에 한 줄 요약. 예:
+
+> ✅ `dave@example.com` / workspace `3095 (주)프로덕트팩토리` · 앱 1개 ·
+> 현재 프로젝트 `aitc-sdk-example` (id 31146): under-review
+
+Bullet 두 줄을 넘기지 않는다 — 자세한 건 위에서 이미 보여줬다.
+
+## CLI 미설치 fallback
+
+`aitcc`가 없으면:
+
+```
+console 상태를 확인하려면 `@ait-co/console-cli`가 필요합니다 (현재 PATH에 없음).
+
+설치:
+  npm i -g @ait-co/console-cli       # 또는 pnpm/bun
+  aitcc login                          # 첫 1회만 브라우저, 이후 headless
+
+설치 후 다시 `/ait status`를 호출해주세요.
+
+참고: https://github.com/apps-in-toss-community/console-cli
+```
+
+`aitcc`는 있는데 미인증인 경우는 그냥 `aitcc whoami` 결과를 그대로 보여주고
+`aitcc login` 안내만 덧붙인다 — 별도 큰 fallback 블록 안 만든다.
+
+## 하지 말아야 할 것
+
+- ❌ `aitcc login` / `logout` / `deploy` / `register`를 자동 호출. 이 skill은
+  read-only.
+- ❌ `aitcc.yaml`을 자동 생성하거나 수정. (그건 `new-miniapp` 또는
+  `aitcc app init` 책임)
+- ❌ JSON 응답을 통째로 덤프. 핵심 필드만 추려서 보여준다.
+- ❌ 응답에서 access token, cookie, session blob 등 민감 정보를 그대로
+  화면에 보여주기. `aitcc whoami`는 기본적으로 redact 되어 있지만, 출력에
+  의심스러운 string이 있으면 `[redacted]`로 가린다.
+
+## 참고
+
+- console-cli 명령 레퍼런스: https://github.com/apps-in-toss-community/console-cli
+- 짝 skill: `deploy` (이 skill이 안전하다고 알려준 뒤 deploy로 넘어가는 흐름)
+- umbrella 정책: `/ait status`는 운영팀 처리 trail의 4046 lock된 앱들과
+  무관하게 현재 메인 앱(31146)에만 집중해도 충분하다 — workspace 전체 ls는
+  맥락 제공용.
