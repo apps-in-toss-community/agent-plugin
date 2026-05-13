@@ -65,4 +65,4 @@ See the [organization landing page](https://apps-in-toss-community.github.io/) f
 
 ---
 
-Community project. Not affiliated with Toss.
+Community open-source project.
