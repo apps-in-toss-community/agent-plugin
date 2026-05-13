@@ -5,7 +5,7 @@
   "author": {
     "name": "apps-in-toss-community"
   },
-  "homepage": "https://apps-in-toss-community.github.io/",
+  "homepage": "https://aitc.dev/",
   "repository": "https://github.com/apps-in-toss-community/agent-plugin",
   "license": "BSD-3-Clause",
   "keywords": ["apps-in-toss", "toss", "mini-app", "claude-code", "community"],
