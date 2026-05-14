@@ -36,6 +36,7 @@
 | `deploy` | 로그인 확인 → `ait-console deploy` → 결과 해석 | `Bash`, console-cli |
 | `logs` / `status` | 콘솔 상태 조회 | `Bash`, console-cli |
 | `auth-setup` | oidc-bridge 연결 옵션 설정 | `Edit` |
+| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 | `Edit`, `Bash` |
 | `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `Read`/`WebFetch` |
 | `debug` | (devtools MCP 있을 때) 브라우저 상태 분석; 없으면 수동 가이드 | devtools MCP (optional) |
 
