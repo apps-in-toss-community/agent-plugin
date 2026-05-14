@@ -1,5 +1,12 @@
 # @ait-co/agent-plugin
 
+## 0.1.4
+
+### Patch Changes
+
+- acc58b9: chore: align homepage URLs to aitc.dev (canonical org domain).
+- 6e9fa22: feat(skill): add setup-phone-preview skill — wires devtools quick-tunnel + launcher PWA flow into Vite projects with one command.
+
 ## 0.1.3
 
 ### Patch Changes
