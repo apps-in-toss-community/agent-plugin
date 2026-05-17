@@ -36,19 +36,23 @@ docs/                              # repo root
 └── docs/                          # Docusaurus content root
     ├── intro.md                   # 랜딩 (slug: /)
     ├── api/                       # "무엇/어떻게" 레퍼런스
-    │   └── <group>/               # clipboard, location, storage
+    │   └── <group>/               # ads, analytics, auth, camera, clipboard,
+    │       │                      # contacts, environment, events, game, haptic,
+    │       │                      # iap, location, navigation, notification,
+    │       │                      # partner, payment, permissions, storage (18개+)
     │       ├── index.mdx          # 그룹 개요
     │       └── <method>.mdx       # 예: api/clipboard/setClipboardText.mdx
-    └── guides/                    # "왜/언제" 패턴
-        └── permissions-pattern.mdx
+    ├── guides/                    # "왜/언제" 패턴
+    │   └── <guide>.mdx            # 예: auth-flow, iap-payment-flow, permissions-pattern
+    └── recipes/                   # 실제 구현 레시피 (20개+)
+        └── <recipe>.mdx           # 예: haptic-feedback, copy-paste-ux, deeplink-routing
 ```
 
 파일 확장자는 `.md` 또는 `.mdx` 혼용(특히 `api/`는 `.mdx`가 흔하다). 리졸버는
 둘 다 시도하며, **`.mdx` 먼저** (`api/` 관례).
 
-> docs repo는 작성 중이라 위 구조는 시간에 따라 확장된다 (`recipes/`,
-> `reference/`, `getting-started/`는 아직 없음 — 향후 추가될 수 있다).
-> 토픽이 안 잡히면 graceful fallback으로 안내한다.
+> docs repo는 지속적으로 확장 중이다 (`getting-started/`, `reference/`는 아직 없음
+> — 향후 추가될 수 있다). 토픽이 안 잡히면 graceful fallback으로 안내한다.
 
 ## 토픽 → 경로 리졸빙
 
@@ -71,12 +75,14 @@ docs/                              # repo root
       볼까요?")
 3. `docs/guides/<topic>.md` / `.mdx` — "왜/언제" 패턴 (예:
    `permissions-pattern`)
-4. (향후 확장) `docs/getting-started/`, `docs/recipes/`, `docs/reference/` —
+4. `docs/recipes/<topic>.md` / `.mdx` — 실제 구현 패턴 레시피 (예:
+   `haptic-feedback`, `copy-paste-ux`, `deeplink-routing`). 현재 20+ 파일 존재.
+5. (향후 확장) `docs/getting-started/`, `docs/reference/` —
    현재 미존재. 디렉토리가 추가되면 같은 `<topic>.{md,mdx}` 패턴으로 시도.
-5. (드물다) `docs/api/<topic>.md` / `.mdx` — 현재 모든 `api/` 항목이
+6. (드물다) `docs/api/<topic>.md` / `.mdx` — 현재 모든 `api/` 항목이
    디렉토리 구조라 거의 안 맞지만, 단일 파일 컨벤션이 들어올 수 있어 후순위
    safety net.
-6. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
+7. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
 
 `.md`와 `.mdx`를 시도할 때는 **`.mdx` 먼저**. `api/`는 `.mdx`가 관례.
 
@@ -122,7 +128,11 @@ https://raw.githubusercontent.com/apps-in-toss-community/docs/main/docs/<resolve
 
 예: `/ait docs permissions-pattern`
 - `docs/permissions-pattern.*` 없음 → `api/permissions-pattern/` 없음 →
-  `api/permissions-pattern.*` 없음 → `guides/permissions-pattern.mdx` 발견 → 로드
+  `guides/permissions-pattern.mdx` 발견 → 로드
+
+예: `/ait docs haptic-feedback`
+- `docs/haptic-feedback.*` 없음 → `api/haptic-feedback/` 없음 →
+  `guides/haptic-feedback.*` 없음 → `recipes/haptic-feedback.mdx` 발견 → 로드
 
 예: `/ait docs intro`
 - `../docs/docs/intro.md` 발견 → 로드 (root 단발 페이지)
@@ -142,7 +152,7 @@ docs 페이지는 각 API에 대해 **"Try it"** 섹션으로 sdk-example의 대
 deep-link한다. 관련 카드가 있으면 링크로 제안:
 
 > 실제 동작을 보고 싶다면 sdk-example의 해당 카드에서 바로 실행해볼 수
-> 있습니다: https://apps-in-toss-community.github.io/sdk-example/
+> 있습니다: https://sdk-example.aitc.dev/
 
 ## Graceful fallback (토픽 못 찾았을 때)
 
@@ -162,7 +172,7 @@ deep-link한다. 관련 카드가 있으면 링크로 제안:
 대안으로:
 - 앱인토스 공식 문서를 `WebFetch`로 조회해볼 수 있습니다
 - sdk-example에서 실제 동작하는 예제를 보여드릴 수 있습니다:
-  https://apps-in-toss-community.github.io/sdk-example/
+  https://sdk-example.aitc.dev/
 
 문서 기여: https://github.com/apps-in-toss-community/docs/issues/new
 ```
