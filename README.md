@@ -58,7 +58,7 @@ git config core.hooksPath .githooks
 
 ## 현황
 
-전체 로드맵은 [organization landing page](https://apps-in-toss-community.github.io/) 참조.
+전체 로드맵은 [organization landing page](https://aitc.dev/) 참조.
 
 ---
 
