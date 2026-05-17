@@ -1,6 +1,6 @@
 {
   "name": "@ait-co/agent-plugin",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Community plugin for building Apps in Toss mini-apps from inside Claude Code and OpenAI Codex",
   "type": "module",
   "private": true,

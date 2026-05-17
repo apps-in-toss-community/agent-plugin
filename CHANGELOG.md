@@ -1,5 +1,11 @@
 # @ait-co/agent-plugin
 
+## 0.1.5
+
+### Patch Changes
+
+- ed27cf2: fix(docs-skill): add recipes/ to resolving order — topics like haptic-feedback, copy-paste-ux, deeplink-routing were silently falling through to "not found" even though docs/docs/recipes/ has 20+ files. Also updates structure diagram and sdk-example URL to aitc.dev.
+
 ## 0.1.4
 
 ### Patch Changes
