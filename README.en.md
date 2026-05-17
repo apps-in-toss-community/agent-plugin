@@ -58,7 +58,7 @@ This is a developer convenience for fast feedback before push. CI runs the same 
 
 ## Status
 
-See the [organization landing page](https://apps-in-toss-community.github.io/) for the full roadmap.
+See the [organization landing page](https://aitc.dev/) for the full roadmap.
 
 ---
 
