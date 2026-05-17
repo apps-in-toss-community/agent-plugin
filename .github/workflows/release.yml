@@ -40,11 +40,13 @@ jobs:
 
       - run: pnpm lint
 
-      # No `publish:` → Changesets only bumps version, creates git tag,
-      # and creates a GitHub Release. The package is `private: true`, so
-      # there is no npm publish step.
+      # `changeset publish` detects `private: true` and skips npm publish.
+      # It still emits `🦋 New tag:` lines that the action reads to create
+      # git tags and GitHub Releases. Without a `publish:` field the action
+      # exits early ("no publish script found") and no tag/release is created.
       - uses: changesets/action@v1
         with:
+          publish: pnpm changeset publish
           version: pnpm changeset version
           createGithubReleases: true
         env:
