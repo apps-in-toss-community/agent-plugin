@@ -56,6 +56,20 @@ git config core.hooksPath .githooks
 
 활성화하지 않아도 CI에서 동일한 검사가 enforcement layer로 동작하므로, hook을 활성화하지 않은 contributor도 PR 단계에서 lint 실패를 볼 수 있습니다.
 
+## 텔레메트리
+
+`/ait` 명령을 실행하면 **버전·플랫폼만** 포함된 익명 사용 신호(Tier 0)가 하루 1회 자동 수집됩니다. IP·이름·코드 등 식별 정보는 수집하지 않습니다.
+
+**비활성화** — 셸 프로필이나 `.env`에 아래를 추가하세요:
+
+```sh
+export AITC_TELEMETRY=off
+```
+
+또는 `~/.config/aitc-agent-plugin/telemetry.json`의 `tier0OptOut: true` 플래그로도 비활성화할 수 있습니다.
+
+Tier 0 (자동 수집)과 Tier 1 (향후 선택적 동의) 비교, 데이터 삭제 방법은 [https://docs.aitc.dev/privacy](https://docs.aitc.dev/privacy)를 참고하세요.
+
 ## 현황
 
 전체 로드맵은 [organization landing page](https://aitc.dev/) 참조.

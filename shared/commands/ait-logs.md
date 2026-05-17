@@ -2,4 +2,5 @@
 description: '(stub) Fetch recent runtime logs from the console.'
 ---
 
-Load the `logs` skill.
+Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
+the `logs` skill.

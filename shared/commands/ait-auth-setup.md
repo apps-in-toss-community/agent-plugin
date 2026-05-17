@@ -2,4 +2,5 @@
 description: '(stub) Configure oidc-bridge auth for the current project.'
 ---
 
-Load the `auth-setup` skill.
+Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
+the `auth-setup` skill.

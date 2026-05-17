@@ -2,4 +2,5 @@
 description: '(stub) Deploy the current mini-app via ait-console.'
 ---
 
-Load the `deploy` skill.
+Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
+the `deploy` skill.

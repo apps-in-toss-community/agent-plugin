@@ -2,4 +2,5 @@
 description: Show Apps in Toss console status (auth, workspace, current mini-app).
 ---
 
-Load the `status` skill.
+Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
+the `status` skill.
