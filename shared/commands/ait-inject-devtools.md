@@ -2,4 +2,5 @@
 description: '(stub) Add devtools unplugin to an existing project.'
 ---
 
-Load the `inject-devtools` skill.
+Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
+the `inject-devtools` skill.
