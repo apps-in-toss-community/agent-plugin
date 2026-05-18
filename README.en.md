@@ -4,18 +4,19 @@
 
 > 🚧 **Work in Progress** — not yet published.
 
-Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — supports both **[Claude Code](https://claude.com/claude-code)** and **[OpenAI Codex CLI](https://developers.openai.com/codex)**.
+Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — currently supports **[Claude Code](https://claude.com/claude-code)**. Codex and other agents are planned for later phases.
 
 ## Goal
 
 Ties together `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, and the community docs into a single integrated experience. Currently scaffolded slash commands (some are stubs):
 
-- `/ait new` — scaffold a new mini-app _(stub)_
-- `/ait docs <topic>` — load curated SDK docs into the session _(working — docs repo content still being written)_
-- `/ait inject-devtools` / `/ait inject-polyfill` — inject config into an existing project _(stub)_
-- `/ait debug` — analyse browser state (when devtools MCP is present) _(stub)_
-- `/ait deploy` / `/ait logs` / `/ait status` — console-cli-backed operations _(stub)_
-- `/ait auth-setup` — configure oidc-bridge connection _(stub)_
+- `/ait new` — scaffold a new mini-app
+- `/ait docs <topic>` — load curated SDK docs into the session _(docs repo content still being written)_
+- `/ait inject-devtools` / `/ait inject-polyfill` — inject config into an existing project
+- `/ait status` / `/ait logs` — console-cli-backed status queries
+- `/ait auth-setup` — configure oidc-bridge connection
+- `/ait debug` — analyse browser state (when devtools MCP is present) _(stub — pending devtools MCP)_
+- `/ait deploy` — deploy the mini-app _(stub — pending console-cli deploy command)_
 
 See the "Skills" table in [`CLAUDE.md`](./CLAUDE.md) for the full skill list and dependency repos.
 

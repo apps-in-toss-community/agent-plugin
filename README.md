@@ -4,18 +4,19 @@
 
 > 🚧 **작업 중** — 아직 배포되지 않았습니다.
 
-AI 코딩 에이전트 안에서 앱인토스 미니앱을 **생성·개발·테스트·배포**까지 할 수 있게 해주는 커뮤니티 플러그인입니다. **[Claude Code](https://claude.com/claude-code)** 와 **[OpenAI Codex CLI](https://developers.openai.com/codex)** 를 모두 지원합니다.
+AI 코딩 에이전트 안에서 앱인토스 미니앱을 **생성·개발·테스트·배포**까지 할 수 있게 해주는 커뮤니티 플러그인입니다. 현재 **[Claude Code](https://claude.com/claude-code)** 를 지원하며, Codex 등 다른 에이전트는 후속 Phase에서 추가됩니다.
 
 ## 목표
 
 `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, 커뮤니티 docs를 엮어 하나의 통합된 경험을 제공합니다. 현재 scaffold된 slash command (일부는 stub):
 
-- `/ait new` — 새 미니앱 스캐폴딩 _(stub)_
-- `/ait docs <topic>` — 큐레이트된 SDK 문서를 세션에 로드 _(동작 중 — docs repo 콘텐츠는 작성 중)_
-- `/ait inject-devtools` / `/ait inject-polyfill` — 기존 프로젝트에 설정 주입 _(stub)_
-- `/ait debug` — 브라우저 상태 분석 (devtools MCP 있을 때) _(stub)_
-- `/ait deploy` / `/ait logs` / `/ait status` — console-cli 기반 운영 _(stub)_
-- `/ait auth-setup` — oidc-bridge 연결 구성 _(stub)_
+- `/ait new` — 새 미니앱 스캐폴딩
+- `/ait docs <topic>` — 큐레이트된 SDK 문서를 세션에 로드 _(docs repo 콘텐츠는 작성 중)_
+- `/ait inject-devtools` / `/ait inject-polyfill` — 기존 프로젝트에 설정 주입
+- `/ait status` / `/ait logs` — console-cli 기반 상태 조회
+- `/ait auth-setup` — oidc-bridge 연결 구성
+- `/ait debug` — 브라우저 상태 분석 (devtools MCP 있을 때) _(stub — devtools MCP 준비 후)_
+- `/ait deploy` — 미니앱 배포 _(stub — console-cli deploy 명령 완성 후)_
 
 전체 skill 목록과 의존 repo는 [`CLAUDE.md`](./CLAUDE.md)의 "Skills" 표 참고.
 
