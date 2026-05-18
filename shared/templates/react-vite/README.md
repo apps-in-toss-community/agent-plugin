@@ -1,10 +1,7 @@
 # {{app_name}}
 
-[apps-in-toss-community](https://github.com/apps-in-toss-community)의 비공식
-커뮤니티 템플릿(`react-vite`)에서 시작한 미니앱 프로젝트입니다.
-
-> ⚠️ 이 템플릿은 토스/앱인토스 팀과 제휴되지 않은 비공식 오픈소스 커뮤니티의
-> 산출물입니다. "공식" 도구가 아닙니다.
+[apps-in-toss-community](https://github.com/apps-in-toss-community) 커뮤니티
+템플릿(`react-vite`)에서 시작한 미니앱 프로젝트입니다.
 
 ## 스택
 
@@ -49,3 +46,7 @@ pnpm preview    # 로컬에서 빌드 결과 확인
 - 커뮤니티 SDK 레퍼런스 앱: <https://sdk-example.aitc.dev/>
 - 커뮤니티 docs: <https://docs.aitc.dev/>
 - 이슈/제안: <https://github.com/apps-in-toss-community>
+
+---
+
+커뮤니티 오픈소스 프로젝트입니다.

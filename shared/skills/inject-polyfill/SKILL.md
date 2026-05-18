@@ -4,8 +4,7 @@ description: |
   Migrate an existing Apps in Toss mini-app project to `@ait-co/polyfill` mode —
   install the package, wire up the auto-import in the entry point, and guide the
   developer on replacing proprietary SDK calls with standard Web APIs.
-  Triggered by `/ait inject-polyfill`. 비공식 커뮤니티 플러그인 — 토스/앱인토스 팀
-  공식 도구가 아님.
+  Triggered by `/ait inject-polyfill`.
 argument-hint: '[--entry <path>]'
 ---
 
@@ -24,9 +23,7 @@ SDK API 대신 **표준 Web API** (`navigator.clipboard`, `navigator.geolocation
 - 로컬 브라우저 개발 시에는 polyfill이 개입 없이 브라우저 원본 API를 사용한다.
   (`@ait-co/devtools`와 함께 쓰면 SDK mock을 경유해 동작 확인도 가능.)
 
-> 이 프로젝트는 토스/앱인토스 팀과 제휴되지 않은 비공식 오픈소스 커뮤니티의
-> 플러그인이다. 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는",
-> "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
+생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
 ## 입력
 
@@ -195,8 +192,7 @@ await setClipboardText({ text: 'hello' });
 await navigator.clipboard.writeText('hello');
 ```
 
-> 비공식 커뮤니티 프로젝트. 토스/앱인토스 팀과 제휴되지 않았습니다.
-> 자세한 내용: <https://github.com/apps-in-toss-community/polyfill>
+자세한 내용: <https://github.com/apps-in-toss-community/polyfill>
 ````
 
 ### 6. 사용자에게 후속 안내

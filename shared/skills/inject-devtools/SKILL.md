@@ -4,8 +4,7 @@ description: |
   Add `@ait-co/devtools` unplugin to an existing Apps in Toss mini-app project.
   Detects the build tool (Vite / Next.js / Rspack / Webpack), installs the dev
   dep with the right package manager, and patches the config file idempotently.
-  Triggered by `/ait inject-devtools`. 비공식 커뮤니티 플러그인 — 토스/앱인토스
-  팀 공식 도구가 아님.
+  Triggered by `/ait inject-devtools`.
 argument-hint: '[--mcp]'
 ---
 
@@ -19,9 +18,7 @@ unplugin을 추가해, 토스 앱 없이 브라우저에서 개발·테스트할
 `new-miniapp`이 from-scratch라면 `inject-devtools`는 **brownfield**. 기존 파일을
 최소한으로 수정하고, 이미 설정이 있으면 skip한다.
 
-> 이 프로젝트는 토스/앱인토스 팀과 제휴되지 않은 비공식 오픈소스 커뮤니티의
-> 플러그인이다. 생성되는 파일/주석에서 "공식(official)", "토스가 제공하는",
-> "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
+생성되는 파일/주석에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
 ## 입력
 

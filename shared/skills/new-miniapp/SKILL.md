@@ -5,8 +5,7 @@ description: |
   + Vite + TypeScript + `@ait-co/devtools` by default). Copies the template
   directory next to the user's cwd, substitutes `{{tokens}}`, and runs the
   initial `pnpm install` so `pnpm dev` works immediately. Triggered by
-  `/ait new <app-name> [--template <name>] [--no-install]`. 비공식 커뮤니티
-  플러그인 — 토스/앱인토스 팀 공식 도구가 아님.
+  `/ait new <app-name> [--template <name>] [--no-install]`.
 argument-hint: '<app-name> [--template <name>] [--no-install]'
 ---
 
@@ -27,9 +26,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 등록(`aitcc app register`), 로그인, 배포는 다른 skill 또는 console-cli의
 책임 — 여기서 자동 호출하지 않는다.
 
-> 이 프로젝트는 토스/앱인토스 팀과 제휴되지 않은 비공식 오픈소스 커뮤니티의
-> 플러그인이다. 생성되는 README/UI/주석에서 "공식(official)", "토스가 제공하는",
-> "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
+생성되는 README/UI/주석에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
 ## 입력
 
