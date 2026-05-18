@@ -23,9 +23,6 @@ argument-hint: '[topic]'
 [apps-in-toss-community/docs](https://github.com/apps-in-toss-community/docs)가
 source of truth. 이 skill은 "어디를 어떻게 읽을지"만 안내한다.
 
-> 이 프로젝트는 비공식 커뮤니티 프로젝트다. docs repo 역시 커뮤니티가
-> 재구성한 비공식 가이드이며, 토스/앱인토스 팀과 제휴 관계가 아니다.
-
 ## 대상 문서 구조 (Docusaurus 3)
 
 docs repo는 Docusaurus 3 기반. 콘텐츠 루트는 **`docs/docs/`** (repo 이름과
