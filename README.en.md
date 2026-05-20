@@ -41,7 +41,7 @@ agent-plugin/
 /plugin marketplace add apps-in-toss-community/agent-plugin
 ```
 
-Codex / Gemini CLI / Cursor / Windsurf are planned for Phase 2+. See "배포 phases" in [`CLAUDE.md`](./CLAUDE.md).
+Codex / Gemini CLI / Cursor / Windsurf are planned for Phase 2+. See the deployment-phases section in [`CLAUDE.md`](./CLAUDE.md).
 
 ## Development
 
