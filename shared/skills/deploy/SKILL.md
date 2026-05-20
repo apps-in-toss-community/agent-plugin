@@ -175,7 +175,7 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 | 에러 패턴 | 힌트 |
 |---|---|
 | `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `aitcc keys create`로 재발급. |
-| `4037` / `4040` / `4099` / `5001` (약관 미체결) | 해당 약관을 `aitcc workspace terms --type <TYPE>`으로 동의 후 재시도. |
+| `4037` / `4040` / `4099` / `5001` (약관 미체결) | 해당 약관을 `aitcc workspace terms agree <TYPE>`으로 동의 후 재시도. |
 | `4046` (REVIEW lock) | 앱이 리뷰 중입니다. 운영팀 처리를 기다린 후 재시도. 새 앱 생성으로 우회 금지. |
 | `bundle not found` / `*.ait 없음` | Step 3 빌드 단계를 건너뛰었거나 빌드가 실패함. `pnpm bundle:ait` 재실행. |
 | 기타 | 에러 메시지를 그대로 보여주고 `aitcc` 로그 / GitHub Issues 안내. |
