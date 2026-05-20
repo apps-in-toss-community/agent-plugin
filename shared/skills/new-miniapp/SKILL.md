@@ -227,7 +227,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
 
 - ❌ 기존 디렉토리 덮어쓰기 (`<package_name>/`이 이미 있으면 즉시 중단).
 - ❌ 생성된 프로젝트 어디에도 "공식(official) Toss …" / "powered by Toss" /
-  "토스가 제공하는" 표현. 비공식 커뮤니티가 source of truth.
+  "토스가 제공하는" 표현. 커뮤니티 오픈소스가 source of truth.
 - ❌ JSX/TSX 안에 토큰을 두기 (빌드를 깨뜨림 — 위 "토큰 규칙" 참고).
 - ❌ 복잡한 템플릿 엔진(handlebars/mustache/ejs) 도입. 단순 문자열 replace로
   충분하지 않은 시점이 오면, 그건 별도 design 변경이 필요한 신호.

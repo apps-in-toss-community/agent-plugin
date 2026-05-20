@@ -14,11 +14,10 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 
 `/ait auth-setup` 한 번으로 사용자 프로젝트에 **토스 로그인 → oidc-bridge 교환 → (선택) Firebase Custom Token** 흐름을 설정한다.
 
-이 skill은 비공식 커뮤니티 프로젝트다. "공식 토스 로그인 SDK", "토스가 제공하는" 같은 표현은 사용하지 않는다. `@apps-in-toss/web-framework`는 원본 SDK 이름이라 그대로 사용한다.
+이 흐름은 커뮤니티 오픈소스다. "공식 토스 로그인 SDK", "토스가 제공하는" 같은 표현은 사용하지 않는다. `@apps-in-toss/web-framework`는 원본 SDK 이름이라 그대로 사용한다.
 
 > **live 검증 상태**: 커뮤니티 공용 인스턴스(`oidc-bridge.aitc.dev`)는 운영 중.
-> sdk-example dog-food 앱(miniAppId 31146)의 REVIEW lock 해제 후
-> 앱인토스 네이티브 환경에서 end-to-end 검증 예정.
+> 앱인토스 네이티브 환경에서의 end-to-end 검증은 진행 중이다.
 
 ## 의존
 
