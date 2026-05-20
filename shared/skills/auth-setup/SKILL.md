@@ -237,6 +237,7 @@ sdk-example의 Auth 페이지(`AuthPage → OidcBridgeSection`)에서 `/oidc/tok
 
 ## 참고
 
+- 커뮤니티 docs — 토스 로그인 흐름: https://docs.aitc.dev/guides/auth-flow
 - oidc-bridge repo: https://github.com/apps-in-toss-community/oidc-bridge
 - 커뮤니티 공용 인스턴스: `https://oidc-bridge.aitc.dev`
 - sdk-example 레퍼런스 구현: `supabase/functions/toss-login/index.ts` + `src/snippets/auth/oidcExchange.ts`
