@@ -35,6 +35,7 @@
 | `inject-polyfill` | polyfill 모드로 마이그레이션 | `Edit` |
 | `deploy` | 번들 확인 → `ait deploy --api-key` → 결과 해석 + scheme URL 표시 | `Bash`, `@apps-in-toss/cli` |
 | `setup-bundle` | 기존 프로젝트에 `.ait` 번들 빌드 환경 추가 (`granite.config.ts` + `bundle:ait` 스크립트) | `Write`/`Edit`, `@apps-in-toss/cli` |
+| `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `Write`/`Bash`, console-cli |
 | `logs` / `status` | 콘솔 상태 조회 | `Bash`, console-cli |
 | `auth-setup` | oidc-bridge 연결 옵션 설정 | `Edit` |
 | `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 | `Edit`, `Bash` |
@@ -78,7 +79,7 @@ agent-plugin/
 
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/plugin.json` 존재.
 
-- ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`
+- ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`, `register`
 - 📝 **Stub**: `debug` (devtools MCP 출시 후)
 - 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
 
