@@ -40,7 +40,7 @@
 | `auth-setup` | oidc-bridge 연결 옵션 설정 | `Edit` |
 | `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 | `Edit`, `Bash` |
 | `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `Read`/`WebFetch` |
-| `debug` | (devtools MCP 있을 때) 브라우저 상태 분석; 없으면 수동 가이드 | devtools MCP (optional) |
+| `debug` | 브라우저 디버깅 안내 (devtools panel · `window.__ait` · 브라우저 DevTools). on-device CDP relay는 진행 중 | `Read`, devtools (optional) |
 
 ### Slash commands & Templates
 
@@ -79,8 +79,8 @@ agent-plugin/
 
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/plugin.json` 존재.
 
-- ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`, `register`
-- 📝 **Stub**: `debug` (devtools MCP 출시 후)
+- ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`, `register`, `debug`
+- 🔜 **확장 예정**: `debug`의 on-device(production 번들) CDP relay 경로 — 브라우저 디버깅은 동작, 폰 안 번들 디버깅은 설계/구현 중
 - 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
 
 ## 공통 스택
