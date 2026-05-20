@@ -6,15 +6,15 @@ Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from in
 
 ## Goal
 
-Ties together `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, and the community docs into a single integrated experience. Currently scaffolded slash commands (some are stubs):
+Ties together `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, and the community docs into a single integrated experience. Slash commands available today:
 
 - `/ait new` — scaffold a new mini-app
-- `/ait docs <topic>` — load curated SDK docs into the session _(docs repo content still being written)_
+- `/ait docs <topic>` — load curated SDK docs into the session
 - `/ait inject-devtools` / `/ait inject-polyfill` — inject config into an existing project
 - `/ait status` / `/ait logs` — console-cli-backed status queries
 - `/ait auth-setup` — configure oidc-bridge connection
-- `/ait debug` — analyse browser state (when devtools MCP is present) _(stub — pending devtools MCP)_
-- `/ait deploy` — deploy the mini-app _(stub — pending console-cli deploy command)_
+- `/ait debug` — browser debugging guidance (devtools panel · `window.__ait` · browser DevTools). On-device CDP debugging of phone bundles is in progress
+- `/ait deploy` — deploy the mini-app
 
 See the "Skills" table in [`CLAUDE.md`](./CLAUDE.md) for the full skill list and dependency repos.
 
