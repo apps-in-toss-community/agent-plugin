@@ -3,7 +3,7 @@ name: inject-polyfill
 description: |
   Migrate an existing Apps in Toss mini-app project to `@ait-co/polyfill` mode —
   install the package, wire up the auto-import in the entry point, and guide the
-  developer on replacing proprietary SDK calls with standard Web APIs.
+  developer on writing standard Web API calls that route through the SDK at runtime.
   Triggered by `/ait inject-polyfill`.
 argument-hint: '[--entry <path>]'
 ---
@@ -12,9 +12,9 @@ argument-hint: '[--entry <path>]'
 
 ## 목적
 
-기존 앱인토스 미니앱 프로젝트에 `@ait-co/polyfill`을 도입해, 앱 코드가 독점
-SDK API 대신 **표준 Web API** (`navigator.clipboard`, `navigator.geolocation` 등)를
-사용할 수 있도록 환경을 준비한다.
+기존 앱인토스 미니앱 프로젝트에 `@ait-co/polyfill`을 도입해, 앱 코드가 SDK를 직접
+호출하지 않고 **표준 Web API** (`navigator.clipboard`, `navigator.geolocation` 등)를
+그대로 써도 런타임에 SDK로 라우팅되도록 환경을 준비한다.
 
 이 skill이 완료된 뒤 개발자는:
 
