@@ -2,9 +2,7 @@
 
 [한국어](./README.md) · **English**
 
-> 🚧 **Work in Progress** — not yet published.
-
-Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — currently supports **[Claude Code](https://claude.com/claude-code)**. Codex and other agents are planned for later phases.
+Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — currently supports [Claude Code](https://claude.com/claude-code). Codex and other agents are planned for later phases. Still in development and not yet published to a marketplace.
 
 ## Goal
 
