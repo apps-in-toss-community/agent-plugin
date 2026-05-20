@@ -167,7 +167,7 @@ deep-link한다. 관련 카드가 있으면 링크로 제안:
   (예: `setClipboardText` → `/ait docs api/clipboard/setClipboardText`)
 
 대안으로:
-- 앱인토스 공식 문서를 `WebFetch`로 조회해볼 수 있습니다
+- 앱인토스 개발자 사이트의 원본 문서를 `WebFetch`로 조회해볼 수 있습니다
 - sdk-example에서 실제 동작하는 예제를 보여드릴 수 있습니다:
   https://sdk-example.aitc.dev/
 
@@ -175,7 +175,7 @@ deep-link한다. 관련 카드가 있으면 링크로 제안:
 ```
 
 추측으로 API 동작을 꾸며내지 **말 것**. 문서에 없으면 "모릅니다"를
-명시적으로 말하고, sdk-example 또는 공식 문서로 넘긴다.
+명시적으로 말하고, sdk-example 또는 앱인토스 개발자 사이트의 원본 문서로 넘긴다.
 
 ## 하지 말아야 할 것
 
