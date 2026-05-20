@@ -1,5 +1,48 @@
 # @ait-co/agent-plugin
 
+## 0.1.7
+
+### Patch Changes
+
+- 9a3233a: feat: add /ait register skill for non-interactive app registration
+
+  New `register` skill closes the harness gap between `/ait setup-bundle` and `/ait deploy`: it scaffolds the `aitcc.yaml` manifest non-interactively (the work the TTY-only `aitcc app init` does), discovers `workspaceId` / `categoryIds` via `aitcc whoami --json` and `aitcc app categories --selectable --json`, then runs `aitcc app register --json` (offers `--dry-run` first; `--accept-terms` only with explicit user consent). Never overwrites an existing manifest, uses the console session (not a Deploy Key), and never invokes interactive `aitcc login`.
+
+- 1cef99d: fix: make `debug` and `inject-devtools` skills match shipped behavior
+
+  - `debug` skill is no longer a TODO stub. It now guides through the
+    debugging surface that ships today — the `@ait-co/devtools` floating panel,
+    the `window.__ait` runtime mock state, and the browser's own DevTools —
+    and describes the in-progress on-device CDP relay surface as the next step
+    rather than implying it already works.
+  - `inject-devtools` skill drops the `--mcp` flag and the
+    `/api/ait-devtools/state` endpoint guidance. The shipped `@ait-co/devtools`
+    unplugin exposes no `mcp` option (only `tunnel`), so the flag did nothing;
+    removing it keeps the skill honest. Real-device preview lives in
+    `/ait setup-phone-preview` (the `tunnel` option).
+
+- b94ab8c: fix: setup-phone-preview writes onlyBuiltDependencies to pnpm-workspace.yaml (pnpm 10.33)
+
+  - `setup-phone-preview` skill now adds `cloudflared` to `pnpm-workspace.yaml`'s `onlyBuiltDependencies` instead of the deprecated `package.json` `pnpm.onlyBuiltDependencies` field — pnpm 10.33 no longer reads the `pnpm` field and only warns. Updated frontmatter, step 3, the non-pnpm fallback, both completion summaries, and the out-of-scope/don't-do notes accordingly.
+  - `react-vite` template `@ait-co/devtools` bumped `^0.1.12` → `^0.1.19`, matching the version the skill's preflight already requires.
+
+- 1ac781e: refactor: sync plugin.json version, fix stale Codex claim, rename ait-console → aitcc, correct stub markers
+
+  - `.claude-plugin/plugin.json` version synced to 0.1.6 (was stuck at 0.1.0)
+  - README ko/en: clarify Claude Code is current target; Codex is a later phase (was "supports both Claude Code and Codex")
+  - `package.json` description updated to match
+  - `ait-console` references replaced with `aitcc` in CLAUDE.md, deploy skill, and deploy command description
+  - `(stub)` markers removed from `ait-inject-devtools`, `ait-auth-setup`, `ait-logs` commands — skills were implemented in 0.1.3
+  - CLAUDE.md Status section updated to reflect implemented vs. still-stub skills
+  - README skill list reordered: working commands listed first, remaining stubs (deploy, debug) at the bottom with blocking reason
+
+- 6b2fee2: fix: strip internal ops state and defensive labels from shipped skills
+
+  - `status` skill: replace the real dog-food app/workspace identifiers in the summary example with generic placeholders, and rewrite the ops note that referenced specific internal miniApp IDs / REVIEW-lock codes into a generic "focus on the current project" guideline.
+  - `auth-setup` skill: drop the internal miniApp ID from the live-validation note and replace the `비공식` label with the calm community open-source identity.
+  - `inject-devtools` / `new-miniapp` skills: replace remaining `비공식 커뮤니티` labels (forbidden by the tone guide) with `커뮤니티 오픈소스`.
+  - `README.en.md`: refer to the deployment-phases section by English description instead of quoting the Korean heading verbatim.
+
 ## 0.1.6
 
 ### Patch Changes
