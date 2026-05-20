@@ -5,7 +5,7 @@ description: |
   Detects the build tool (Vite / Next.js / Rspack / Webpack), installs the dev
   dep with the right package manager, and patches the config file idempotently.
   Triggered by `/ait inject-devtools`.
-argument-hint: '[--mcp]'
+argument-hint: ''
 ---
 
 # inject-devtools skill
@@ -22,15 +22,12 @@ unplugin을 추가해, 토스 앱 없이 브라우저에서 개발·테스트할
 
 ## 입력
 
-- `--mcp` (선택): Vite dev server에 MCP state endpoint(`/api/ait-devtools/state`)를
-  활성화한다(`mcp: true` 옵션). AI 에이전트가 브라우저 mock state를 읽을 때 사용.
-  기본값: off.
+`/ait inject-devtools`는 인자를 받지 않는다.
 
 호출 예:
 
 ```
 /ait inject-devtools
-/ait inject-devtools --mcp
 ```
 
 ## 의존
@@ -162,7 +159,6 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react(), aitDevtools.vite()],
-  // --mcp 플래그를 붙였다면: aitDevtools.vite({ mcp: true })
 });
 ```
 
@@ -217,13 +213,6 @@ const nextConfig: NextConfig = {
 export default nextConfig;
 ```
 
-**`--mcp` + Next.js**: Next.js는 Vite dev server가 아니므로 `mcp` 옵션은
-무시된다. 사용자에게 알린다:
-
-```
---mcp 옵션은 Vite dev server 전용입니다. Next.js 환경에서는 무시됩니다.
-```
-
 #### Rspack (`rspack.config.ts` / `rspack.config.js`)
 
 ```ts
@@ -248,8 +237,8 @@ module.exports = {
 
 **config 파일 수정 원칙**:
 - `Edit` tool로 최소 변경. 기존 코드 포맷·주석·설정은 유지.
-- `aitDevtools.vite()` 인수 없이 쓰는 것이 기본. `--mcp` 플래그가 있으면
-  `aitDevtools.vite({ mcp: true })`.
+- `aitDevtools.vite()`는 인수 없이 쓴다 (실기기 미리보기 tunnel이 필요하면
+  `/ait setup-phone-preview`가 별도로 `tunnel` 옵션을 설정).
 - `production` 빌드에서는 unplugin이 자동으로 비활성화된다(`NODE_ENV=production`
   감지). 빌드 결과물에 mock이 포함되지 않으므로 추가 조건 분기는 불필요.
 
@@ -276,13 +265,6 @@ module.exports = {
   - devtools는 NODE_ENV=development 에서만 활성화됩니다 (production 빌드엔 미포함).
   - 문서: https://github.com/apps-in-toss-community/devtools
   - 커뮤니티: https://aitc.dev/
-```
-
-`--mcp`가 켜진 경우(Vite 한정) 추가 안내:
-
-```
-MCP endpoint 활성화됨: http://localhost:<port>/api/ait-devtools/state
-AI 에이전트(Claude Code 등)가 이 URL로 브라우저 mock 상태를 읽을 수 있습니다.
 ```
 
 ## Out of scope (이 skill이 하지 않는 것)
