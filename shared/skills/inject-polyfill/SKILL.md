@@ -186,7 +186,7 @@ const restore = await install();
 ```ts
 // Before
 import { setClipboardText } from '@apps-in-toss/web-framework';
-await setClipboardText({ text: 'hello' });
+await setClipboardText('hello');
 
 // After (polyfill이 자동 처리)
 await navigator.clipboard.writeText('hello');
@@ -213,7 +213,7 @@ SDK 직접 호출 코드를 표준 API로 교체하는 것은 **자동 codemod �
 
   clipboard:
     Before: import { setClipboardText } from '@apps-in-toss/web-framework'
-            await setClipboardText({ text: '...' })
+            await setClipboardText('...')
     After:  await navigator.clipboard.writeText('...')
 
   geolocation:
