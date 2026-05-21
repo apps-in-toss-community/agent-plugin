@@ -47,7 +47,9 @@ jobs:
       - uses: changesets/action@v1
         with:
           publish: pnpm changeset publish
-          version: pnpm changeset version && pnpm sync:plugin-version
+          # changesets/action exec's this string directly (no shell), so the
+          # `&& sync` chain lives inside the `release:version` npm script.
+          version: pnpm release:version
           createGithubReleases: true
         env:
           # App token (not GITHUB_TOKEN) so the release/tag chain triggers

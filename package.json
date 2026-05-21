@@ -13,7 +13,8 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "sync:plugin-version": "node scripts/sync-plugin-version.mjs"
+    "sync:plugin-version": "node scripts/sync-plugin-version.mjs",
+    "release:version": "changeset version && pnpm sync:plugin-version"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
