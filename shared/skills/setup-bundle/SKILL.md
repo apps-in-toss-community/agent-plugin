@@ -20,7 +20,7 @@ argument-hint: ''
 이 skill이 완료되면:
 - `pnpm bundle:ait` 한 번으로 토스 앱이 로드할 수 있는 `.ait` 번들이 생성된다.
 - 번들 빌드 산출물(`.ait`, `.granite/`)은 자동으로 gitignore된다.
-- 다음 단계(`/ait deploy`)로 바로 이어질 수 있다.
+- 다음 단계(`/ait register` → `/ait deploy`)로 바로 이어질 수 있다.
 
 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
@@ -255,6 +255,7 @@ setup-bundle 완료
   pnpm bundle:ait        # ait build 실행 → <appName>.ait 생성
 
 다음 단계:
+  /ait register          # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
   /ait deploy            # 번들을 앱인토스 콘솔에 업로드
 
 참고:
