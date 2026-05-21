@@ -1,5 +1,34 @@
 # @ait-co/agent-plugin
 
+## 0.1.10
+
+### Patch Changes
+
+- 41e2c1f: fix(release): run the version+sync chain via a single npm script
+
+  `changesets/action` exec's its `version:` string directly (no shell), so
+  `pnpm changeset version && pnpm sync:plugin-version` passed `&&` as a literal
+  argument to the changeset CLI ("Too many arguments passed to changesets"),
+  breaking the release run. Move the chain into a `release:version` npm script
+  and point the workflow at `pnpm release:version`.
+
+- 120f691: chore: auto-sync .claude-plugin/plugin.json version on release
+
+  `changeset version` only bumps `package.json`, so the plugin manifest
+  (`.claude-plugin/plugin.json`) drifted behind every release and had to be
+  hand-bumped (it was stuck at 0.1.8 while the package was 0.1.9). The release
+  workflow now runs `pnpm sync:plugin-version` right after `changeset version`,
+  copying the package version into the manifest so the Version Packages PR
+  always carries the synced manifest. Also re-syncs the manifest to 0.1.9.
+
+- fc76249: fix(release): sync plugin.json version surgically to preserve Biome formatting
+
+  `sync-plugin-version.mjs` rewrote the whole manifest with `JSON.stringify(_, 2)`,
+  which expands the short `keywords` array to multiline — but Biome keeps it on one
+  line, so the regenerated Version Packages PR failed `pnpm lint`. Replace only the
+  `version` string value via a targeted regex, leaving the rest of the file's
+  formatting untouched.
+
 ## 0.1.9
 
 ### Patch Changes
