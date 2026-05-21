@@ -2,7 +2,7 @@
 
 **한국어** · [English](./README.en.md)
 
-AI 코딩 에이전트 안에서 앱인토스 미니앱을 생성·개발·테스트·배포까지 할 수 있게 해주는 커뮤니티 플러그인입니다. 현재 [Claude Code](https://claude.com/claude-code)를 지원하며, Codex 등 다른 에이전트는 후속 Phase에서 추가됩니다. 아직 마켓플레이스에 배포되지 않은 개발 단계입니다.
+AI 코딩 에이전트 안에서 앱인토스 미니앱을 생성·개발·테스트·배포까지 할 수 있게 해주는 커뮤니티 플러그인입니다. 현재 [Claude Code](https://claude.com/claude-code)를 지원하며, Codex 등 다른 에이전트는 후속 Phase에서 추가됩니다.
 
 ## 목표
 
@@ -28,7 +28,7 @@ agent-plugin/
 │   ├── skills/              # SKILL.md 번들
 │   ├── commands/            # slash command 진입점 (얇은 래퍼)
 │   └── templates/           # 스캐폴딩 템플릿
-├── .claude-plugin/          # Claude Code plugin manifest (Phase 1, 현재)
+├── .claude-plugin/          # Claude Code plugin + marketplace manifest (Phase 1, 현재)
 └── .codex-plugin/           # Codex (Phase 3, 스펙 확정 후)
 ```
 
@@ -36,10 +36,14 @@ agent-plugin/
 
 ### 설치
 
+Claude Code에서 marketplace를 추가하고 플러그인을 설치합니다:
+
 ```bash
-# Claude Code (Phase 1 — manifest 존재, marketplace 등록은 아직)
 /plugin marketplace add apps-in-toss-community/agent-plugin
+/plugin install ait@aitc
 ```
+
+설치 후 `/ait` 명령(`/ait new`, `/ait deploy` 등)을 사용할 수 있습니다.
 
 Codex / Gemini CLI / Cursor / Windsurf는 Phase 2+ 예정입니다. [`CLAUDE.md`](./CLAUDE.md)의 "배포 phases" 참고.
 
