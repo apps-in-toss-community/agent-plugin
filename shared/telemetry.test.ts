@@ -221,16 +221,18 @@ describe('sendTier0Ping', () => {
   });
 });
 
-describe('sendTier1Event (stub)', () => {
+describe('sendTier1Event', () => {
   let sandbox = '';
 
   beforeEach(() => {
     sandbox = makeSandbox();
+    delete process.env.AITC_TELEMETRY;
     vi.resetModules();
   });
 
   afterEach(() => {
     cleanSandbox(sandbox);
+    delete process.env.AITC_TELEMETRY;
     vi.restoreAllMocks();
     vi.resetModules();
   });
@@ -257,12 +259,12 @@ describe('sendTier1Event (stub)', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it('is a no-op even when consent is granted (stub — follow-up)', async () => {
+  it('is a no-op when a granted consent is from a stale policy version', async () => {
     const { writeState } = await import('./telemetry-state.js');
     await writeState({
       anonId: '00000000-0000-4000-8000-000000000004',
       consent: 'granted',
-      policyVersion: '2026-05-18',
+      policyVersion: '2020-01-01', // stale → resolveEffectiveConsent reverts to undecided
     });
 
     vi.resetModules();
@@ -270,5 +272,84 @@ describe('sendTier1Event (stub)', () => {
     const { sendTier1Event } = await import('./telemetry.js');
     await sendTier1Event('skill_invoked', '0.1.5', { skill: 'docs' });
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('is a no-op when AITC_TELEMETRY=off even with granted consent', async () => {
+    const { writeState, CURRENT_POLICY_VERSION } = await import('./telemetry-state.js');
+    await writeState({
+      anonId: '00000000-0000-4000-8000-000000000005',
+      consent: 'granted',
+      policyVersion: CURRENT_POLICY_VERSION,
+    });
+
+    vi.resetModules();
+    process.env.AITC_TELEMETRY = 'off';
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const { sendTier1Event } = await import('./telemetry.js');
+    await sendTier1Event('skill_invoked', '0.1.5', { skill: 'docs' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('POSTs a tier-1 payload when consent is granted under the current policy', async () => {
+    const { writeState, CURRENT_POLICY_VERSION } = await import('./telemetry-state.js');
+    const anonId = '00000000-0000-4000-8000-000000000006';
+    await writeState({
+      anonId,
+      consent: 'granted',
+      policyVersion: CURRENT_POLICY_VERSION,
+    });
+
+    vi.resetModules();
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 202 }));
+    const { sendTier1Event } = await import('./telemetry.js');
+    await sendTier1Event('skill_invoked', '0.1.5', { skill: 'new-miniapp' });
+
+    expect(fetchSpy).toHaveBeenCalledOnce();
+    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain('/e');
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body.tier).toBe(1);
+    expect(body.source).toBe('agent-plugin');
+    expect(body.event).toBe('skill_invoked');
+    expect(body.anon_id).toBe(anonId);
+    expect(body.version).toBe('0.1.5');
+    expect(body.meta).toEqual({ skill: 'new-miniapp' });
+    expect(typeof body.ts).toBe('number');
+  });
+
+  it('omits meta when not provided', async () => {
+    const { writeState, CURRENT_POLICY_VERSION } = await import('./telemetry-state.js');
+    await writeState({
+      anonId: '00000000-0000-4000-8000-000000000007',
+      consent: 'granted',
+      policyVersion: CURRENT_POLICY_VERSION,
+    });
+
+    vi.resetModules();
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 202 }));
+    const { sendTier1Event } = await import('./telemetry.js');
+    await sendTier1Event('skill_invoked', '0.1.5');
+
+    const [, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(init.body as string) as Record<string, unknown>;
+    expect(body).not.toHaveProperty('meta');
+  });
+
+  it('does not throw when fetch rejects (network error)', async () => {
+    const { writeState, CURRENT_POLICY_VERSION } = await import('./telemetry-state.js');
+    await writeState({
+      anonId: '00000000-0000-4000-8000-000000000008',
+      consent: 'granted',
+      policyVersion: CURRENT_POLICY_VERSION,
+    });
+
+    vi.resetModules();
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network unreachable'));
+    const { sendTier1Event } = await import('./telemetry.js');
+    await expect(sendTier1Event('skill_invoked', '0.1.5')).resolves.toBeUndefined();
   });
 });

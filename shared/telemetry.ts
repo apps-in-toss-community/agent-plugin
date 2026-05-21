@@ -9,14 +9,20 @@
  *   IP+UA+date. Enabled by default; disabled by AITC_TELEMETRY=off or
  *   tier0OptOut: true in the state file.
  *
- * Tier 1 — opt-in skill event stream (stub — wiring in follow-up PR):
- *   sendTier1Event is present for import compatibility but is a no-op until
- *   Tier 1 consent prompt + server-side schema are finalized.
+ * Tier 1 — opt-in skill event stream:
+ *   sendTier1Event POSTs {tier:1, source, event, anon_id, version, ts, meta?}
+ *   only when effective consent is 'granted'. Silent no-op otherwise.
  *
  * Privacy: https://docs.aitc.dev/privacy
  */
 
-import { CURRENT_POLICY_VERSION, readState, todayUtc, writeState } from './telemetry-state.js';
+import {
+  CURRENT_POLICY_VERSION,
+  readState,
+  resolveEffectiveConsent,
+  todayUtc,
+  writeState,
+} from './telemetry-state.js';
 
 export const TELEMETRY_CONFIG = {
   endpoint:
@@ -103,23 +109,52 @@ export async function sendTier0Ping(version: string): Promise<void> {
 /**
  * Sends a Tier 1 skill event.
  *
- * STUB — Tier 1 consent prompt and server-side schema are follow-up work.
- * This function is present so call sites can be wired now; it is a no-op
- * until the follow-up PR activates it.
+ * - Requires explicit, current-policy consent (`resolveEffectiveConsent`
+ *   returns 'granted'); a stale-policy grant reverts to 'undecided' and is
+ *   treated as no consent.
+ * - Honors the global AITC_TELEMETRY opt-out, same as Tier 0.
+ * - Fire-and-forget: 5 s timeout, silent skip on any error.
+ * - The client sends its persisted `anonId`; the server stores it verbatim.
  */
 export async function sendTier1Event(
   event: 'skill_invoked',
   version: string,
   meta?: Record<string, unknown>,
 ): Promise<void> {
-  // Validate consent before doing anything.
-  const state = readState();
-  if (state.consent !== 'granted') {
+  // Global opt-out via environment variable (mirrors Tier 0).
+  const envFlag = process.env.AITC_TELEMETRY;
+  if (envFlag === 'off' || envFlag === '0' || envFlag === 'false') {
     return;
   }
 
-  // TODO(follow-up): implement POST to /e with tier:1, anon_id, event, meta.
-  void event;
-  void version;
-  void meta;
+  const state = readState();
+  if (resolveEffectiveConsent(state) !== 'granted') {
+    return;
+  }
+
+  const payload = {
+    tier: 1,
+    source: TELEMETRY_CONFIG.source,
+    event,
+    anon_id: state.anonId,
+    version,
+    ts: Date.now(),
+    ...(meta !== undefined ? { meta } : {}),
+  };
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5_000);
+
+  try {
+    await fetch(TELEMETRY_CONFIG.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } catch {
+    // Network error, timeout, or abort — silent skip.
+  } finally {
+    clearTimeout(timer);
+  }
 }
