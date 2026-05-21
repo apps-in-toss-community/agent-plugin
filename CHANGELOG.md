@@ -1,5 +1,11 @@
 # @ait-co/agent-plugin
 
+## 0.1.12
+
+### Patch Changes
+
+- 843002c: Add `argument-hint` frontmatter to the 11 `/ait *` command wrappers that were missing it (only `ait-docs` and `ait-new` had it). Each wrapper now mirrors its SKILL.md hint — argument-less commands carry an explicit `argument-hint: ''` per the skill-uniformity rule, so the agent shows a consistent hint for every command.
+
 ## 0.1.11
 
 ### Patch Changes
