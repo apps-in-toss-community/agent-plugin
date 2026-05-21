@@ -2,7 +2,7 @@
 
 [한국어](./README.md) · **English**
 
-Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — currently supports [Claude Code](https://claude.com/claude-code). Codex and other agents are planned for later phases. Still in development and not yet published to a marketplace.
+Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — currently supports [Claude Code](https://claude.com/claude-code). Codex and other agents are planned for later phases.
 
 ## Goal
 
@@ -28,7 +28,7 @@ agent-plugin/
 │   ├── skills/              # SKILL.md bundles
 │   ├── commands/            # slash command entry points (thin wrappers)
 │   └── templates/           # scaffolding templates
-├── .claude-plugin/          # Claude Code plugin manifest (Phase 1, current)
+├── .claude-plugin/          # Claude Code plugin + marketplace manifest (Phase 1, current)
 └── .codex-plugin/           # Codex (Phase 3, after spec is finalised)
 ```
 
@@ -36,10 +36,14 @@ agent-plugin/
 
 ### Install
 
+In Claude Code, add the marketplace and install the plugin:
+
 ```bash
-# Claude Code (Phase 1 — manifest exists, marketplace registration pending)
 /plugin marketplace add apps-in-toss-community/agent-plugin
+/plugin install ait@aitc
 ```
+
+After installation the `/ait` commands (`/ait new`, `/ait deploy`, etc.) become available.
 
 Codex / Gemini CLI / Cursor / Windsurf are planned for Phase 2+. See the deployment-phases section in [`CLAUDE.md`](./CLAUDE.md).
 

@@ -54,7 +54,7 @@ agent-plugin/
 │   ├── skills/                  # SKILL.md + 하위 리소스
 │   ├── commands/                # slash command 진입점
 │   └── templates/               # (README만, 실제 템플릿 계획)
-├── .claude-plugin/              # ✅ Claude Code plugin manifest (Phase 1)
+├── .claude-plugin/              # ✅ Claude Code plugin + marketplace manifest (Phase 1)
 ├── gemini-extension.json        # 🔜 Gemini CLI extension (Phase 2)
 ├── .codex-plugin/               # 🔜 Codex (Phase 3, 스펙 확정 후)
 ├── .cursor-plugin/              # 🔜 Cursor (Phase 4)
@@ -77,7 +77,7 @@ agent-plugin/
 
 ## Status
 
-Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/plugin.json` 존재.
+Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/{plugin.json,marketplace.json}` 존재 — `marketplace.json`이 `/plugin marketplace add apps-in-toss-community/agent-plugin` 설치 경로(harness station 0)를 지탱한다.
 
 - ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`, `register`, `debug`
 - 🔜 **확장 예정**: `debug`의 on-device(production 번들) CDP relay 경로 — 브라우저 디버깅은 동작, 폰 안 번들 디버깅은 설계/구현 중
