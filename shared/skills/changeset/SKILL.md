@@ -5,6 +5,7 @@ description: |
   Default bump is ALWAYS patch. Never auto-select minor or major — those
   require explicit user instruction. Use this when the user asks to "make a
   changeset", "add a changeset", "버전 올려줘", or invokes /changeset.
+argument-hint: '[patch|minor|major]'
 ---
 
 # Changeset 작성 skill
@@ -146,6 +147,25 @@ git add .changeset/<file>.md
 
 **커밋하지 않는다**. 사용자가 "커밋해줘"라고 별도로 지시해야 커밋. PR 흐름을
 사용자가 통제하도록.
+
+### 7. 다음 단계 안내
+
+stage 후 한 블록으로 마무리한다. changeset은 harness의 6 station 흐름이 아니라
+**메인테이너 릴리즈 워크플로**의 첫 마디다 — 다음은 PR이지 `/ait` 명령이 아니다:
+
+```
+changeset 생성 완료 (stage됨, 커밋은 안 함)
+
+  .changeset/<file>.md  → "<package>": <bump>
+
+다음 단계:
+  1. 커밋 + PR (직접 또는 `/ship`).
+  2. PR 머지 시 changesets/action이 "Version Packages" PR을 자동으로 연다.
+  3. 그 VP PR을 머지하면 release 워크플로가 publish(Type A) 또는 git tag
+     (Type B agent-plugin)까지 처리한다.
+```
+
+이 흐름의 source of truth는 umbrella `meta/release-strategy.md`.
 
 ## 하지 말아야 할 것
 

@@ -237,6 +237,10 @@ setup-phone-preview 완료
   launcher PWA에서 QR을 스캔하거나 URL을 붙여넣으면
   폰에서 dev 앱이 full-screen으로 열립니다.
 
+다음 단계:
+  /ait debug          # 폰에서 재현되는 회귀를 브라우저 패널·콘솔로 진단
+  /ait setup-bundle   # 배포 준비가 되면 .ait 번들 환경 구성
+
 참고:
   - tunnel URL은 실행마다 바뀝니다 (*.trycloudflare.com, 인증 없음).
   - tunnel은 pnpm dev에는 영향 없습니다 (AIT_TUNNEL=1 일 때만 켜짐).
@@ -273,6 +277,10 @@ Changes applied:
   Scan the QR (or paste the URL) in the launcher PWA to open the dev app
   full-screen on your phone.
 
+Next steps:
+  /ait debug          # diagnose phone-only regressions via the browser panel
+  /ait setup-bundle   # when you're ready to ship, set up the .ait bundle build
+
 Notes:
   - The tunnel URL changes every run (*.trycloudflare.com, unauthenticated).
   - pnpm dev is unchanged — the tunnel only starts when AIT_TUNNEL=1.
@@ -281,8 +289,7 @@ Notes:
 
 ---
 
-> **폰 PWA install은 OS gesture가 필요**해 자동화할 수 없다.
-> 이 skill은 **데스크톱 셋업까지만** 책임진다 — launcher 홈화면 추가는 사용자가 직접.
+폰 PWA install은 OS gesture가 필요해 자동화할 수 없다. 이 skill은 데스크톱 셋업까지만 책임진다 — launcher 홈화면 추가는 사용자가 직접.
 
 ## Out of scope (이 skill이 하지 않는 것)
 
@@ -306,15 +313,9 @@ Notes:
   등 제휴·후원·인증 암시 표현.
 - ❌ idempotency 체크 없이 중복 적용 — 2회 실행 시 변경이 없어야 한다.
 
-## 짝 skill
-
-- `inject-devtools` — `@ait-co/devtools` 신규 설치 + vite.config 기본 설정.
-  `setup-phone-preview`보다 먼저 실행해야 한다.
-- `inject-polyfill` — polyfill 병행 사용 시.
-- `deploy` — tunnel 검증 후 앱인토스 배포.
-
 ## 참고
 
+- 짝 skill: `inject-devtools` (`@ait-co/devtools` 신규 설치 + vite.config 기본 설정 — `setup-phone-preview`보다 먼저 실행), `inject-polyfill` (polyfill 병행 사용 시), `deploy` (tunnel 검증 후 앱인토스 배포).
 - devtools tunnel 구현 (PR #131): https://github.com/apps-in-toss-community/devtools/pull/131
 - sdk-example wiring 사례 (PR #59): https://github.com/apps-in-toss-community/sdk-example/pull/59
 - devtools README "Run on a real phone" 섹션: https://github.com/apps-in-toss-community/devtools

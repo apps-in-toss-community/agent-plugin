@@ -146,10 +146,23 @@ https://raw.githubusercontent.com/apps-in-toss-community/docs/main/docs/<resolve
 ### 4. 후속 액션 유도 (선택)
 
 docs 페이지는 각 API에 대해 **"Try it"** 섹션으로 sdk-example의 대응 카드에
-deep-link한다. 관련 카드가 있으면 링크로 제안:
+deep-link한다. 관련 카드가 있으면 링크로 제안한다:
 
-> 실제 동작을 보고 싶다면 sdk-example의 해당 카드에서 바로 실행해볼 수
-> 있습니다: https://sdk-example.aitc.dev/
+```
+실제 동작을 보고 싶다면 sdk-example의 해당 카드에서 바로 실행해볼 수
+있습니다: https://sdk-example.aitc.dev/
+```
+
+로드한 토픽이 harness station과 직접 대응하면, 다음 `/ait` 명령으로 seam을 잇는다:
+
+| 로드한 토픽 | 다음 `/ait` 명령 |
+|---|---|
+| `guides/auth-flow`, `api/auth/*` | `/ait auth-setup` (로그인 배선) |
+| `api/<group>/*` (clipboard, location 등) | `/ait inject-polyfill` (표준 Web API 경로) 또는 sdk-example 카드 |
+| 배포·번들 관련 | `/ait setup-bundle` → `/ait register` → `/ait deploy` |
+| 디버깅·mock 관련 | `/ait debug` |
+
+토픽이 station과 무관한 순수 레퍼런스면 seam 없이 출처 링크로 마무리한다 — 억지로 명령을 갖다 붙이지 않는다.
 
 ## Graceful fallback (토픽 못 찾았을 때)
 

@@ -254,7 +254,9 @@ module.exports = {
   - <config-file>에 unplugin 설정 추가 (또는 이미 있어서 skip)
 
 다음 단계:
-  pnpm dev          # (또는 npm run dev / yarn dev / bun dev)
+  pnpm dev                  # (또는 npm run dev / yarn dev / bun dev)
+  /ait debug                # 브라우저 패널·window.__ait 상태로 디버깅
+  /ait setup-phone-preview  # (선택) 실기기에서 dev 앱 미리보기
 
 브라우저에서 앱을 열면 하단에 AIT DevTools 패널이 나타납니다.
 패널에서 mock 상태(권한, 위치, IAP 등)를 실시간으로 제어할 수 있습니다.

@@ -17,8 +17,7 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 
 이 흐름은 커뮤니티 오픈소스다. "공식 토스 로그인 SDK", "토스가 제공하는" 같은 표현은 사용하지 않는다. `@apps-in-toss/web-framework`는 원본 SDK 이름이라 그대로 사용한다.
 
-> **live 검증 상태**: 커뮤니티 공용 인스턴스(`oidc-bridge.aitc.dev`)는 운영 중.
-> 앱인토스 네이티브 환경에서의 end-to-end 검증은 진행 중이다.
+커뮤니티 공용 인스턴스(`oidc-bridge.aitc.dev`)는 운영 중이며, 앱인토스 네이티브 환경에서의 end-to-end 검증은 진행 중이다.
 
 ## 아키텍처 요약 (M5 flow)
 
@@ -225,6 +224,25 @@ await signInWithPopup(getAuth(), credential);
 3. `id_token`의 `sub` claim이 실제 토스 계정 ID인지 확인
 
 sdk-example의 Auth 페이지(`AuthPage → OidcBridgeSection`)에서 `/oidc/token` 흐름을 인터랙티브하게 테스트해볼 수 있다.
+
+### 7. 완료 요약 + 다음 단계
+
+배선 완료 후 한 블록으로 마무리한다:
+
+```
+auth-setup 완료
+
+배선된 것:
+  - appLogin() → consumer backend → bridge /oidc/token → signInWithIdToken
+  - bridge URL: <bridge-url> (기본 https://oidc-bridge.aitc.dev)
+
+다음 단계:
+  pnpm dev            # devtools sandbox에서 appLogin() mock으로 흐름 확인
+  /ait deploy         # 앱인토스에 배포해 native end-to-end 검증
+  /ait status         # 배포 후 콘솔 상태 확인
+```
+
+native 검증은 배포가 선행되어야 하므로, sandbox 확인이 끝나면 `/ait deploy`로 넘어간다.
 
 ## 하지 말아야 할 것
 
