@@ -6,6 +6,7 @@ description: |
   authenticated user/workspace, mini-apps in the workspace, and (when an
   `aitcc.yaml` is present in cwd) the review state of the current app.
   Triggered by `/ait status`. Read-only — does not modify any console state.
+argument-hint: ''
 ---
 
 # status skill
@@ -29,8 +30,7 @@ description: |
 - 사용자가 한 번 이상 `aitcc login` 해서 세션이 캐시되어 있어야 함.
   - 미인증이면 `aitcc whoami`가 비워진 상태로 응답 — 그것도 status의 답이다.
 
-> 이 skill은 **read-only**다. login/logout/deploy/register 같은 변경 명령을
-> 부르지 않는다 (그건 다른 skill의 책임).
+이 skill은 read-only다. login/logout/deploy/register 같은 변경 명령을 부르지 않는다 (그건 다른 skill의 책임).
 
 ## 실행 순서
 
@@ -86,14 +86,28 @@ aitcc app service-status --json
 > `aitcc.yaml` 위치 탐색은 CLI에 위임한다 (cwd 기준). parent 디렉토리를
 > 거슬러 올라갈지 여부도 CLI가 결정 — skill에서 별도 로직 없음.
 
-### 5. 요약
+### 5. 요약 + 다음 단계 (관측 결과로 분기)
 
-마지막에 한 줄 요약. 예:
+마지막에 한 줄 요약 + **관측된 상태에 따라 다음 `/ait` 명령을 분기 제시**한다. status는 read-only지만 seam은 가진다 — "지금 상태면 다음은 무엇"을 직접 인쇄한다.
 
-> ✅ `you@example.com` / workspace `<번호> <이름>` · 앱 N개 ·
-> 현재 프로젝트 `<앱 이름>` (id `<miniAppId>`): under-review
+요약 한 줄 (bullet 두 줄을 넘기지 않는다 — 자세한 건 위에서 이미 보여줬다):
 
-Bullet 두 줄을 넘기지 않는다 — 자세한 건 위에서 이미 보여줬다.
+```
+you@example.com / workspace <번호> <이름> · 앱 N개 ·
+현재 프로젝트 <앱 이름> (id <miniAppId>): under-review
+```
+
+이어서 상태별 다음 단계:
+
+| 관측된 상태 | 다음 단계 |
+|---|---|
+| 미인증 (`whoami` 비어 있음) | `aitcc login` (첫 1회만 브라우저) |
+| cwd에 `aitcc.yaml` 없음 (미등록) | `/ait register`로 콘솔 등록 |
+| 등록됨 · `under-review` | 운영팀 처리 대기. 그 사이 dog-food는 `aitcc app bundles test-push` |
+| 등록됨 · `rejected` | 반려 사유 확인 후 수정 → `/ait deploy`로 재업로드 |
+| 등록됨 · `approved` / `OPENED` | `/ait deploy`로 새 번들 배포 |
+
+이 skill은 분기 명령을 **자동 실행하지 않는다** — 가리키기만 한다.
 
 ## CLI 미설치 fallback
 

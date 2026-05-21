@@ -178,12 +178,17 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 | `bundle not found` / `*.ait 없음` | Step 3 빌드 단계를 건너뛰었거나 빌드가 실패함. `pnpm bundle:ait` 재실행. |
 | 기타 | 에러 메시지를 그대로 보여주고 `aitcc` 로그 / GitHub Issues 안내. |
 
-### 6. 완료 요약
+### 6. 완료 요약 + 다음 단계
 
-배포 성공 후 한 줄 요약:
+배포 성공 후 한 블록으로 마무리한다:
 
 ```
-✅ 배포 완료 · scheme URL: intoss-private://... · 메모: <memo>
+배포 완료 · scheme URL: intoss-private://... · 메모: <memo>
+
+다음 단계:
+  /ait status         # 콘솔에서 review/serviceStatus 확인
+  # serviceStatus가 PREPARE면 위 test-push 안내로 기기에서 dog-food
+  # approved/OPENED면 scheme URL이 그대로 토스 앱에서 로드됨
 ```
 
 ## Out of scope (이 skill이 하지 않는 것)

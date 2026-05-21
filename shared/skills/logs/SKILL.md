@@ -5,16 +5,20 @@ description: |
   console does not expose a runtime log endpoint, so this skill explains
   the confirmed gap and guides the user to practical alternatives.
   Triggered by `/ait logs`.
+argument-hint: ''
 ---
 
 # logs skill
 
-## 상태: deferred (endpoint 부재 확정)
+## 목적
 
-`aitcc logs` 명령은 구현되지 않았다. 앱인토스 콘솔 UI에 런타임 로그를
-서피스하는 엔드포인트가 없음이 확인되었다(2026-05-02 조사 결과).
+`/ait logs`는 현재 미니앱의 런타임 로그 옵션을 안내한다.
 
-이 skill은 `aitcc`를 호출하는 대신 **현재 가능한 대안 네 가지**를 안내한다.
+상태는 **deferred**다: `aitcc logs` 명령은 구현되지 않았다. 앱인토스 콘솔 UI에
+런타임 로그를 서피스하는 엔드포인트가 없음이 확인되었기 때문이다(2026-05-02 조사
+결과). 이건 콘솔 설계 현황이지 플러그인 버그가 아니다.
+
+따라서 이 skill은 `aitcc`를 호출하는 대신 **현재 가능한 대안 네 가지**를 안내한다.
 
 ## 실행 순서
 
