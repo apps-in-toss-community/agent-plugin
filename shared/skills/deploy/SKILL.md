@@ -34,7 +34,7 @@ argument-hint: ''
   이 skill은 Deploy Key를 생성하거나 저장하지 않는다.
   키는 운영자가 CI secret 또는 환경변수(`AITCC_API_KEY`)로 관리한다.
 - **콘솔 앱 등록**: `aitcc.yaml`(또는 `aitcc/aitcc.yaml`)이 cwd에 있어야 한다.
-  없으면 `aitcc app init` + `aitcc app register` 선행 안내.
+  없으면 `/ait register` 선행 안내.
 
 > 이 skill은 Deploy Key를 **직접 발급하지 않는다**. 발급은
 > `aitcc keys create`(콘솔 CLI)의 역할이며 운영자/maintainer가 결정한다.
@@ -79,9 +79,7 @@ ls aitcc.yaml aitcc/aitcc.yaml 2>/dev/null
 
 ```
 aitcc.yaml이 없습니다. 앱인토스 콘솔에 앱이 등록되지 않았습니다.
-다음 명령으로 먼저 등록하세요:
-  aitcc app init
-  aitcc app register
+먼저 /ait register를 실행해주세요.
 ```
 
 ### 2. Deploy Key 확인
@@ -190,7 +188,7 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 앱 등록(`aitcc app init` / `aitcc app register`) — 사전 작업.
+- ❌ 앱 등록 — `/ait register` skill의 역할 (사전 작업).
 - ❌ Deploy Key 발급(`aitcc keys create`) — 운영자/maintainer 결정.
 - ❌ 콘솔 로그인(`aitcc login`) — `ait deploy`는 Deploy Key 인증이므로 `aitcc` 세션 불필요.
 - ❌ `test-push` 자동 호출 — 운영자가 기기 직접 확인 후 결정하는 흐름.

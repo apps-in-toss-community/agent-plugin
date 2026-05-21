@@ -269,7 +269,7 @@ setup-bundle 완료
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 콘솔 앱 등록(`aitcc app register`) — `aitcc app init` + `aitcc app register`의 역할.
+- ❌ 콘솔 앱 등록 — `/ait register` skill의 역할 (비대화형 앱 등록).
 - ❌ Deploy Key 발급(`aitcc keys create`) — 운영자/maintainer 결정 필요.
 - ❌ 콘솔 인증(`aitcc login`) — 별도 작업.
 - ❌ 배포 업로드 — `/ait deploy` (`deploy` skill).

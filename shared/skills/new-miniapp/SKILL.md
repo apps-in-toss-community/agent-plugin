@@ -213,8 +213,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 콘솔 인증 (`aitcc login`) — 인증이 필요한 작업은 별도 skill.
-- ❌ `aitcc.yaml` 생성 / 콘솔에 앱 등록 — `aitcc app init` / `aitcc app
-  register`의 역할.
+- ❌ `aitcc.yaml` 생성 / 콘솔에 앱 등록 — `/ait register` skill의 역할.
 - ❌ 배포 — `/ait deploy` (`deploy` skill).
 - ❌ 기존 프로젝트에 devtools 주입 — `/ait inject-devtools`
   (`inject-devtools` skill).
