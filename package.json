@@ -12,7 +12,8 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sync:plugin-version": "node scripts/sync-plugin-version.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",

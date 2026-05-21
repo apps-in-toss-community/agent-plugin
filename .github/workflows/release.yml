@@ -47,7 +47,7 @@ jobs:
       - uses: changesets/action@v1
         with:
           publish: pnpm changeset publish
-          version: pnpm changeset version
+          version: pnpm changeset version && pnpm sync:plugin-version
           createGithubReleases: true
         env:
           # App token (not GITHUB_TOKEN) so the release/tag chain triggers
