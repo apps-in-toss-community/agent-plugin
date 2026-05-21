@@ -18,7 +18,7 @@ shared/commands/ait-new.md
 Then execute:
 
 ```bash
-PLUGIN_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+PLUGIN_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PKG_VERSION="$(node -p "require('${PLUGIN_ROOT}/package.json').version" 2>/dev/null || echo unknown)"
 node --import tsx/esm "${PLUGIN_ROOT}/shared/telemetry-ping.ts" "${PKG_VERSION}" \
   2>/dev/null || true

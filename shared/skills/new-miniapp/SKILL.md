@@ -20,7 +20,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
   바로 `pnpm dev`가 도는 빈 프로젝트가 만들어져 있다.
 - `@ait-co/devtools`가 dev 시점에 SDK를 mock해주므로, 토스 앱 없이
   브라우저에서 개발할 수 있다.
-- 다음 단계(`pnpm dev` → 코드 수정 → `/ait deploy`)가 명확히 안내된다.
+- 다음 단계(`pnpm dev` → 코드 수정 → `/ait setup-bundle` → `/ait register` → `/ait deploy`)가 명확히 안내된다.
 
 이 skill은 **단순 파일 복사 + 토큰 치환 + 1회 install**만 담당한다. 콘솔
 등록(`aitcc app register`), 로그인, 배포는 다른 skill 또는 console-cli의
@@ -190,8 +190,9 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   pnpm dev          # 브라우저에서 devtools panel과 함께 실행
 
 배포 준비가 되면:
-  /ait status       # 콘솔 인증/워크스페이스 확인
-  /ait deploy       # 콘솔에 업로드 (별도 skill)
+  /ait setup-bundle # .ait 번들 빌드 환경 추가 (granite.config.ts + bundle:ait 스크립트)
+  /ait register     # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
+  /ait deploy       # 번들을 콘솔에 업로드
 
 문서: https://docs.aitc.dev/      (커뮤니티 docs)
 ```
