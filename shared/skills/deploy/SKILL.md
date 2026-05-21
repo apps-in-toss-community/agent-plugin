@@ -190,7 +190,7 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 
 - ❌ 앱 등록 — `/ait register` skill의 역할 (사전 작업).
 - ❌ Deploy Key 발급(`aitcc keys create`) — 운영자/maintainer 결정.
-- ❌ 콘솔 로그인(`aitcc login`) — `ait deploy`는 Deploy Key 인증이므로 `aitcc` 세션 불필요.
+- ❌ 콘솔 로그인(`aitcc login`) — 이 skill은 `ait deploy --api-key`(Deploy Key 인증)를 쓰므로 `aitcc` 세션이 필요 없다. (세션 기반 배포가 필요하면 `aitcc app deploy`를 직접 사용.)
 - ❌ `test-push` 자동 호출 — 운영자가 기기 직접 확인 후 결정하는 흐름.
 - ❌ `bundle:ait` 환경 설정 — `/ait setup-bundle` skill.
 - ❌ 리뷰 제출(`--request-review`) 자동화 — 릴리즈 노트 검토가 필요한 intentional 작업.
