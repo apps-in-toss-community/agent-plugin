@@ -89,6 +89,12 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
 이 skill은 이미지를 생성·리사이즈하지 않는다. 규격은 등록 시점에
 로컬 + 서버 양쪽에서 강제된다.
 
+아이콘·스크린샷 준비는 **현재 사용자 수동 단계**다 — harness의 디자인
+station(`/ait design`, station 8)이 이 산출을 맡을 예정이지만 아직 미착수다.
+그때까지는 register가 규격을 명시적으로 안내하고 사용자가 채우는 hand-off로
+처리한다(절벽이 아니라 seam). `/ait design`이 들어오면 그 단계가 이 자산을
+만들어 register 앞에 자연스럽게 연결된다.
+
 | 파일 | 규격 | 개수 |
 |---|---|---|
 | `assets/logo.png` | 600×600 | 1 (필수) |
@@ -192,7 +198,8 @@ mkdir -p assets
 (이 skill은 이미지를 만들지 않는다 — 사용자가 배치):
 
 ```
-./assets/ 에 다음 PNG를 준비해주세요:
+./assets/ 에 다음 PNG를 준비해주세요 (현재는 직접 준비하는 단계입니다 —
+디자인 station(/ait design)이 들어오면 이 자산을 자동 생성합니다):
   - logo.png             600×600        (필수)
   - thumbnail.png        1932×828       (필수)
   - screenshot-1.png …   636×1048       (필수, 세로 ≥ 3장)
@@ -308,7 +315,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 이미지 생성·리사이즈 — 사용자가 `./assets/`에 규격대로 배치.
+- ❌ 이미지 생성·리사이즈 — 현재는 사용자가 `./assets/`에 규격대로 배치(디자인 station `/ait design` 미착수 동안의 수동 hand-off).
 - ❌ 번들 빌드(`/ait setup-bundle`)와 배포(`/ait deploy`) — register는 둘 **사이**의 단계. 두 짝 skill을 cross-ref.
 - ❌ Deploy Key 발급(`aitcc keys create`) — 등록은 세션, 배포는 Deploy Key.
 - ❌ 대화형 로그인(`aitcc login`) — skill 안에서 절대 호출하지 않는다.
