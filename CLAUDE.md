@@ -24,7 +24,7 @@
 
 이 repo에서 MCP는 기본 tool(`Bash`/`Read`/`Write`/`Edit`/`WebFetch`)로 못 하는 일에만 — 예: live 브라우저 상태 조작(devtools 디버깅 MCP), 관리자 전용 운영 데이터(oidc-bridge 관리자 MCP). CLI wrapping·스캐폴딩·문서 fetch는 전부 skill + Bash로.
 
-**"구현 안 함" vs "등록함" 경계**: plugin manifest(`.claude-plugin/plugin.json`)의 `mcpServers`에 `ait-devtools`(= devtools repo가 제공하는 `devtools-mcp` bin)를 **한 줄로 등록(reference)**한다 — `npx -y @ait-co/devtools devtools-mcp`. 이건 station 2·3의 live CDP attach가 "기본 tool로 못 하는 일"이라는 위 기준을 정확히 만족하는 유일한 케이스다(umbrella `CLAUDE.md` §4 "debug가 유일한 정당한 MCP 후보"). plugin은 여전히 MCP를 **자체 구현하지 않고**, 서버는 attach 전 bootstrap 도구만 노출하므로 idle context도 작다(2단계 tools/list — `devtools` #208). 다른 머신 clone에서도 깨지지 않게 **머신 절대경로 launcher를 박지 않는다**(`npx`로 published bin 지목 — devtools friction-2 #209 전제). 설계 정본: umbrella `meta/three-environments-fidelity.md` §7.4.
+**"구현 안 함" vs "등록함" 경계**: plugin manifest(`.claude-plugin/plugin.json`)의 `mcpServers`에 `ait-devtools`(= devtools repo가 제공하는 `devtools-mcp` bin)를 **한 줄로 등록(reference)**한다 — `npx -y @ait-co/devtools devtools-mcp`. 이건 station 2·3의 live CDP attach가 "기본 tool로 못 하는 일"이라는 위 기준을 정확히 만족하는 유일한 케이스다(umbrella `CLAUDE.md` §4 "debug가 유일한 정당한 MCP 후보"). plugin은 여전히 MCP를 **자체 구현하지 않고**, 서버는 attach 전 bootstrap 도구만 노출하므로 idle context도 작다(2단계 tools/list — `devtools` #208). 다른 머신 clone에서도 깨지지 않게 **머신 절대경로 launcher를 박지 않는다**(`npx`로 published bin 지목 — devtools friction-2 #209 전제). 설계 정본: umbrella `meta/four-environments-fidelity.md` §7.4.
 
 ## 제공물
 
@@ -40,9 +40,9 @@
 | `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `Write`/`Bash`, console-cli |
 | `logs` / `status` | 콘솔 상태 조회 | `Bash`, console-cli |
 | `auth-setup` | oidc-bridge 연결 옵션 설정 | `Edit` |
-| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 | `Edit`, `Bash` |
+| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 — 환경 2(AITC Sandbox PWA) 진입, 실기기 WebKit dev 미리보기 | `Edit`, `Bash` |
 | `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `Read`/`WebFetch` |
-| `debug` | 환경 3종 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2·3: `ait-devtools` MCP의 `build_attach_url` QR로 on-device CDP relay attach | `Read`, `ait-devtools` MCP |
+| `debug` | 환경 4겹 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2: PWA Sandbox(`setup-phone-preview`). 환경 3·4: `ait-devtools` MCP의 `build_attach_url` QR로 on-device CDP relay attach | `Read`, `ait-devtools` MCP |
 
 ### Slash commands & Templates
 
@@ -82,7 +82,7 @@ agent-plugin/
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/{plugin.json,marketplace.json}` 존재 — `marketplace.json`이 `/plugin marketplace add apps-in-toss-community/agent-plugin` 설치 경로(harness station 0)를 지탱한다. `plugin.json`의 `mcpServers."ait-devtools"`가 `devtools-mcp`를 상시 기동해 station 2·3을 단일 MCP surface로 묶는다.
 
 - ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`, `register`, `debug`
-- ✅ **등록**: `ait-devtools` MCP(`npx -y @ait-co/devtools devtools-mcp`) — `/ait debug`가 환경 2·3 attach 경로(`build_attach_url` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
+- ✅ **등록**: `ait-devtools` MCP(`npx -y @ait-co/devtools devtools-mcp`) — `/ait debug`가 환경 3·4 attach 경로(`build_attach_url` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
 - 🔜 **남은 검증**: plugin 설치 → `/mcp`에 `ait-devtools` 노출 + 실기기 QR attach 1회 acceptance (GitHub Project M-track 추적)
 - 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
 
