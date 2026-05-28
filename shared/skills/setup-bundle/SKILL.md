@@ -34,9 +34,9 @@ argument-hint: ''
   아무것도 없으면 `pnpm`으로 가정.
 - 인터넷 연결 필요 (`@apps-in-toss/cli` npm 설치).
 
-> 이 skill은 콘솔 인증을 **요구하지 않는다**. 번들 빌드는 로컬 전용.
-> 앱 등록(`aitcc app register`)과 Deploy Key 발급(`aitcc keys create`)은
-> 별도 작업이다 — 이 skill의 범위 밖.
+이 skill은 콘솔 인증을 요구하지 않는다. 번들 빌드는 로컬 전용.
+앱 등록(`aitcc app register`)은 `/ait register`가, Deploy Key 발급·프로파일
+저장은 `/ait deploy-key`가 담당한다 — 이 skill의 범위 밖.
 
 ## 입력 (프롬프트)
 
@@ -256,21 +256,22 @@ setup-bundle 완료
 
 다음 단계:
   /ait register          # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
-  /ait deploy            # 번들을 앱인토스 콘솔에 업로드
+  /ait deploy-key        # Deploy Key 발급 + ~/.ait/credentials 프로파일 저장 (처음이면 먼저)
+  /ait deploy            # 번들을 앱인토스 콘솔에 업로드 (ait deploy --profile <name>)
 
 참고:
   - granite.config.ts의 permissions: []는 placeholder입니다.
     SDK 권한 prompt가 필요한 API를 사용한다면 여기에 추가하세요.
   - bundle:ait 명령은 내부적으로 vite build를 한 번 더 실행합니다.
     타입 체크는 별도로 pnpm typecheck를 돌리세요.
-  - 콘솔 앱 등록(aitcc app register)과 Deploy Key 발급(aitcc keys create)이
-    완료되어 있어야 /ait deploy를 진행할 수 있습니다.
+  - Deploy Key 프로파일이 없으면 /ait deploy-key 를 먼저 실행하세요.
+    ~/.ait/credentials 에 저장한 프로파일로 ait deploy --profile <name> 을 씁니다.
 ```
 
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 콘솔 앱 등록 — `/ait register` skill의 역할 (비대화형 앱 등록).
-- ❌ Deploy Key 발급(`aitcc keys create`) — 운영자/maintainer 결정 필요.
+- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` skill의 역할.
 - ❌ 콘솔 인증(`aitcc login`) — 별도 작업.
 - ❌ 배포 업로드 — `/ait deploy` (`deploy` skill).
 - ❌ 기존 `granite.config.ts` 수정 — 수동 편집 내용을 보호하기 위해 파일이 있으면 중단.
@@ -291,8 +292,9 @@ setup-bundle 완료
 
 ## 참고
 
-- 짝 skill: `deploy` (`bundle:ait` 빌드 후 콘솔에 업로드).
+- 짝 skill: `deploy` (`bundle:ait` 빌드 후 콘솔에 업로드 — `ait deploy --profile <name>`).
+- 짝 skill: `deploy-key` (Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장).
 - 짝 skill: `new-miniapp` (새 프로젝트 생성 — `granite.config.ts` 없는 상태에서 시작).
 - sdk-example 구현 사례: https://github.com/apps-in-toss-community/sdk-example
 - `@apps-in-toss/cli` (번들러 바이너리): https://www.npmjs.com/package/@apps-in-toss/cli
-- 커뮤니티 docs: https://docs.aitc.dev/
+- 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow

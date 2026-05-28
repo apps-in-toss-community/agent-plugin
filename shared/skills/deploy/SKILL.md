@@ -3,10 +3,9 @@ name: deploy
 description: |
   Deploy the current mini-app bundle to Apps in Toss. Builds the `.ait`
   bundle if missing (`pnpm bundle:ait`), verifies console auth, then runs
-  `ait deploy --api-key <key>` (Deploy Key supplied by the operator — not
-  generated here). Interprets the result and surfaces the
-  `intoss-private://` scheme URL. Includes a note on the PREPARE-stage
-  `test-push` workaround for dog-food before review approval.
+  `ait deploy --profile <name>` (Deploy Key stored via `/ait deploy-key`).
+  Falls back to `--api-key "$AITCC_API_KEY"` in CI/env-only environments.
+  Interprets the result and surfaces the `intoss-private://` scheme URL.
   Triggered by `/ait deploy`.
 argument-hint: ''
 ---
@@ -19,8 +18,8 @@ argument-hint: ''
 결과로 나오는 `intoss-private://` scheme URL을 사용자에게 전달한다.
 
 이 skill의 범위는 **빌드 확인 → 업로드 → 결과 해석**으로 한정한다.
-앱 등록(`aitcc app register`)과 Deploy Key 발급(`aitcc keys create`)은
-사전에 완료되어 있어야 하며 — 이 skill이 수행하지 않는다.
+앱 등록(`aitcc app register`)은 사전에 완료되어 있어야 하며 — 이 skill이
+수행하지 않는다. Deploy Key 발급과 프로파일 저장은 `/ait deploy-key`가 담당한다.
 
 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
@@ -30,15 +29,15 @@ argument-hint: ''
   없으면 `/ait setup-bundle`을 먼저 실행하도록 안내하고 중단.
 - **`ait` CLI**: `@apps-in-toss/cli`가 `devDependencies`에 있어야 한다.
   `pnpm bundle:ait`가 동작하는 환경이면 이미 갖춰진 상태.
-- **Deploy Key**: `ait deploy --api-key <key>` 호출에 필요한 자격증명.
-  이 skill은 Deploy Key를 생성하거나 저장하지 않는다.
-  키는 운영자가 CI secret 또는 환경변수(`AITCC_API_KEY`)로 관리한다.
+- **Deploy Key 프로파일**: `ait deploy --profile <name>` 호출에 필요한 자격증명.
+  로컬 개발 환경에서는 `/ait deploy-key`로 `~/.ait/credentials`에 저장한 프로파일을
+  사용한다. CI/env-only 환경에서는 `AITCC_API_KEY` 환경변수로 대체할 수 있다.
+  프로파일이 없으면 `/ait deploy-key`를 먼저 실행한다.
 - **콘솔 앱 등록**: `aitcc.yaml`(또는 `aitcc/aitcc.yaml`)이 cwd에 있어야 한다.
   없으면 `/ait register` 선행 안내.
 
-> 이 skill은 Deploy Key를 **직접 발급하지 않는다**. 발급은
-> `aitcc keys create`(콘솔 CLI)의 역할이며 운영자/maintainer가 결정한다.
-> 키 이름은 편의상 "Deploy Key"로 부르지만, CLI flag는 `--api-key`.
+Deploy Key 발급·프로파일 저장은 `/ait deploy-key`가 담당한다 — 아직
+프로파일이 없으면 배포 전에 먼저 실행한다.
 
 ## 실행 순서
 
@@ -82,31 +81,36 @@ aitcc.yaml이 없습니다. 앱인토스 콘솔에 앱이 등록되지 않았습
 먼저 /ait register를 실행해주세요.
 ```
 
-### 2. Deploy Key 확인
+### 2. Deploy Key 경로 선택
 
-사용자에게 Deploy Key를 어떻게 제공할지 묻는다. 두 가지 경로:
+두 가지 경로 중 하나를 사용한다.
 
-**경로 A: 환경변수로 제공 (CI/자동화)**
+**경로 A: 로컬 프로파일 (권장)**
 
-```
-Deploy Key가 환경변수 AITCC_API_KEY에 있으면 그대로 사용됩니다.
-배포를 계속하려면 Enter를 눌러주세요.
-```
+`~/.ait/credentials`에 프로파일이 저장돼 있으면 `ait deploy --profile <name>`이
+argv에 키 값을 노출하지 않고 바로 사용할 수 있다.
 
-`echo "${AITCC_API_KEY:+set}"` 으로 변수가 세팅되어 있는지 확인한다.
-세팅되어 있으면 경로 A로 진행.
-
-**경로 B: 직접 입력**
-
-변수가 없으면 안전하게 입력받는다:
-
-```
-Deploy Key를 입력해주세요 (입력 내용은 화면에 표시되지 않습니다):
+```bash
+ait token list 2>/dev/null
 ```
 
-입력된 값은 메모리에만 두고 파일에 쓰지 않는다.
+사용할 프로파일 이름을 확인한다. 프로파일이 없으면 `/ait deploy-key`를 먼저
+실행해 저장한다:
 
-> Deploy Key가 없으면 콘솔 UI 또는 `aitcc keys create`로 발급한 후 다시 실행.
+```
+프로파일이 없습니다. 먼저 /ait deploy-key 를 실행해 Deploy Key를 발급·저장하세요.
+```
+
+**경로 B: 환경변수 (CI/env-only 환경에서만)**
+
+로컬 프로파일 없이 `AITCC_API_KEY` 환경변수를 쓰는 경우다. 이 경로는 `ps aux`에
+키 값이 평문으로 노출되므로 로컬 개발 환경에서는 경로 A를 사용한다.
+
+```bash
+echo "${AITCC_API_KEY:+set}"
+```
+
+변수가 세팅되어 있으면 경로 B로 진행한다.
 
 ### 3. 번들 확인 + 빌드 (필요 시)
 
@@ -128,20 +132,32 @@ pnpm bundle:ait
 
 ### 4. 배포 실행
 
+**경로 A — 로컬 프로파일 (권장)**:
+
+```bash
+pnpm exec ait deploy --profile <profile-name> --scheme-only -m "<타임스탬프 또는 사용자 메모>"
+```
+
+실행 예:
+
+```bash
+pnpm exec ait deploy --profile aitc-sdk-example-local --scheme-only -m "v0.1.2 $(date +%Y-%m-%dT%H:%M:%S)"
+```
+
+**경로 B — 환경변수 (CI/env-only 환경에서만)**:
+
 ```bash
 pnpm exec ait deploy --api-key "$AITCC_API_KEY" --scheme-only -m "<타임스탬프 또는 사용자 메모>"
 ```
 
+로컬 환경에서 `--api-key`를 직접 쓰면 `ps aux`에 키 값이 평문으로 노출된다.
+로컬 개발에서는 경로 A를 사용한다.
+
+공통 플래그:
+
 - `--scheme-only`: 업로드 완료 후 stdout 마지막 줄에 `intoss-private://...` URL만 출력.
 - `-m`: 배포 메모. 타임스탬프(`date +%Y-%m-%dT%H:%M:%S`)를 기본값으로 쓴다.
   사용자가 메모를 제공하면 그걸 쓴다.
-- `--api-key`: 경로 A면 `"$AITCC_API_KEY"`, 경로 B면 메모리에서 삽입.
-
-**실행 예**:
-
-```bash
-pnpm exec ait deploy --api-key "$AITCC_API_KEY" --scheme-only -m "v0.1.2 $(date +%Y-%m-%dT%H:%M:%S)"
-```
 
 ### 5. 결과 해석
 
@@ -194,24 +210,26 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 앱 등록 — `/ait register` skill의 역할 (사전 작업).
-- ❌ Deploy Key 발급(`aitcc keys create`) — 운영자/maintainer 결정.
-- ❌ 콘솔 로그인(`aitcc login`) — 이 skill은 `ait deploy --api-key`(Deploy Key 인증)를 쓰므로 `aitcc` 세션이 필요 없다. (세션 기반 배포가 필요하면 `aitcc app deploy`를 직접 사용.)
+- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` skill의 역할.
+- ❌ 콘솔 로그인(`aitcc login`) — 이 skill은 `ait deploy --profile`(프로파일 인증) 또는 `--api-key`(env 인증)를 쓰므로 `aitcc` 세션이 필요 없다.
 - ❌ `test-push` 자동 호출 — 운영자가 기기 직접 확인 후 결정하는 흐름.
 - ❌ `bundle:ait` 환경 설정 — `/ait setup-bundle` skill.
 - ❌ 리뷰 제출(`--request-review`) 자동화 — 릴리즈 노트 검토가 필요한 intentional 작업.
 
 ## 하지 말아야 할 것
 
-- ❌ Deploy Key를 파일에 쓰거나 커밋에 포함. 메모리에서만 사용.
+- ❌ Deploy Key 값을 파일에 쓰거나 커밋에 포함. `--profile` 경로는 키를 전달하지 않는다.
+- ❌ 로컬 환경에서 `--api-key` 직접 사용 — `ps aux`에 평문 노출. 프로파일 경로를 쓴다.
 - ❌ `4046` (REVIEW lock) 에러 시 새 앱 등록으로 우회. 운영팀 처리 대기가 올바른 경로.
 - ❌ 에러 메시지 없이 "배포 실패"만 전달. 반드시 원인과 힌트를 제시.
 - ❌ `granite.config.ts`가 없는 상태에서 진행. Step 1에서 반드시 확인하고 중단.
 
 ## 참고
 
+- 짝 skill: `deploy-key` (Deploy Key 발급 + 프로파일 저장 — 이 skill의 전제 조건).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — 이 skill의 전제 조건).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인 — 배포 전 점검).
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli
 - `@apps-in-toss/cli` (번들러): https://www.npmjs.com/package/@apps-in-toss/cli
 - test-push 배경: umbrella `CLAUDE.md` "Dog-food 흐름" 단락
-- 커뮤니티 docs: https://docs.aitc.dev/
+- 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow
