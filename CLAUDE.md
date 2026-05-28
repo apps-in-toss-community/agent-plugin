@@ -35,7 +35,8 @@
 | `new-miniapp` | 템플릿 선택·파일 생성·dev-dep 주입 | `Write`/`Edit`, `templates/` |
 | `inject-devtools` | 기존 프로젝트에 devtools unplugin 설정 추가 | `Edit` |
 | `inject-polyfill` | polyfill 모드로 마이그레이션 | `Edit` |
-| `deploy` | 번들 확인 → `ait deploy --api-key` → 결과 해석 + scheme URL 표시 | `Bash`, `@apps-in-toss/cli` |
+| `deploy-key` | Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장 (`aitcc keys create --save-profile`) — `ait deploy --profile` 전제 조건 | `Bash`, console-cli |
+| `deploy` | 번들 확인 → `ait deploy --profile <name>` (또는 CI env fallback `--api-key`) → 결과 해석 + scheme URL 표시 | `Bash`, `@apps-in-toss/cli` |
 | `setup-bundle` | 기존 프로젝트에 `.ait` 번들 빌드 환경 추가 (`granite.config.ts` + `bundle:ait` 스크립트) | `Write`/`Edit`, `@apps-in-toss/cli` |
 | `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `Write`/`Bash`, console-cli |
 | `logs` / `status` | 콘솔 상태 조회 | `Bash`, console-cli |
@@ -81,7 +82,7 @@ agent-plugin/
 
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/{plugin.json,marketplace.json}` 존재 — `marketplace.json`이 `/plugin marketplace add apps-in-toss-community/agent-plugin` 설치 경로(harness station 0)를 지탱한다. `plugin.json`의 `mcpServers."ait-devtools"`가 `devtools-mcp`를 상시 기동해 station 2·3을 단일 MCP surface로 묶는다.
 
-- ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy`, `setup-bundle`, `register`, `debug`
+- ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy-key`, `deploy`, `setup-bundle`, `register`, `debug`
 - ✅ **등록**: `ait-devtools` MCP(`npx -y @ait-co/devtools devtools-mcp`) — `/ait debug`가 환경 3·4 attach 경로(`build_attach_url` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
 - 🔜 **남은 검증**: plugin 설치 → `/mcp`에 `ait-devtools` 노출 + 실기기 QR attach 1회 acceptance (GitHub Project M-track 추적)
 - 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
