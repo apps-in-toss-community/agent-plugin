@@ -170,28 +170,89 @@ native swipe-back)는 CDP(Chrome DevTools Protocol) relay로 attach해야 관측
 candidate scheme URL이 없으면 먼저 station 5(`/ait setup-bundle` → `/ait register`
 → `/ait deploy`)로 candidate를 만들도록 안내한다.
 
-### 5-B. attach — `build_attach_url` QR
+#### `MCP_ENV` 환경 자동 감지
 
-1. `ait-devtools` 서버의 **`build_attach_url`** 도구를 호출한다 (scheme URL 전달).
-   서버가 `debug=1&relay=<wss>`를 splice해 attach용 deep link를 합성하고 **ASCII
-   QR을 터미널에 렌더**한다.
-2. 사용자가 **폰 카메라로 그 QR을 스캔**한다 — 이게 환경 3·4의 단일 진입 경로다.
+`ait-devtools` 서버는 `MCP_ENV` 환경 변수로 동작 모드를 결정한다:
+
+| `MCP_ENV` 값 | 동작 |
+|---|---|
+| 미설정 + relay target 없음 | `mock` 모드 — 로컬 브라우저 대상, attach 없이 bootstrap 도구만 유효 |
+| `relay-dev` | 환경 3 — intoss-private candidate에 relay attach |
+| `relay-live` | 환경 4 — LIVE 번들에 relay attach (read-only) |
+
+실기기 relay가 목적이면 서버 기동 전에 `MCP_ENV=relay-dev`(환경 3) 또는
+`MCP_ENV=relay-live`(환경 4)를 명시한다. 미설정이면 서버가 mock 모드로 기동되므로
+relay target이 없어도 무방하다. `/mcp`에서 `ait-devtools`가 뜨는지 확인 후 진행.
+
+### 5-B. candidate 번들 준비
+
+attach 경로에는 이미 올라가 있는 candidate scheme URL이 필요하다. 없으면 먼저
+`ait`(번들러, `@apps-in-toss/cli`)로 빌드·배포한다:
+
+```bash
+# 1. .ait 번들 빌드
+ait build
+
+# 2. candidate로 배포하고 scheme URL만 출력 (콘솔 큐에 올리되 검수 제출은 하지 않음)
+ait deploy --scheme-only
+# → intoss-private://<app-id>?_deploymentId=<uuid> 형태의 URL 출력
+```
+
+`ait`는 번들러(`@apps-in-toss/cli`) — `aitcc`(콘솔 자동화, console-cli)가 아니다.
+`--scheme-only`는 배포 큐에만 올리고 검수를 제출하지 않으므로 PREPARE 상태에서
+cold-load할 수 있다.
+
+### 5-C. attach — `build_attach_url` QR
+
+1. **`build_attach_url`** 도구를 호출한다 (5-B에서 얻은 scheme URL 전달).
+   서버가 `?debug=1&relay=<wss://<random>.trycloudflare.com>`을 splice해 attach용
+   deep link를 합성하고, **QR PNG를 OS 기본 이미지 뷰어로 자동 연다** (ASCII QR도
+   터미널에 병행 출력).
+
+   예시 deep link 형태 (실제 값은 도구 호출 결과로 받음):
+   ```
+   intoss-private://<app-id>?_deploymentId=<deployment-id>&debug=1&relay=wss://<random>.trycloudflare.com
+   ```
+
+2. 사용자가 **폰 카메라로 QR을 스캔**한다 — 이게 환경 3·4의 단일 진입 경로다.
    QR 스캔은 USB 연결·플랫폼별 CLI·드라이버 의존이 0이라 iOS/Android 동일하게
    동작한다. `devicectl`/`adb` 같은 device-control 발사는 쓰지 않는다(brittle,
    실유저 플로우 아님).
-3. 폰 토스 앱 WebView가 deep link를 열면 in-app gate를 통과해 relay에 attach된다.
-   **`list_pages`** 도구로 붙었는지 확인한다(attach 전엔 빈 목록).
-4. attach 성공 순간 서버가 `notifications/tools/list_changed`를 emit → Claude Code가
-   tool 목록을 갱신한다. `list_console_messages`·`list_network_requests`·
-   `get_dom_document`·`take_snapshot`·`take_screenshot`·`measure_safe_area`·`AIT.*`
-   같은 attach 의존 도구가 **같은 세션에서 즉시 callable**해진다 — 세션 재시작·재승인
-   불필요. 이 도구들로 폰 안 번들의 console/network/DOM/safe-area를 read한다.
 
-attach 전에 보이는 도구는 bootstrap 2종(`build_attach_url`·`list_pages`)뿐이다 —
-그게 정상이다. 나머지가 안 보이면 아직 폰이 안 붙은 것이니 2번 QR 스캔으로 돌아간다.
+3. 폰 토스 앱 WebView가 deep link를 열면 in-app gate를 통과해 relay에 attach된다.
+
+### 5-D. attach 확인 및 도구 자동 등록
+
+1. **`list_pages`** 도구를 호출해 attach 여부를 확인한다.
+   - attach 전: 빈 목록 → 2번 QR 스캔으로 돌아간다.
+   - attach 후: 연결된 페이지(WebView) 목록이 보인다.
+
+2. attach 성공 순간 서버가 `notifications/tools/list_changed`를 emit → Claude Code가
+   tool 목록을 자동 갱신한다. 다음 9종의 attach 의존 도구가 **같은 세션에서 즉시
+   callable**해진다 — 세션 재시작·재승인 불필요:
+
+   | 도구 | 용도 |
+   |---|---|
+   | `list_console_messages` | WebView console 출력·예외 스택 읽기 |
+   | `list_network_requests` | fetch/XHR 왕복·응답 상태 확인 |
+   | `get_dom_document` | 현재 DOM 스냅샷 (ARIA tree 포함) |
+   | `take_snapshot` | 페이지 접근성 트리 캡처 |
+   | `take_screenshot` | 폰 화면 PNG 캡처 |
+   | `measure_safe_area` | safe-area inset 측정 (노치·홈바 여백) |
+   | `call_sdk` | SDK 메서드 직접 호출 (권한 확인, 스토리지 읽기 등) |
+   | `evaluate` | WebView JS 표현식 평가 |
+   | `get_diagnostics` | relay 연결 상태·latency 진단 |
+
+3. 이 도구들로 폰 안 `.ait` 번들의 console/network/DOM/safe-area를 읽고 회귀를
+   진단한다.
+
+**attach 전에 보이는 도구는 bootstrap 3종(`build_attach_url`·`list_pages`·
+`get_diagnostics`)뿐이다** — 그게 정상이다. 나머지 9종이 안 보이면 아직 폰이 안
+붙은 것이니 5-C 2번 QR 스캔으로 돌아간다.
 
 > SECRET-HANDLING: relay attach에 시크릿/인증 코드가 쓰이더라도 그 값을
 > stdout/로그/메시지에 절대 출력하지 않는다. attach 실패 사유는 enum 수준으로만 보고.
+> deep link/wssUrl의 실제 값도 예시가 아닌 한 그대로 인쇄하지 않는다.
 
 ## Out of scope (이 skill이 하지 않는 것)
 
@@ -208,10 +269,10 @@ attach 전에 보이는 도구는 bootstrap 2종(`build_attach_url`·`list_pages
 
 ## 하지 말아야 할 것
 
-- ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 2종
-  (`build_attach_url`·`list_pages`)만 보이는 게 정상이고, 폰이 붙으면 나머지가
-  동적 등록된다(5-B).
-- ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다.
+- ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 3종
+  (`build_attach_url`·`list_pages`·`get_diagnostics`)만 보이는 게 정상이고, 폰이
+  붙으면 나머지 9종이 동적 등록된다(5-D).
+- ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다(5-C).
 - ❌ 시크릿/인증 코드 값을 stdout·로그·메시지에 출력.
 - ❌ `window.__ait`의 메서드명을 고정으로 단정. 버전에 따라 다를 수 있으니 객체를
   펼쳐 확인하도록 안내.
@@ -219,6 +280,10 @@ attach 전에 보이는 도구는 bootstrap 2종(`build_attach_url`·`list_pages
   이슈로 보고 안내.
 - ❌ 메시지에 "공식(official)", "토스가 제공하는", "powered by Toss" 등
   제휴·후원·인증 암시 표현.
+- ❌ `MCP_ENV` 없이 relay-dev/live 목적으로 서버를 기동. mock 모드로 떠 relay를
+  맺지 못한다. 서버 기동 전 `MCP_ENV` 설정 확인(5-A).
+- ❌ `ait build`/`ait deploy` 대신 `aitcc`로 번들 빌드 시도. `ait`(번들러)와
+  `aitcc`(콘솔 자동화)는 별개 도구다(5-B).
 
 ## 다음 단계 (관찰 결과에 따라 분기)
 
@@ -226,16 +291,24 @@ attach 전에 보이는 도구는 bootstrap 2종(`build_attach_url`·`list_pages
   재현되지 않고 실기기 엔진 fidelity가 의심되면 먼저 `/ait setup-phone-preview`로
   환경 2(AITC Sandbox PWA)를 시도한다(토스 앱 deploy 불필요, 실기기 WebKit 엔진
   확인 가능). 그래도 토스 WebView·SDK 네이티브 거동이 필요한 회귀라면 환경 3으로:
-  `/ait deploy`로 candidate를 만들고 5-B의 QR attach.
+  `/ait deploy`로 candidate를 만들고 5-C의 QR attach.
 - **candidate scheme URL이 아직 없음** → `/ait setup-bundle` → `/ait register` →
   `/ait deploy`로 candidate를 만든 뒤 다시 `/ait debug`.
+- **`build_attach_url` 호출 후 스캔 대기 중** → 폰 카메라로 QR 스캔. attach 후
+  `list_pages`로 확인 → 페이지가 보이면 5-D의 9종 도구로 디버깅 시작.
+- **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
+  Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
+  다시 확인. 여전히 없으면 `get_diagnostics`로 relay 연결 상태 점검.
 - **환경 4(LIVE) 운영 관측** → `/ait status`, `/ait logs`로 콘솔 상태도 함께 확인.
 
 ## 참고
 
 - 짝 skill: `inject-devtools` (panel 설정), `setup-phone-preview` (환경 2(AITC Sandbox PWA) 진입 — 실기기 WebKit dev 미리보기 tunnel).
 - 환경 4겹 × fidelity 설계 정본: umbrella `meta/four-environments-fidelity.md` (§1 환경 모델, §5 동적 도구 등록, §7 CDP 단일 transport).
+- 환경 3·4 진입 시나리오 + QR relay 흐름: https://github.com/apps-in-toss-community/devtools/blob/main/docs/scenarios/env-3.md
+- dogfood relay 루프 (candidate 빌드 → QR 스캔 → attach → 관측 사이클): https://github.com/apps-in-toss-community/devtools/blob/main/docs/dogfood-relay-loop.md
 - devtools (mock + panel + MCP): https://github.com/apps-in-toss-community/devtools
 - devtools live demo: https://devtools.aitc.dev/
 - on-device debug (CDP relay MCP): `@ait-co/devtools` `./in-app` + `./mcp` + `devtools-mcp` bin. plugin manifest `mcpServers."ait-devtools"`가 `npx -y @ait-co/devtools devtools-mcp`로 기동.
-- 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow (swipe-back 등 lifecycle 디버깅)
+- 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://docs.aitc.dev/guides/navigation-flow
+- 커뮤니티 docs — 환경 4겹 개요: https://docs.aitc.dev/guides/four-environments
