@@ -1,5 +1,19 @@
 # @ait-co/agent-plugin
 
+## 0.1.13
+
+### Patch Changes
+
+- 55f2ee0: /ait debug SKILL.md: on-device relay 동적 흐름 안내로 확장 (#81)
+
+  `shared/skills/debug/SKILL.md` §5를 동적 attach 흐름 실행 안내로 확장한다. `MCP_ENV` 환경 자동 감지 설명(`mock`/`relay-dev`/`relay-live`), `ait build && ait deploy --scheme-only` candidate 번들 준비 단계(5-B), `build_attach_url` QR 발급 → 스캔 → attach 확인(5-C/5-D), attach 후 자동 등록되는 9종 도구 명세, bootstrap 3종 목록 업데이트, 관측 결과 분기 seam 확장, docs deep-link를 주제 페이지로 교체.
+
+- 6b3cc40: plugin manifest에 `ait-devtools` MCP 서버 등록 — 환경 2·3 단일 MCP surface (#82)
+
+  `.claude-plugin/plugin.json`의 `mcpServers`에 `devtools-mcp`(devtools repo 제공 bin)를 `npx -y @ait-co/devtools devtools-mcp`로 등록한다. 머신 절대경로 launcher가 아니라 published bin을 지목하므로 다른 머신 clone에서도 깨지지 않는다. plugin은 MCP를 자체 구현하지 않고 한 줄 등록만 한다(idle context는 attach 전 bootstrap 도구 2종으로 제한).
+
+  `debug` skill을 환경 3종 분기로 확장: 환경 1(브라우저)은 기존대로, 환경 2·3(intoss-private candidate / live)은 `build_attach_url` QR로 on-device CDP relay attach 경로를 발급한다. attach 성공 시 `notifications/tools/list_changed`로 attach 의존 도구가 같은 세션에 동적 등록된다.
+
 ## 0.1.12
 
 ### Patch Changes
