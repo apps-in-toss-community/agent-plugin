@@ -190,7 +190,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   pnpm dev          # 브라우저에서 devtools panel과 함께 실행
 
 배포 준비가 되면:
-  /ait setup-bundle # .ait 번들 빌드 환경 추가 (granite.config.ts + bundle:ait 스크립트)
+  /ait setup-bundle # .ait 번들 빌드 환경 추가 (apps-in-toss.config.ts + bundle:ait 스크립트)
   /ait register     # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
   /ait deploy       # 번들을 콘솔에 업로드
 
