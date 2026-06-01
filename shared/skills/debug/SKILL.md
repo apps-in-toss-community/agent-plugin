@@ -9,11 +9,12 @@ description: |
   tunnel — no Toss WebView or app review required; set up via
   `/ait setup-phone-preview`, NOT this skill's MCP attach. Environments 3/4
   (on-device intoss-private candidate / live bundle): the `ait-devtools` MCP
-  server — registered by this plugin and always running — issues a QR attach
-  URL via `build_attach_url`; once the phone scans it and the relay attaches,
-  attach-dependent tools register dynamically in the same session. `/ait debug`
-  branches by what it observes and prints the right path. Triggered by
-  `/ait debug`.
+  server — registered by this plugin and always running — call
+  `start_debug({mode})` to switch the active environment at runtime without
+  restarting the server, then issue a QR attach URL via `build_attach_url`;
+  once the phone scans it and the relay attaches, attach-dependent tools
+  register dynamically in the same session. `/ait debug` branches by what it
+  observes and prints the right path. Triggered by `/ait debug`.
 argument-hint: ''
 ---
 
@@ -28,8 +29,8 @@ argument-hint: ''
 |---|---|---|
 | 1. 로컬 브라우저 | desktop Chromium + mock SDK + Panel | 2-A/2-B/3 — panel · `window.__ait` · 브라우저 DevTools |
 | 2. AITC Sandbox PWA | 실기기 Safari/WebKit + installable PWA(`devtools.aitc.dev/launcher/`) + cloudflared 터널 | → `/ait setup-phone-preview`(이 skill 범위 밖, 실기기 WebKit dev 미리보기) |
-| 3. intoss-private relay dev | 실기기 토스 앱 WebView(dogfood) + CDP relay | 5 — `build_attach_url` QR로 relay attach |
-| 4. intoss live relay debug | 실기기 토스 앱 WebView(LIVE, 검수 통과) + CDP relay | 5 — 동일 relay, LIVE attach (read-only) |
+| 3. intoss-private relay dev | 실기기 토스 앱 WebView(dogfood) + CDP relay | 5 — `start_debug({mode:'relay-dev'})` → `build_attach_url` QR attach |
+| 4. intoss live relay debug | 실기기 토스 앱 WebView(LIVE, 검수 통과) + CDP relay | 5 — `start_debug({mode:'relay-live', confirm:true})` → `build_attach_url` QR (read-only) |
 
 - **환경 1**은 지금 바로, 의존 없이 쓴다:
   - `@ait-co/devtools`의 floating panel — mock 상태(권한·위치·IAP·이벤트 등)를
@@ -37,9 +38,10 @@ argument-hint: ''
   - `window.__ait` — 런타임 SDK mock 상태 객체. 콘솔이나 에이전트가 직접 읽는다.
   - 브라우저 기본 DevTools — console / network / sources.
 - **환경 3·4**는 `ait-devtools` MCP 서버로 닿는다. 이 서버는 plugin이 manifest에
-  등록해 **상시 기동**되므로, `/ait debug`는 새 서버를 띄우지 않고 **attach 경로만
-  발급**한다(아래 5). attach 전에는 bootstrap 도구(`build_attach_url`·`list_pages`)만
-  보이고, 폰이 relay에 붙으면 나머지 도구가 같은 세션에서 동적 등록된다.
+  등록해 **상시 기동**되므로, `/ait debug`는 새 서버를 띄우지 않고 **`start_debug({mode})`로
+  runtime 환경을 설정한 뒤 attach 경로를 발급**한다(아래 5). attach 전에는 bootstrap 도구
+  (`start_debug`·`build_attach_url`·`list_pages`·`get_diagnostics`)만 보이고, 폰이
+  relay에 붙으면 나머지 도구가 같은 세션에서 동적 등록된다.
 
 생성·수정하는 모든 메시지에서 "공식(official)", "토스가 제공하는",
 "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
@@ -170,19 +172,30 @@ native swipe-back)는 CDP(Chrome DevTools Protocol) relay로 attach해야 관측
 candidate scheme URL이 없으면 먼저 station 5(`/ait setup-bundle` → `/ait register`
 → `/ait deploy`)로 candidate를 만들도록 안내한다.
 
-#### `MCP_ENV` 환경 자동 감지
+#### `start_debug(mode)` — 런타임 환경 전환 (정본 진입 경로)
 
-`ait-devtools` 서버는 `MCP_ENV` 환경 변수로 동작 모드를 결정한다:
+`ait-devtools` 데몬은 **상시 기동** 상태로, 환경 진입은 **서버 재구동 없이** MCP 도구
+`start_debug({mode})`를 호출해 런타임에 결정한다. 한 데몬이 local(환경 1) + relay(환경
+3·4) connection을 동시에 보유하며, `start_debug`가 어느 connection을 active로 쓸지
+**warm attach를 유지한 채** 즉시 전환한다. 한 세션에서 환경 1→3→1 사이를 자유롭게
+오갈 수 있다(Claude Code 재구동·MCP 재핸드셰이크 불필요).
 
-| `MCP_ENV` 값 | 동작 |
-|---|---|
-| 미설정 + relay target 없음 | `mock` 모드 — 로컬 브라우저 대상, attach 없이 bootstrap 도구만 유효 |
-| `relay-dev` | 환경 3 — intoss-private candidate에 relay attach |
-| `relay-live` | 환경 4 — LIVE 번들에 relay attach (read-only) |
+| `mode` 값 | 환경 | 특이사항 |
+|---|---|---|
+| `local-browser-dev` | 환경 1 — mock Chromium panel | 기본값, relay 불필요 |
+| `local-browser-cdp` | 환경 1 — 브라우저 CDP 직접 연결 | Chrome remote debugging 포트 필요 |
+| `relay-dev` | 환경 3 — intoss-private candidate relay | side-effect unguarded (dogfood) |
+| `relay-live` | 환경 4 — LIVE 번들 relay | **`confirm: true` 필수** (LIVE side-effect guard) |
 
-실기기 relay가 목적이면 서버 기동 전에 `MCP_ENV=relay-dev`(환경 3) 또는
-`MCP_ENV=relay-live`(환경 4)를 명시한다. 미설정이면 서버가 mock 모드로 기동되므로
-relay target이 없어도 무방하다. `/mcp`에서 `ait-devtools`가 뜨는지 확인 후 진행.
+`relay-live`로 전환할 때 `confirm: true`를 빠뜨리면 서버가 진입을 거부한다. 이후
+`call_sdk`/`evaluate` 등도 LIVE에서는 `confirm: true`가 필요한 2중 게이트가 적용된다
+(비가역 부작용 방지). `relay-live` 이후 `local-*` mode로 전환하면 guard가 자동 해제된다.
+
+**`MCP_ENV`** (deprecated back-compat): 부팅 시 `liveIntent`를 시드하는 용도로만 남은
+구버전 별칭이다. 신규 환경 진입에는 `start_debug`를 쓴다 — `MCP_ENV`를 서버 기동 전에
+명시하는 방식은 정본 진입 경로가 아니다.
+
+`start_debug` 호출 후 폰에 relay를 붙이려면 바로 아래 5-B·5-C 순서를 따른다.
 
 ### 5-B. candidate 번들 준비
 
@@ -202,9 +215,16 @@ ait deploy --scheme-only
 `--scheme-only`는 배포 큐에만 올리고 검수를 제출하지 않으므로 PREPARE 상태에서
 cold-load할 수 있다.
 
-### 5-C. attach — `build_attach_url` QR
+### 5-C. attach — `start_debug` → `build_attach_url` QR
 
-1. **`build_attach_url`** 도구를 호출한다 (5-B에서 얻은 scheme URL 전달).
+1. **`start_debug`** 도구를 먼저 호출해 relay mode를 설정한다:
+   - 환경 3: `start_debug({mode: 'relay-dev'})`
+   - 환경 4: `start_debug({mode: 'relay-live', confirm: true})`
+
+   이 단계가 "어느 환경을 쓸 것인가"를 결정한다. 서버가 해당 relay connection을
+   active로 잡고, 이후 `build_attach_url`에서 relay endpoint를 splice할 준비를 한다.
+
+2. **`build_attach_url`** 도구를 호출한다 (5-B에서 얻은 scheme URL 전달).
    서버가 `?debug=1&relay=<wss://<random>.trycloudflare.com>`을 splice해 attach용
    deep link를 합성하고, **QR PNG를 OS 기본 이미지 뷰어로 자동 연다** (ASCII QR도
    터미널에 병행 출력).
@@ -214,17 +234,17 @@ cold-load할 수 있다.
    intoss-private://<app-id>?_deploymentId=<deployment-id>&debug=1&relay=wss://<random>.trycloudflare.com
    ```
 
-2. 사용자가 **폰 카메라로 QR을 스캔**한다 — 이게 환경 3·4의 단일 진입 경로다.
+3. 사용자가 **폰 카메라로 QR을 스캔**한다 — 이게 환경 3·4의 단일 진입 경로다.
    QR 스캔은 USB 연결·플랫폼별 CLI·드라이버 의존이 0이라 iOS/Android 동일하게
    동작한다. `devicectl`/`adb` 같은 device-control 발사는 쓰지 않는다(brittle,
    실유저 플로우 아님).
 
-3. 폰 토스 앱 WebView가 deep link를 열면 in-app gate를 통과해 relay에 attach된다.
+4. 폰 토스 앱 WebView가 deep link를 열면 in-app gate를 통과해 relay에 attach된다.
 
 ### 5-D. attach 확인 및 도구 자동 등록
 
 1. **`list_pages`** 도구를 호출해 attach 여부를 확인한다.
-   - attach 전: 빈 목록 → 2번 QR 스캔으로 돌아간다.
+   - attach 전: 빈 목록 → 5-C 3번 QR 스캔으로 돌아간다.
    - attach 후: 연결된 페이지(WebView) 목록이 보인다.
 
 2. attach 성공 순간 서버가 `notifications/tools/list_changed`를 emit → Claude Code가
@@ -246,9 +266,9 @@ cold-load할 수 있다.
 3. 이 도구들로 폰 안 `.ait` 번들의 console/network/DOM/safe-area를 읽고 회귀를
    진단한다.
 
-**attach 전에 보이는 도구는 bootstrap 3종(`build_attach_url`·`list_pages`·
-`get_diagnostics`)뿐이다** — 그게 정상이다. 나머지 9종이 안 보이면 아직 폰이 안
-붙은 것이니 5-C 2번 QR 스캔으로 돌아간다.
+**attach 전에 보이는 도구는 bootstrap 4종(`start_debug`·`build_attach_url`·
+`list_pages`·`get_diagnostics`)뿐이다** — 그게 정상이다. 나머지 9종이 안 보이면 아직 폰이 안
+붙은 것이니 5-C 3번 QR 스캔으로 돌아간다.
 
 > SECRET-HANDLING: relay attach에 시크릿/인증 코드가 쓰이더라도 그 값을
 > stdout/로그/메시지에 절대 출력하지 않는다. attach 실패 사유는 enum 수준으로만 보고.
@@ -269,8 +289,8 @@ cold-load할 수 있다.
 
 ## 하지 말아야 할 것
 
-- ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 3종
-  (`build_attach_url`·`list_pages`·`get_diagnostics`)만 보이는 게 정상이고, 폰이
+- ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 4종
+  (`start_debug`·`build_attach_url`·`list_pages`·`get_diagnostics`)만 보이는 게 정상이고, 폰이
   붙으면 나머지 9종이 동적 등록된다(5-D).
 - ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다(5-C).
 - ❌ 시크릿/인증 코드 값을 stdout·로그·메시지에 출력.
@@ -280,8 +300,8 @@ cold-load할 수 있다.
   이슈로 보고 안내.
 - ❌ 메시지에 "공식(official)", "토스가 제공하는", "powered by Toss" 등
   제휴·후원·인증 암시 표현.
-- ❌ `MCP_ENV` 없이 relay-dev/live 목적으로 서버를 기동. mock 모드로 떠 relay를
-  맺지 못한다. 서버 기동 전 `MCP_ENV` 설정 확인(5-A).
+- ❌ `MCP_ENV` 기반 구버전 진입 방식에 의존. 환경 전환은 `start_debug({mode})`로
+  런타임에 한다 — 서버 재구동이 필요 없고 `MCP_ENV`를 미리 설정할 필요도 없다(5-A).
 - ❌ `ait build`/`ait deploy` 대신 `aitcc`로 번들 빌드 시도. `ait`(번들러)와
   `aitcc`(콘솔 자동화)는 별개 도구다(5-B).
 
@@ -294,8 +314,8 @@ cold-load할 수 있다.
   `/ait deploy`로 candidate를 만들고 5-C의 QR attach.
 - **candidate scheme URL이 아직 없음** → `/ait setup-bundle` → `/ait register` →
   `/ait deploy`로 candidate를 만든 뒤 다시 `/ait debug`.
-- **`build_attach_url` 호출 후 스캔 대기 중** → 폰 카메라로 QR 스캔. attach 후
-  `list_pages`로 확인 → 페이지가 보이면 5-D의 9종 도구로 디버깅 시작.
+- **`start_debug` 호출 후 `build_attach_url` 스캔 대기 중** → 폰 카메라로 QR 스캔.
+  attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 9종 도구로 디버깅 시작.
 - **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
   Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
   다시 확인. 여전히 없으면 `get_diagnostics`로 relay 연결 상태 점검.
