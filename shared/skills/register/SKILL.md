@@ -47,7 +47,7 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
   (아래 "입력" 참조). 이 skill은 이미지를 생성하지 않는다.
 
 > **세션 ≠ Deploy Key.** 등록은 콘솔 **세션**(`aitcc login`으로 로그인)을
-> 사용하고, 배포(`/ait deploy`)는 **Deploy Key**(`--api-key`)를 사용한다.
+> 사용하고, 배포(`/ait deploy`)는 **Deploy Key**(`aitcc` 인증 — `/ait deploy-key`로 발급)를 사용한다.
 > 둘은 서로 다른 자격증명이다 — 혼동하지 않는다. 이 skill은 Deploy Key를
 > 발급하지도 사용하지도 않는다.
 
