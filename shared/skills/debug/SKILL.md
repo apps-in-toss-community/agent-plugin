@@ -175,9 +175,9 @@ CDP(Chrome DevTools Protocol) relay로 attach해야 관측된다.
   `pnpm dev`로 터널을 띄워야 한다. **SDK는 mock** — CDP 관측 전용.
   **`--target=mobile`로 MCP를 기동**해야 하며(런타임 swap 불가, 아래 표 참조),
   5-C의 mobile 분기에서 launcher QR을 발급한다.
-- **환경 3 (intoss-private candidate)** — `ait build` + `aitcc app deploy`로
-  업로드한 `intoss-private://…?_deploymentId=<uuid>` candidate.
-  PREPARE 상태에서도 cold-load된다. 출시 전 실기기 개발 루프.
+- **환경 3 (intoss-private candidate)** — `RELEASE_CHANNEL=dogfood`로 빌드해
+  `ait deploy --scheme-only`가 출력한 `intoss-private://…?_deploymentId=<uuid>`
+  candidate. PREPARE 상태에서도 cold-load된다. 출시 전 실기기 개발 루프.
 - **환경 4 (intoss live)** — 검수를 통과해 LIVE인 번들(`intoss://…`). 동일 relay로
   붙되 **read-only 관측**만. 검수 큐 제출(비가역)은 이 skill의 범위가 아니다.
 
@@ -222,19 +222,17 @@ warm swap으로 자유롭게 오갈 수 있다(Claude Code 재구동·MCP 재핸
 없으면 먼저 `/ait deploy`로 빌드·업로드한다:
 
 ```bash
-# 1. .ait 번들 빌드 (web-framework 3.0 번들러)
+# 1. .ait 번들 빌드
 ait build
 
-# 2. candidate를 콘솔에 업로드 (검수 제출은 하지 않음 — PREPARE 상태 유지)
-aitcc app deploy ./<appName>.ait
-
-# 3. deploymentId로 scheme URL 조회
-aitcc app bundles ls
+# 2. candidate로 배포하고 scheme URL만 출력 (콘솔 큐에 올리되 검수 제출은 하지 않음)
+ait deploy --scheme-only
+# → intoss-private://<app-id>?_deploymentId=<uuid> 형태의 URL 출력
 ```
 
-`ait`는 번들러(`@apps-in-toss/web-framework`에 내장) — `aitcc`(콘솔 자동화, console-cli)가 아니다.
-`aitcc app deploy`는 업로드만 하고 검수를 제출하지 않으므로 PREPARE 상태에서
-cold-load할 수 있다. 간편하게는 `/ait deploy`를 쓴다.
+`ait`는 번들러(`@apps-in-toss/cli`) — `aitcc`(콘솔 자동화, console-cli)가 아니다.
+`--scheme-only`는 배포 큐에만 올리고 검수를 제출하지 않으므로 PREPARE 상태에서
+cold-load할 수 있다.
 
 ### 5-C. attach — `start_debug` → `build_attach_url` QR
 
@@ -360,8 +358,8 @@ cold-load할 수 있다. 간편하게는 `/ait deploy`를 쓴다.
   제휴·후원·인증 암시 표현.
 - ❌ `MCP_ENV` 기반 구버전 진입 방식에 의존. 환경 전환은 `start_debug({mode})`로
   런타임에 한다 — 서버 재구동이 필요 없고 `MCP_ENV`를 미리 설정할 필요도 없다(5-A).
-- ❌ `ait build` 대신 `aitcc`로 번들 빌드 시도. `ait`(번들러, web-framework 내장)와
-  `aitcc`(콘솔 자동화)는 별개 도구다(5-B). 빌드는 `ait build`, 업로드는 `aitcc app deploy`.
+- ❌ `ait build`/`ait deploy` 대신 `aitcc`로 번들 빌드 시도. `ait`(번들러)와
+  `aitcc`(콘솔 자동화)는 별개 도구다(5-B).
 
 ## 다음 단계 (관찰 결과에 따라 분기)
 

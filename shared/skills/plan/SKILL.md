@@ -191,7 +191,7 @@ SDK 도메인 (필요)
 ## 하지 말아야 할 것
 
 - ❌ 카탈로그에 없는 도메인·권한·약관 type을 그럴듯하게 지어내기. 모르면 "확인 필요"로 남긴다.
-- ❌ `ait`(= `@apps-in-toss/web-framework`에 내장된 번들러)와 `aitcc`(= console-cli, 등록/배포/약관)를 혼동. 약관은 `aitcc workspace terms`, 번들은 `ait build`다.
+- ❌ `ait`(= `@apps-in-toss/cli`, 번들러)와 `aitcc`(= console-cli, 등록/배포/약관)를 혼동. 약관은 `aitcc workspace terms`, 번들은 `ait build`다.
 - ❌ 전체 카탈로그 덤프. 출력은 "이 미니앱에 필요한 것"만 추린다.
 - ❌ 약관에 자동 동의하거나, 동의가 이미 됐다고 가정. plan은 예고만 한다.
 - ❌ "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현.
