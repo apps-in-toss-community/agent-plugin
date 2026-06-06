@@ -110,18 +110,40 @@ grep '"@ait-co/devtools"' package.json
 
 Step 4에서 이미 있으면 skip.
 
+#### 채널 선택 (web-framework 버전에 따라 다르다)
+
+`@ait-co/devtools`는 두 dist-tag 채널로 배포된다. **프로젝트의 `@apps-in-toss/web-framework` 버전에 맞는 채널**을 설치해야 peer가 정합된다.
+
+| web-framework 버전 | 설치 채널 | 명령 예시 |
+|---|---|---|
+| `2.x` (stable) | `latest` (stable) | `pnpm add -D @ait-co/devtools` |
+| `3.0.0-beta.*` (beta 라인) | `beta` | `pnpm add -D @ait-co/devtools@beta` |
+
 ```bash
-# pnpm
+# package.json에서 web-framework 버전 확인
+grep '"@apps-in-toss/web-framework"' package.json
+```
+
+`3.0.0-beta.*`이면 아래 beta 채널 명령을 사용한다.
+
+```bash
+# pnpm — stable (web-framework 2.x)
 pnpm add -D @ait-co/devtools
 
+# pnpm — beta (web-framework 3.0-beta 라인)
+pnpm add -D @ait-co/devtools@beta
+
 # npm
-npm install --save-dev @ait-co/devtools
+npm install --save-dev @ait-co/devtools        # stable
+npm install --save-dev @ait-co/devtools@beta   # beta
 
 # yarn
-yarn add -D @ait-co/devtools
+yarn add -D @ait-co/devtools        # stable
+yarn add -D @ait-co/devtools@beta   # beta
 
 # bun
-bun add -d @ait-co/devtools
+bun add -d @ait-co/devtools        # stable
+bun add -d @ait-co/devtools@beta   # beta
 ```
 
 설치 시 `unmet peer react-native` 경고가 나올 수 있다 — **무시해도 된다**. 웹

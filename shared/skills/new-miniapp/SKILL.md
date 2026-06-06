@@ -173,6 +173,10 @@ cd ./<package_name> && pnpm install
 **무시해도 된다** — 웹 미니앱은 RN을 쓰지 않고, devtools가 dev 시점에 SDK를
 mock으로 대체한다. 사용자에게도 이 점을 한 줄로 알린다.
 
+이 `react-vite` 템플릿은 `@apps-in-toss/web-framework` **3.0.0-beta** 라인과
+`@ait-co/devtools` **beta** 채널 조합을 사용한다. 첫 install 시 devtools가 beta
+채널에서 설치되는 것은 정상이다 — peer 정합을 위한 의도적 선택이다.
+
 `pnpm`이 없으면 npm/bun으로 fallback할지 사용자에게 묻지 말고, "이 템플릿은
 pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려면
 `--no-install`로 만든 뒤 `pnpm`을 설치하거나 본인 환경에 맞게 변경하세요"
