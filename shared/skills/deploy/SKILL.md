@@ -1,10 +1,12 @@
 ---
 name: deploy
 description: |
-  Deploy the current mini-app bundle to Apps in Toss. Runs `ait build`
-  (web-framework 3.0 bundler, produces `<appName>.ait`), then uploads via
-  `aitcc app deploy <path-to-.ait>`. Interprets the result and surfaces the
-  deploymentId for scheme URL lookup. Triggered by `/ait deploy`.
+  Deploy the current mini-app bundle to Apps in Toss. Builds the `.ait`
+  bundle if missing (`pnpm bundle:ait`), verifies console auth, then runs
+  `ait deploy --profile <name>` (Deploy Key stored via `/ait deploy-key`).
+  Falls back to `--api-key "$AITCC_API_KEY"` in CI/env-only environments.
+  Interprets the result and surfaces the `intoss-private://` scheme URL.
+  Triggered by `/ait deploy`.
 argument-hint: ''
 ---
 
@@ -12,38 +14,37 @@ argument-hint: ''
 
 ## 목적
 
-`/ait deploy` 한 번으로 미니앱 번들을 빌드하고 앱인토스 콘솔에 업로드한다.
+`/ait deploy` 한 번으로 미니앱 번들을 앱인토스 콘솔에 업로드하고,
+결과로 나오는 `intoss-private://` scheme URL을 사용자에게 전달한다.
 
-**3.0 배포 플로는 두 단계**로 분리된다:
-
-1. **`ait build`** — `@apps-in-toss/web-framework`에 내장된 번들러. `apps-in-toss.config.ts`를 읽어 `<appName>.ait` 파일을 생성한다. 각 빌드에는 uuidv7 `deploymentId`가 내장된다.
-2. **`aitcc app deploy <path-to-.ait>`** — console-cli(`aitcc`) 바이너리. `.ait`에서 `deploymentId`를 추출해 업로드 URL을 초기화하고, 번들 바이트를 PUT 업로드한다.
-
-이 skill의 범위는 **빌드 확인 → `ait build` → `aitcc app deploy` → 결과 해석**으로 한정한다.
-앱 등록(`aitcc app register`)은 사전에 완료되어 있어야 한다 — 이 skill이 수행하지 않는다.
+이 skill의 범위는 **빌드 확인 → 업로드 → 결과 해석**으로 한정한다.
+앱 등록(`aitcc app register`)은 사전에 완료되어 있어야 하며 — 이 skill이
+수행하지 않는다. Deploy Key 발급과 프로파일 저장은 `/ait deploy-key`가 담당한다.
 
 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
 ## 의존
 
-- **번들 빌드 환경**: `apps-in-toss.config.ts`가 있어야 한다.
+- **번들 빌드 환경**: `granite.config.ts`와 `bundle:ait` 스크립트가 있어야 한다.
   없으면 `/ait setup-bundle`을 먼저 실행하도록 안내하고 중단.
-- **`ait` 바이너리**: `@apps-in-toss/web-framework@3.0+`에 내장되어 있다.
-  `pnpm exec ait build`가 동작하는 환경이면 이미 갖춰진 상태.
-- **`aitcc` 바이너리**: console-cli(`@ait-co/console-cli`)가 설치되어 있어야 한다.
-  없으면 `pnpm add -g @ait-co/console-cli`로 설치 안내.
-- **`aitcc` 인증**: `aitcc login` 또는 `AITCC_API_KEY` 환경변수가 설정되어 있어야 한다.
-  (`aitcc`의 Deploy Key 인증은 `aitcc login`/`AITCC_API_KEY` 경로를 사용한다 —
-  `/ait deploy-key` skill이 이 설정을 담당한다.)
+- **`ait` CLI**: `@apps-in-toss/cli`가 `devDependencies`에 있어야 한다.
+  `pnpm bundle:ait`가 동작하는 환경이면 이미 갖춰진 상태.
+- **Deploy Key 프로파일**: `ait deploy --profile <name>` 호출에 필요한 자격증명.
+  로컬 개발 환경에서는 `/ait deploy-key`로 `~/.ait/credentials`에 저장한 프로파일을
+  사용한다. CI/env-only 환경에서는 `AITCC_API_KEY` 환경변수로 대체할 수 있다.
+  프로파일이 없으면 `/ait deploy-key`를 먼저 실행한다.
 - **콘솔 앱 등록**: `aitcc.yaml`(또는 `aitcc/aitcc.yaml`)이 cwd에 있어야 한다.
   없으면 `/ait register` 선행 안내.
+
+Deploy Key 발급·프로파일 저장은 `/ait deploy-key`가 담당한다 — 아직
+프로파일이 없으면 배포 전에 먼저 실행한다.
 
 ## 실행 순서
 
 ### 1. 사전 조건 확인
 
 ```bash
-ls package.json apps-in-toss.config.ts
+ls package.json granite.config.ts
 ```
 
 `package.json`이 없으면 중단:
@@ -52,23 +53,19 @@ ls package.json apps-in-toss.config.ts
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
 ```
 
-`apps-in-toss.config.ts`가 없으면 중단:
+`granite.config.ts`가 없으면 중단:
 
 ```
-apps-in-toss.config.ts가 없습니다. 번들 빌드 환경이 설정되지 않았습니다.
+granite.config.ts가 없습니다. 번들 빌드 환경이 설정되지 않았습니다.
 먼저 /ait setup-bundle을 실행해주세요.
 ```
 
-`granite.config.ts`만 있고 `apps-in-toss.config.ts`가 없는 경우:
+`package.json`을 `Read`로 읽어 `scripts["bundle:ait"]`가 있는지 확인한다.
+없으면 중단:
 
 ```
-granite.config.ts만 있고 apps-in-toss.config.ts가 없습니다.
-web-framework 3.0에서 설정 파일 이름이 바뀌었습니다.
-
-마이그레이션:
-  pnpm exec ait migrate v3
-
-이후 /ait deploy를 다시 실행해주세요.
+package.json에 bundle:ait 스크립트가 없습니다.
+먼저 /ait setup-bundle을 실행해주세요.
 ```
 
 `aitcc.yaml` 또는 `aitcc/aitcc.yaml`이 있는지 확인한다:
@@ -84,98 +81,105 @@ aitcc.yaml이 없습니다. 앱인토스 콘솔에 앱이 등록되지 않았습
 먼저 /ait register를 실행해주세요.
 ```
 
-### 2. `aitcc` 인증 확인
+### 2. Deploy Key 경로 선택
 
-`aitcc`는 두 가지 인증 경로를 지원한다.
+두 가지 경로 중 하나를 사용한다.
 
-**경로 A: `aitcc login` 세션 (권장)**
+**경로 A: 로컬 프로파일 (권장)**
+
+`~/.ait/credentials`에 프로파일이 저장돼 있으면 `ait deploy --profile <name>`이
+argv에 키 값을 노출하지 않고 바로 사용할 수 있다.
 
 ```bash
-aitcc whoami 2>/dev/null
+ait token list 2>/dev/null
 ```
 
-세션이 있으면 경로 A로 진행한다.
+사용할 프로파일 이름을 확인한다. 프로파일이 없으면 `/ait deploy-key`를 먼저
+실행해 저장한다:
 
-**경로 B: 환경변수 (CI/env-only 환경)**
+```
+프로파일이 없습니다. 먼저 /ait deploy-key 를 실행해 Deploy Key를 발급·저장하세요.
+```
 
-`AITCC_API_KEY`가 세팅되어 있으면 경로 B로 진행한다:
+**경로 B: 환경변수 (CI/env-only 환경에서만)**
+
+로컬 프로파일 없이 `AITCC_API_KEY` 환경변수를 쓰는 경우다. 이 경로는 `ps aux`에
+키 값이 평문으로 노출되므로 로컬 개발 환경에서는 경로 A를 사용한다.
 
 ```bash
 echo "${AITCC_API_KEY:+set}"
 ```
 
-둘 다 없으면 중단:
+변수가 세팅되어 있으면 경로 B로 진행한다.
 
-```
-aitcc 인증이 없습니다. 다음 중 하나를 실행하세요.
+### 3. 번들 확인 + 빌드 (필요 시)
 
-로컬 개발:
-  aitcc login
-
-CI/env-only 환경:
-  export AITCC_API_KEY=<Deploy Key>
-
-Deploy Key 발급: /ait deploy-key
-```
-
-### 3. 번들 빌드 (`ait build`)
-
-`apps-in-toss.config.ts`를 `Read`로 읽어 `appName`을 추출한다.
+`granite.config.ts`를 `Read`로 읽어 `appName`을 추출한다.
 예상 산출물 파일명은 `<appName>.ait`.
 
 ```bash
 ls *.ait 2>/dev/null
 ```
 
-`.ait` 파일이 없거나 사용자가 재빌드를 원하면 빌드한다:
+`.ait` 파일이 없거나 사용자가 재빌드를 원하면 번들을 빌드한다:
 
 ```bash
-pnpm exec ait build
+pnpm bundle:ait
 ```
 
-`pnpm`이 없으면:
-
-```bash
-npx ait build
-```
-
-빌드 성공 시 `<appName>.ait`가 프로젝트 루트에 생성된다.
 빌드 실패 시 에러를 그대로 보여주고 중단.
+`pnpm`이 없으면 `npx ait build`로 fallback 안내.
 
-### 4. 업로드 (`aitcc app deploy`)
+### 4. 배포 실행
+
+**경로 A — 로컬 프로파일 (권장)**:
 
 ```bash
-aitcc app deploy ./<appName>.ait
+pnpm exec ait deploy --profile <profile-name> --scheme-only -m "<타임스탬프 또는 사용자 메모>"
 ```
 
-CI 환경에서 `AITCC_API_KEY`를 쓰는 경우도 동일 명령이다
-(`aitcc`가 환경변수를 자동으로 읽는다).
+실행 예:
 
-업로드가 완료되면 `aitcc`가 `deploymentId`를 출력한다.
+```bash
+pnpm exec ait deploy --profile aitc-sdk-example-local --scheme-only -m "v0.1.2 $(date +%Y-%m-%dT%H:%M:%S)"
+```
+
+**경로 B — 환경변수 (CI/env-only 환경에서만)**:
+
+```bash
+pnpm exec ait deploy --api-key "$AITCC_API_KEY" --scheme-only -m "<타임스탬프 또는 사용자 메모>"
+```
+
+로컬 환경에서 `--api-key`를 직접 쓰면 `ps aux`에 키 값이 평문으로 노출된다.
+로컬 개발에서는 경로 A를 사용한다.
+
+공통 플래그:
+
+- `--scheme-only`: 업로드 완료 후 stdout 마지막 줄에 `intoss-private://...` URL만 출력.
+- `-m`: 배포 메모. 타임스탬프(`date +%Y-%m-%dT%H:%M:%S`)를 기본값으로 쓴다.
+  사용자가 메모를 제공하면 그걸 쓴다.
 
 ### 5. 결과 해석
 
-**성공 시** (exit 0):
+**성공 시** (exit 0, `intoss-private://`로 끝나는 stdout):
 
 ```
 배포 완료
 
-deploymentId: <uuid>
+scheme URL:
+  intoss-private://...
 
-scheme URL 확인:
-  aitcc app bundles ls --json | jq '.[] | select(.deploymentId=="<uuid>") | .schemeUrl'
-
-또는:
-  aitcc app bundles ls
-
-intoss-private:// scheme URL로 PREPARE 상태에서 cold-load:
-  실기기 토스 앱에서 해당 URL을 QR/deep-link로 열면 candidate 번들이 로드됩니다.
-  (/ait debug의 환경 3 경로)
+이 URL을 토스 앱에서 열면 업로드된 번들을 로드합니다.
 
 [PREPARE 단계 주의]
 앱의 serviceStatus가 PREPARE(출시 리뷰 통과 전)인 동안은
-intoss:// URL(라이브)이 아닌 intoss-private:// URL(candidate)만 사용해야 합니다.
-릴리즈 리뷰 제출은 aitcc app deploy --request-review 또는 콘솔 UI에서.
+토스 앱이 이 URL로 actual bundle을 로드하지 않습니다.
+리뷰 통과 전에 기기에서 직접 확인하려면 test-push를 사용하세요:
+
+  aitcc app bundles test-push --deployment-id <deploymentId>
+
+deploymentId는 배포 stdout 또는 aitcc app bundles ls --json 에서 확인.
+test-push는 업로더 기기로 푸시 알림을 보내고, 그 알림으로 번들을 로드합니다.
 ```
 
 **에러 시** (non-zero exit):
@@ -184,10 +188,10 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 
 | 에러 패턴 | 힌트 |
 |---|---|
-| `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `/ait deploy-key`로 재발급. |
-| `4037` / `4040` / `4099` / `5001` (약관 미체결) | `aitcc workspace terms agree <TYPE>`으로 동의 후 재시도. |
+| `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `aitcc keys create`로 재발급. |
+| `4037` / `4040` / `4099` / `5001` (약관 미체결) | 해당 약관을 `aitcc workspace terms agree <TYPE>`으로 동의 후 재시도. |
 | `4046` (REVIEW lock) | 앱이 리뷰 중입니다. 운영팀 처리를 기다린 후 재시도. 새 앱 생성으로 우회 금지. |
-| `.ait 없음` / `file not found` | Step 3 빌드 단계를 건너뛰었거나 빌드가 실패함. `pnpm exec ait build` 재실행. |
+| `bundle not found` / `*.ait 없음` | Step 3 빌드 단계를 건너뛰었거나 빌드가 실패함. `pnpm bundle:ait` 재실행. |
 | 기타 | 에러 메시지를 그대로 보여주고 `aitcc` 로그 / GitHub Issues 안내. |
 
 ### 6. 완료 요약 + 다음 단계
@@ -195,37 +199,37 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 배포 성공 후 한 블록으로 마무리한다:
 
 ```
-배포 완료 · deploymentId: <uuid>
+배포 완료 · scheme URL: intoss-private://... · 메모: <memo>
 
 다음 단계:
   /ait status         # 콘솔에서 review/serviceStatus 확인
-  /ait debug          # 환경 3: deploymentId로 실기기 QR attach
-  # serviceStatus가 PREPARE면 intoss-private:// URL로 기기에서 dog-food
-  # approved/OPENED면 intoss:// URL이 그대로 토스 앱에서 로드됨
+  # serviceStatus가 PREPARE면 위 test-push 안내로 기기에서 dog-food
+  # approved/OPENED면 scheme URL이 그대로 토스 앱에서 로드됨
 ```
 
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 앱 등록 — `/ait register` skill의 역할 (사전 작업).
-- ❌ Deploy Key 발급 — `/ait deploy-key` skill의 역할.
-- ❌ 콘솔 로그인(`aitcc login`) — 세션이 없으면 안내만 한다.
-- ❌ 번들 빌드 환경 설정 — `/ait setup-bundle` skill.
+- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` skill의 역할.
+- ❌ 콘솔 로그인(`aitcc login`) — 이 skill은 `ait deploy --profile`(프로파일 인증) 또는 `--api-key`(env 인증)를 쓰므로 `aitcc` 세션이 필요 없다.
+- ❌ `test-push` 자동 호출 — 운영자가 기기 직접 확인 후 결정하는 흐름.
+- ❌ `bundle:ait` 환경 설정 — `/ait setup-bundle` skill.
 - ❌ 리뷰 제출(`--request-review`) 자동화 — 릴리즈 노트 검토가 필요한 intentional 작업.
 
 ## 하지 말아야 할 것
 
+- ❌ Deploy Key 값을 파일에 쓰거나 커밋에 포함. `--profile` 경로는 키를 전달하지 않는다.
+- ❌ 로컬 환경에서 `--api-key` 직접 사용 — `ps aux`에 평문 노출. 프로파일 경로를 쓴다.
 - ❌ `4046` (REVIEW lock) 에러 시 새 앱 등록으로 우회. 운영팀 처리 대기가 올바른 경로.
 - ❌ 에러 메시지 없이 "배포 실패"만 전달. 반드시 원인과 힌트를 제시.
-- ❌ `apps-in-toss.config.ts`가 없는 상태에서 진행. Step 1에서 반드시 확인하고 중단.
-- ❌ 존재하지 않는 `ait deploy --profile`, `ait deploy --api-key`, `ait deploy --scheme-only` 플래그 사용.
-  3.0에서 `ait deploy`는 없다 — 빌드는 `ait build`, 업로드는 `aitcc app deploy`.
+- ❌ `granite.config.ts`가 없는 상태에서 진행. Step 1에서 반드시 확인하고 중단.
 
 ## 참고
 
+- 짝 skill: `deploy-key` (Deploy Key 발급 + 프로파일 저장 — 이 skill의 전제 조건).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — 이 skill의 전제 조건).
-- 짝 skill: `deploy-key` (Deploy Key 발급 — `aitcc` 인증에 필요).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인 — 배포 전 점검).
-- `ait`(번들러, `@apps-in-toss/web-framework`에 내장)와 `aitcc`(콘솔 자동화, console-cli)는 다른 도구다.
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli
-- `@apps-in-toss/web-framework` (번들러 포함): https://www.npmjs.com/package/@apps-in-toss/web-framework
+- `@apps-in-toss/cli` (번들러): https://www.npmjs.com/package/@apps-in-toss/cli
+- test-push 배경: umbrella `CLAUDE.md` "Dog-food 흐름" 단락
 - 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow

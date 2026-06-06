@@ -1,10 +1,11 @@
 ---
 name: deploy-key
 description: |
-  Issue a Deploy Key and save it to `~/.ait/credentials` for use with
-  `aitcc` — no plaintext echo, no argv exposure. Checks for a usable
-  existing profile first; if one is valid and expires in 7+ days, skips
-  issuance and reports the name. Triggered by `/ait deploy-key`.
+  Issue a Deploy Key and save it to `~/.ait/credentials` so
+  `ait deploy --profile <name>` works immediately — no plaintext echo, no
+  argv exposure. Checks for a usable existing profile first; if one is
+  valid and expires in 7+ days, skips issuance and reports the name.
+  Triggered by `/ait deploy-key`.
 argument-hint: '[profile-name]'
 ---
 
@@ -12,7 +13,7 @@ argument-hint: '[profile-name]'
 
 ## 목적
 
-`aitcc app deploy` 등 console-cli 명령에 필요한 Deploy Key를 한 번 발급해
+`ait deploy --profile <name>` 배포에 필요한 Deploy Key를 한 번 발급해
 `~/.ait/credentials`에 프로파일로 저장한다.
 
 - 기존 프로파일이 유효하면(만료 7일+ 이상) 재발급 없이 그 이름을 안내하고 종료.
@@ -50,8 +51,7 @@ aitcc keys ls --json
 기존 Deploy Key 가 있습니다.
   키 이름: <name>   만료: <expireTs>
 
-저장된 프로파일: <profile-name>
-사용 예: aitcc app deploy ./<appName>.ait
+ait deploy --profile <profile-name> --scheme-only -m "<memo>"
 
 프로파일 이름 <profile-name> 을 아직 저장하지 않았다면 아래 "발급" 단계를
 실행해 --save-profile 로 저장하세요.
@@ -136,11 +136,10 @@ ait token list 2>/dev/null | grep "<profile-name>" || echo "profile-check-skippe
 Deploy Key 저장 완료 · 프로파일: <profile-name>
 
 배포 명령:
-  /ait deploy
+  /ait deploy --profile <profile-name>
 
-또는 직접 (3.0 2-step 플로):
-  pnpm exec ait build          # → <appName>.ait 생성
-  aitcc app deploy ./<appName>.ait
+또는 직접:
+  pnpm exec ait deploy --profile <profile-name> --scheme-only -m "<memo>"
 
 번들 빌드 환경이 아직 없으면 /ait setup-bundle 을 먼저 실행하세요.
 앱인토스 콘솔 등록이 안 됐으면 /ait register 를 먼저 실행하세요.
@@ -149,7 +148,7 @@ Deploy Key 저장 완료 · 프로파일: <profile-name>
 ## 참고
 
 - docs: https://docs.aitc.dev/guides/navigation-flow (배포 흐름 전체)
-- 짝 skill: `deploy` — 이 skill로 저장한 프로파일을 `aitcc app deploy` 인증에 소비.
+- 짝 skill: `deploy` — 이 skill로 저장한 프로파일을 `ait deploy --profile` 로 소비.
 - 짝 skill: `setup-bundle` — 번들 빌드 환경 설정 (이 skill의 전제 조건).
 - 짝 skill: `register` — 앱인토스 콘솔 앱 등록.
 - console-cli keys 명령 레퍼런스: https://github.com/apps-in-toss-community/console-cli
