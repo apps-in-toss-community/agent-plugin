@@ -46,7 +46,7 @@ argument-hint: ''
   **환경 2에서 `call_sdk`/`evaluate` 실 SDK 호출은 불가**하다(SDK mock) — CDP 기반
   관측(DOM·console·network·screenshot·safe-area)만 쓸 수 있다. 실 SDK fidelity가
   필요하면 환경 3(intoss-private dogfood)으로 올라가야 한다. attach 전에는 bootstrap 도구
-  (`start_debug`·`build_attach_url`·`list_pages`·`get_diagnostics`)만 보이고, 폰이
+  (`start_debug`·`build_attach_url`·`list_pages`·`get_debug_status`)만 보이고, 폰이
   relay에 붙으면 나머지 도구가 같은 세션에서 동적 등록된다.
 
 생성·수정하는 모든 메시지에서 "공식(official)", "토스가 제공하는",
@@ -307,13 +307,13 @@ cold-load할 수 있다.
    | `measure_safe_area` | safe-area inset 측정 (노치·홈바 여백) |
    | `call_sdk` | SDK 메서드 직접 호출 — **환경 2(mobile)에서 불가** (SDK mock) |
    | `evaluate` | WebView JS 표현식 평가 — **환경 2(mobile)에서 실 SDK 접근 불가** (SDK mock) |
-   | `get_diagnostics` | relay 연결 상태·latency 진단 |
+   | `get_debug_status` | 현재 환경/모드·relay 연결 상태·세션 진단 스냅샷 |
 
 3. 이 도구들로 폰 안 `.ait` 번들의 console/network/DOM/safe-area를 읽고 회귀를
    진단한다.
 
 **attach 전에 보이는 도구는 bootstrap 4종(`start_debug`·`build_attach_url`·
-`list_pages`·`get_diagnostics`)뿐이다** — 그게 정상이다. 나머지 9종이 안 보이면 아직 폰이 안
+`list_pages`·`get_debug_status`)뿐이다** — 그게 정상이다. 나머지 9종이 안 보이면 아직 폰이 안
 붙은 것이니 5-C 3번 QR 스캔으로 돌아간다.
 
 > SECRET-HANDLING: relay attach에 시크릿/인증 코드가 쓰이더라도 그 값을
@@ -340,7 +340,7 @@ cold-load할 수 있다.
 ## 하지 말아야 할 것
 
 - ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 4종
-  (`start_debug`·`build_attach_url`·`list_pages`·`get_diagnostics`)만 보이는 게 정상이고, 폰이
+  (`start_debug`·`build_attach_url`·`list_pages`·`get_debug_status`)만 보이는 게 정상이고, 폰이
   붙으면 나머지 9종이 동적 등록된다(5-D).
 - ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다(5-C).
 - ❌ 환경 2(`mobile`)에서 `call_sdk`/`evaluate`로 실 SDK 호출 시도. SDK가 mock이라
@@ -376,7 +376,7 @@ cold-load할 수 있다.
   attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 9종 도구로 디버깅 시작.
 - **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
   Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
-  다시 확인. 여전히 없으면 `get_diagnostics`로 relay 연결 상태 점검.
+  다시 확인. 여전히 없으면 `get_debug_status`로 현재 환경/모드·relay 연결 상태 점검.
 - **환경 4(LIVE) 운영 관측** → `/ait status`, `/ait logs`로 콘솔 상태도 함께 확인.
 
 ## 참고
