@@ -103,6 +103,7 @@ you@example.com / workspace <번호> <이름> · 앱 N개 ·
 |---|---|
 | 미인증 (`whoami` 비어 있음) | `aitcc login` (첫 1회만 브라우저) |
 | cwd에 `aitcc.yaml` 없음 (미등록) | `/ait register`로 콘솔 등록 |
+| 등록됨 · `serviceStatus: PREPARE` (검수 미제출) | 배포된 번들은 있으나 아직 검수를 제출하지 않은 상태(`ait deploy --scheme-only` 직후). 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면 `aitcc app deploy --request-review`(비가역). |
 | 등록됨 · `under-review` | 운영팀 처리 대기. 그 사이 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load) |
 | 등록됨 · `rejected` | 반려 사유 확인 후 수정 → `/ait deploy`로 재업로드 |
 | 등록됨 · `approved` / `OPENED` | `/ait deploy`로 새 번들 배포 |

@@ -89,11 +89,11 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
 이 skill은 이미지를 생성·리사이즈하지 않는다. 규격은 등록 시점에
 로컬 + 서버 양쪽에서 강제된다.
 
-아이콘·스크린샷 준비는 **현재 사용자 수동 단계**다 — harness의 디자인
-station(`/ait design`, station 8)이 이 산출을 맡을 예정이지만 아직 미착수다.
-그때까지는 register가 규격을 명시적으로 안내하고 사용자가 채우는 hand-off로
-처리한다(절벽이 아니라 seam). `/ait design`이 들어오면 그 단계가 이 자산을
-만들어 register 앞에 자연스럽게 연결된다.
+아이콘·스크린샷 준비는 harness의 디자인 station(`/ait design`, station 8)이
+맡는다 — 이 산출은 `/ait design`으로 실행한다. design을 거치지 않고 자산을
+직접 준비할 수도 있으며, 그때는 register가 규격을 명시적으로 안내하고
+사용자가 `./assets/`에 채우는 hand-off로 처리한다(절벽이 아니라 seam).
+`/ait design`은 register 규격에 맞는 자산을 만들어 그 앞에 자연스럽게 연결된다.
 
 | 파일 | 규격 | 개수 |
 |---|---|---|
@@ -312,8 +312,8 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 | `no-workspace-selected` (2) | workspaceId가 정해지지 않음. `aitcc.yaml`에 설정하거나 `--workspace`로 전달. |
 | `invalid-config` (2, `message`) | 매니페스트 형식/검증 오류. `message`를 그대로 보여줌. |
 | `missing-required-field` (2, `field`,`message`) | 빠진 필드(`field`)를 지목. |
-| `image-dimension-mismatch` (2, `path`,`expected`,`actual`,`message`) | 어느 이미지(`path`)가 규격(`expected`)과 다른지(`actual`) 안내. |
-| `image-unreadable` (2, `path`,`message`) | `path`의 이미지가 없거나 손상됨. |
+| `image-dimension-mismatch` (2, `path`,`expected`,`actual`,`message`) | 어느 이미지(`path`)가 규격(`expected`)과 다른지(`actual`) 안내. 자산을 다시 만들려면 `/ait design`. |
+| `image-unreadable` (2, `path`,`message`) | `path`의 이미지가 없거나 손상됨. `./assets/`에 규격대로 배치하거나 `/ait design`으로 생성. |
 | `terms-not-accepted` (2, `message`) | 사용자 동의를 다시 받아 `--accept-terms`로 재실행. |
 | `authenticated:false` (10) | `aitcc login` 직접 실행 후 재시도. |
 | `network-error` (11, `message`) | 네트워크 오류. `message`를 보여주고 재시도. |
