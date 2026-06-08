@@ -269,7 +269,7 @@ setup-phone-preview 완료
   - tunnel은 pnpm dev에는 영향 없습니다 (AIT_TUNNEL=1 일 때만 켜짐).
   - 환경 2에서 실 SDK 호출(call_sdk/evaluate)은 불가합니다 (SDK mock).
     실 토스 WebView fidelity가 필요하면 환경 3: /ait deploy 후 /ait debug.
-  - 문서: https://docs.aitc.dev/guides/four-environments
+  - 환경 4겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md
 ```
 
 ---
@@ -323,7 +323,7 @@ Notes:
   - pnpm dev is unchanged — the tunnel only starts when AIT_TUNNEL=1.
   - Real SDK calls (call_sdk/evaluate) are not available in env 2 (SDK is mock).
     For real Toss WebView fidelity, go to env 3: /ait deploy then /ait debug.
-  - Docs: https://docs.aitc.dev/guides/four-environments
+  - Four-environments design: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md
 ```
 
 ---
