@@ -227,4 +227,3 @@ UX 매핑:
   (https://docs.aitc.dev/guides/navigation-flow — 진입·종료·화면 컨텍스트, swipe-back/PageHeader).
 - 보조 UX docs: `/ait docs accessory-button-ux`
   (https://docs.aitc.dev/guides/accessory-button-ux — 하단 고정 버튼/safe-area 패턴).
-- 커뮤니티 docs: https://docs.aitc.dev/

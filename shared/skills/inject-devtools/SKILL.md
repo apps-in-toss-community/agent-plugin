@@ -293,4 +293,3 @@ module.exports = {
 - 짝 skill: `new-miniapp` (새 프로젝트 생성), `inject-polyfill` (polyfill 마이그레이션), `deploy`.
 - devtools API / 지원 번들러 상세: https://github.com/apps-in-toss-community/devtools
 - devtools live demo: https://devtools.aitc.dev/
-- 커뮤니티 docs: https://docs.aitc.dev/
