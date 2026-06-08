@@ -30,7 +30,7 @@ argument-hint: ''
 | 환경 | 실행 면 | 이 skill의 경로 |
 |---|---|---|
 | 1. 로컬 브라우저 | desktop Chromium + mock SDK + Panel | 2-A/2-B/3 — panel · `window.__ait` · 브라우저 DevTools |
-| 2. AITC Sandbox PWA | 실기기 Safari/WebKit + installable PWA(`devtools.aitc.dev/launcher/`) + cloudflared 터널 | 5 — `start_debug({mode:'mobile'})` → `build_attach_url` launcher QR attach (SDK mock; CDP는 실 WebKit; 터널은 `setup-phone-preview` 선행) |
+| 2. AITC Sandbox PWA | 실기기 Safari/WebKit + installable PWA(`devtools.aitc.dev/launcher/`) + cloudflared 터널 | 5 — `start_debug({mode:'mobile'})` → `build_attach_url` launcher QR attach (SDK mock; CDP는 실 WebKit; `setup-phone-preview`로 `dev:phone:cdp` 스크립트 + CDP relay 배선 선행, MCP `--target=mobile`) |
 | 3. intoss-private relay dev | 실기기 토스 앱 WebView(dogfood) + CDP relay | 5 — `start_debug({mode:'relay-dev'})` → `build_attach_url` QR attach |
 | 4. intoss live relay debug | 실기기 토스 앱 WebView(LIVE, 검수 통과) + CDP relay | 5 — `start_debug({mode:'relay-live', confirm:true})` → `build_attach_url` QR (read-only) |
 
@@ -161,18 +161,32 @@ CDP(Chrome DevTools Protocol) relay로 attach해야 관측된다.
 띄우지 않고 attach 경로만 발급한다.
 
 > **환경 2(AITC Sandbox PWA)**: 이 §5의 `mobile` mode가 환경 2 attach 경로다.
-> 실기기 WebKit 엔진을 토스 앱·검수 없이 볼 수 있다. 단, **PWA 터널 인프라는
-> `/ait setup-phone-preview` 선행**(vite.config에 `tunnel:{cdp:true}` 켜기)이고,
-> MCP는 **`--target=mobile`로 기동**해야 한다. 환경 2에서는 SDK가 mock이라
-> `call_sdk`/`evaluate` 실 SDK 호출은 불가 — CDP 관측 도구만 쓸 수 있다.
+> 실기기 WebKit 엔진을 토스 앱·검수 없이 볼 수 있다. 단 아래 전제가 갖춰져 있어야
+> 한다(갖춰지지 않으면 `AIT_RELAY_BASE_URL`/`AIT_TUNNEL_BASE_URL`이 없어 CDP relay가
+> 뜨지 않고 이 경로가 막힌다):
+>
+> 1. `/ait setup-phone-preview`가 vite.config에
+>    `tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false`
+>    를 주입했는지, `dev:phone:cdp` 스크립트가 package.json에 있는지 확인한다.
+> 2. **`pnpm dev:phone:cdp`** (`AIT_TUNNEL=1 AIT_TUNNEL_CDP=1 vite`)로 dev 서버를 띄운다.
+>    이 명령이 두 번째 cloudflared + Chii relay를 boot하고
+>    `AIT_RELAY_BASE_URL`/`AIT_TUNNEL_BASE_URL`을 환경에 주입한다.
+>    `pnpm dev:phone`(screen-only)은 CDP relay를 띄우지 않으므로 이 경로에서 쓰면 안 된다.
+> 3. MCP를 **`--target=mobile`로 기동**한다(런타임 swap 불가 — 아래 표 참조).
+>
+> 환경 2에서는 SDK가 mock이라 `call_sdk`/`evaluate` 실 SDK 호출은 불가 — CDP 관측 도구만
+> 쓸 수 있다.
 
 ### 5-A. 환경 분기
 
 폰 디버깅은 세 환경 중 하나다. 사용자가 어느 환경을 보는지로 가른다:
 
 - **환경 2 (AITC Sandbox PWA)** — 토스 앱·검수 없이 실기기 WebKit 엔진을 볼 수 있는
-  PWA. `/ait setup-phone-preview`로 vite.config에 `tunnel:{cdp:true}`를 켠 뒤
-  `pnpm dev`로 터널을 띄워야 한다. **SDK는 mock** — CDP 관측 전용.
+  PWA. `/ait setup-phone-preview`로 vite.config에 tunnel 옵션을 주입한 뒤
+  **`pnpm dev:phone:cdp`** (`AIT_TUNNEL=1 AIT_TUNNEL_CDP=1`)로 dev 서버를 띄워야
+  CDP relay(`AIT_RELAY_BASE_URL`/`AIT_TUNNEL_BASE_URL`)가 boot된다.
+  `pnpm dev:phone`(screen-only)은 CDP relay를 띄우지 않으므로 이 경로에서 쓰지 않는다.
+  **SDK는 mock** — CDP 관측 전용.
   **`--target=mobile`로 MCP를 기동**해야 하며(런타임 swap 불가, 아래 표 참조),
   5-C의 mobile 분기에서 launcher QR을 발급한다.
 - **환경 3 (intoss-private candidate)** — `RELEASE_CHANNEL=dogfood`로 빌드해
@@ -240,15 +254,16 @@ cold-load할 수 있다.
 
 **환경 2 (mobile) 경로:**
 
-1. `pnpm dev`로 dev 서버를 띄운다. `/ait setup-phone-preview`로 `tunnel:{cdp:true}`가
-   켜져 있으면 Vite가 두 개의 cloudflared 터널을 자동으로 연다:
+1. **`pnpm dev:phone:cdp`** (`AIT_TUNNEL=1 AIT_TUNNEL_CDP=1 vite`)로 dev 서버를 띄운다.
+   `AIT_TUNNEL_CDP=1`이 있어야 Vite가 두 개의 cloudflared 터널을 열고 아래 env를
+   프로세스에 주입한다(`pnpm dev:phone`/`pnpm dev`는 이 env를 발행하지 않는다):
    - 앱 HTTP 터널 → `AIT_TUNNEL_BASE_URL`
    - relay wss 터널 → `AIT_RELAY_BASE_URL`
 
 2. MCP를 **`--target=mobile`**로 기동하고 env로 `AIT_RELAY_BASE_URL`과
-   `AIT_TUNNEL_BASE_URL`을 전달한다 (이 두 env는 터널 호스트를 가리키므로 값을
-   로그·메시지에 직접 인쇄하지 않는다 — placeholder 형태 `https://<A>.trycloudflare.com`
-   로만 참조).
+   `AIT_TUNNEL_BASE_URL`을 전달한다 (이 두 env는 1번 dev 서버가 발행한 터널 호스트를
+   가리키므로 값을 로그·메시지에 직접 인쇄하지 않는다 — placeholder 형태
+   `https://<A>.trycloudflare.com`으로만 참조).
 
 3. **`start_debug({mode: 'mobile'})`** 도구를 호출한다.
 
@@ -333,7 +348,7 @@ cold-load할 수 있다.
   (환경 2는 candidate 번들 불필요 — 터널만.)
 - ❌ 검수 큐 제출(환경 3→4 전환, 비가역) — 명시 승인 없이 하지 않는다.
 - ❌ devtools 설정 주입 — `/ait inject-devtools`.
-- ❌ 환경 2 PWA 터널 인프라 배선 — `/ait setup-phone-preview`(vite.config `tunnel:{cdp:true}` + 터널 기동). 이 skill은 그 위에서 CDP attach/관측을 담당한다.
+- ❌ 환경 2 PWA 터널 인프라 배선 — `/ait setup-phone-preview`(vite.config tunnel 옵션 주입 + `dev:phone:cdp` 스크립트 추가). 이 skill은 그 위에서(`pnpm dev:phone:cdp`가 CDP relay를 boot한 상태에서) CDP attach/관측을 담당한다.
 - ❌ 콘솔 인증·앱 등록·운영 조회 — `/ait deploy`, `/ait register`, `/ait status`.
 - ❌ 코드 자동 수정 — 관찰·진단을 돕고, 수정은 에이전트의 일반 편집 흐름으로.
 
@@ -346,7 +361,10 @@ cold-load할 수 있다.
 - ❌ 환경 2(`mobile`)에서 `call_sdk`/`evaluate`로 실 SDK 호출 시도. SDK가 mock이라
   불가하다. 실 SDK fidelity가 필요하면 환경 3(intoss-private dogfood)으로 올라간다.
 - ❌ 환경 2 진입 시 candidate scheme URL을 준비하려 `/ait deploy` 시작. 환경 2는
-  candidate 번들 불필요 — `setup-phone-preview` 터널이 선행이면 된다.
+  candidate 번들 불필요 — `pnpm dev:phone:cdp`로 CDP relay가 boot된 상태면 된다.
+- ❌ 환경 2에서 `pnpm dev` 또는 `pnpm dev:phone`(screen-only)으로 dev 서버를 띄운 뒤
+  MCP attach 시도. CDP relay(`AIT_RELAY_BASE_URL`/`AIT_TUNNEL_BASE_URL`)는
+  `AIT_TUNNEL_CDP=1`일 때만 boot된다 — `pnpm dev:phone:cdp`를 써야 한다.
 - ❌ 환경 2→3 이동 시 `start_debug` warm swap 기대. mobile은 런타임 swap 불가라
   MCP를 재구동해야 한다(5-A mobile mode 주의사항 참조).
 - ❌ 시크릿/인증 코드 값을 stdout·로그·메시지에 출력.
@@ -366,8 +384,9 @@ cold-load할 수 있다.
 - **환경 1에서 재현·진단 끝** → 수정은 에이전트의 일반 편집 흐름으로. 브라우저에서
   재현되지 않고 실기기 엔진 fidelity가 의심되면 먼저 `/ait setup-phone-preview`로
   환경 2(AITC Sandbox PWA)를 배선한다(토스 앱 deploy 불필요, 실기기 WebKit 엔진
-  확인 가능). 그 위에서 DOM·console·safe-area를 MCP로 관측하려면 `--target=mobile`로
-  재기동 후 `start_debug({mode:'mobile'})` → 5-C mobile 경로. 실 SDK fidelity(토스
+  확인 가능). 그 위에서 DOM·console·safe-area를 MCP로 관측하려면 **`pnpm dev:phone:cdp`**로
+  CDP relay를 boot하고 `--target=mobile`로 MCP를 재기동한 뒤
+  `start_debug({mode:'mobile'})` → 5-C mobile 경로. 실 SDK fidelity(토스
   WebView·네이티브 브리지)가 필요한 회귀라면 환경 3으로: `/ait deploy`로 candidate를
   만들고 5-C의 QR attach.
 - **candidate scheme URL이 아직 없음** → `/ait setup-bundle` → `/ait register` →
