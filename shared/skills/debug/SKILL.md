@@ -209,20 +209,20 @@ warm swap으로 자유롭게 오갈 수 있다(Claude Code 재구동·MCP 재핸
 | `mode` 값 | 환경 | 특이사항 |
 |---|---|---|
 | `local-browser` | 환경 1 — mock Chromium panel / 브라우저 CDP | 기본값. panel 모드와 CDP 직접 연결 모두 이 mode 사용 |
-| `relay-sandbox` | 환경 2 — 실기기 PWA (외부 relay) | SDK mock; `dev:phone:cdp` 스크립트 + `tunnel:{cdp:true}` 필요. single-connection 데몬에서는 런타임 swap 불가(아래 주의사항 참조) |
+| `relay-sandbox` | 환경 2 — 실기기 PWA (외부 relay) | SDK mock; `dev:phone:cdp` 스크립트 + `tunnel:{cdp:true}` 필요. 기본 데몬에서 in-place 진입(아래 주의사항 참조) |
 | `relay-staging` | 환경 3 — intoss-private candidate relay | side-effect unguarded (dogfood) |
 | `relay-live` | 환경 4 — LIVE 번들 relay | **`confirm: true` 필수** (LIVE side-effect guard) |
 
-> **`relay-sandbox` mode의 런타임 swap — single vs dual-connection 데몬 구분**:
-> 환경 3·4(`relay-staging` / `relay-live`)는 같은 데몬에서 `start_debug`로 hot-swap
-> 되지만, `relay-sandbox`(환경 2 PWA)는 데몬 유형에 따라 동작이 다르다.
-> - **single-connection 데몬**: `relay-sandbox`로의 동적 전환을 거부한다
->   (`"'relay-sandbox'(환경 2 PWA, 외부 relay)로 동적 전환할 수 없습니다 (dual-connection
->   데몬에서만 지원). MCP 서버를 relay-sandbox 모드로 재시작하세요"` 에러).
->   이 경우 MCP를 env-2 target으로 재구동해야 한다.
-> - **dual-connection 데몬**: `relay-sandbox`를 in-place로 진입할 수 있다(재구동 불필요).
-> 즉 환경 2로의 전환 가능 여부는 MCP가 어떤 연결 모드로 기동됐는가에 달려 있다.
-> 에러가 나면 데몬 restart 안내를 따른다.
+> **`relay-sandbox`(환경 2) 진입 — 외부 relay URL이 전제**:
+> 환경 3·4(`relay-staging` / `relay-live`)는 MCP 데몬이 자체 relay를 띄우지만,
+> 환경 2는 Vite dev 서버의 unplugin(`tunnel:{cdp:true}`)이 **먼저 띄운 외부 relay**에
+> MCP가 CDP 클라이언트로 붙는 구조다(아키텍처 상수 — 데몬이 이 relay를 스스로 못 만든다).
+> plugin이 등록한 기본 데몬(`npx -y @ait-co/devtools devtools-mcp`)에서 `start_debug`로
+> 그대로 in-place 진입한다 — 재구동 불필요. 단 외부 relay 주소가 필요하므로:
+> - `AIT_RELAY_BASE_URL`이 MCP env에 설정돼 있거나,
+> - `projectRoot`에서 `.ait_urls` 파일을 자동 발견할 수 있어야 한다(`setup-phone-preview`가 배선).
+> 둘 다 없으면 attach가 실패한다 — 그때는 `/ait setup-phone-preview`로 터널·relay를
+> 먼저 배선한다(5-A 환경 2 경로 참조). relay 주소만 있으면 데몬 모드와 무관하게 작동한다.
 
 `relay-live`로 전환할 때 `confirm: true`를 빠뜨리면 서버가 진입을 거부한다. 이후
 `call_sdk`/`evaluate` 등도 LIVE에서는 `confirm: true`가 필요한 2중 게이트가 적용된다
@@ -380,8 +380,10 @@ cold-load할 수 있다.
 - ❌ 환경 2에서 `pnpm dev` 또는 `pnpm dev:phone`(screen-only)으로 dev 서버를 띄우거나
   기동을 권장. CDP relay(`AIT_RELAY_BASE_URL`/`AIT_TUNNEL_BASE_URL`)는 `AIT_TUNNEL_CDP=1`일 때만
   boot된다 — 이 skill은 `pnpm dev:phone:cdp`를 백그라운드로 자동 기동한다(5-C 1단계).
-- ❌ single-connection 데몬에서 `relay-sandbox` warm swap 기대. 에러가 나면 MCP를
-  env-2 target으로 재구동해야 한다(5-A relay-sandbox mode 주의사항 참조).
+- ❌ 외부 relay 주소(`AIT_RELAY_BASE_URL` 또는 `.ait_urls`) 없이 `relay-sandbox` 진입
+  기대. 환경 2는 데몬이 relay를 스스로 못 띄우므로, 주소가 없으면 attach가 실패한다 —
+  `/ait setup-phone-preview`로 터널·relay를 먼저 배선한다(5-A 주의사항 참조). 데몬 재구동은
+  필요 없다(기본 데몬에서 in-place 진입).
 - ❌ `.ait_urls` 파일 내용(URL 값)을 읽거나 로그·메시지에 출력. 존재 여부만 확인한다(5-C 2단계).
 - ❌ 시크릿/인증 코드 값을 stdout·로그·메시지에 출력.
 - ❌ `window.__ait`의 메서드명을 고정으로 단정. 버전에 따라 다를 수 있으니 객체를
