@@ -242,5 +242,4 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
 - devtools 사용법 / 지원 SDK 버전: https://github.com/apps-in-toss-community/devtools
 - SDK 레퍼런스 앱: https://sdk-example.aitc.dev/ (이 템플릿의 dog-fooded
   consumer)
-- 커뮤니티 docs: https://docs.aitc.dev/
 - 템플릿 디렉토리 정책: `shared/templates/README.md`

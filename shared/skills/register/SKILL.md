@@ -346,4 +346,3 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 - 짝 skill: `deploy` (등록된 앱에 번들 업로드 — register 뒤 단계).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인).
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli
-- 커뮤니티 docs: https://docs.aitc.dev/
