@@ -424,4 +424,4 @@ cold-load할 수 있다.
 - on-device debug (CDP relay MCP): `@ait-co/devtools` `./in-app` + `./mcp` + `devtools-mcp` bin. plugin manifest `mcpServers."ait-devtools"`가 `npx -y @ait-co/devtools devtools-mcp`로 기동.
 - env-2 부트스트랩 설계 근거 (approach B): https://github.com/apps-in-toss-community/devtools/issues/428
 - 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://docs.aitc.dev/guides/navigation-flow
-- 커뮤니티 docs — 환경 4겹 개요: https://docs.aitc.dev/guides/four-environments
+- 환경 4겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md

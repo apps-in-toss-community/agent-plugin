@@ -1,5 +1,5 @@
 ---
-description: '(stub) Deploy the current mini-app via aitcc.'
+description: 'Deploy the current mini-app via aitcc.'
 argument-hint: ''
 ---
 

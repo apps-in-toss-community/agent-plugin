@@ -173,13 +173,11 @@ scheme URL:
 
 [PREPARE 단계 주의]
 앱의 serviceStatus가 PREPARE(출시 리뷰 통과 전)인 동안은
-토스 앱이 이 URL로 actual bundle을 로드하지 않습니다.
-리뷰 통과 전에 기기에서 직접 확인하려면 test-push를 사용하세요:
-
-  aitcc app bundles test-push --deployment-id <deploymentId>
-
-deploymentId는 배포 stdout 또는 aitcc app bundles ls --json 에서 확인.
-test-push는 업로더 기기로 푸시 알림을 보내고, 그 알림으로 번들을 로드합니다.
+scheme URL을 토스 앱에서 그냥 열어도 번들이 로드되지 않습니다.
+PREPARE 상태에서 실기기 확인이 필요하면 `/ait debug` 환경 3 경로를 사용하세요:
+  intoss-private://…?_deploymentId=<deploymentId>&debug=1&relay=<wss>
+  위 deep link를 QR로 스캔하면 PREPARE 상태에서도 cold-load됩니다.
+  → `/ait debug`를 실행하면 QR 발급까지 안내합니다.
 ```
 
 **에러 시** (non-zero exit):
@@ -203,7 +201,7 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 
 다음 단계:
   /ait status         # 콘솔에서 review/serviceStatus 확인
-  # serviceStatus가 PREPARE면 위 test-push 안내로 기기에서 dog-food
+  # serviceStatus가 PREPARE면 `/ait debug` 환경 3(QR/deep-link relay)으로 실기기 dog-food
   # approved/OPENED면 scheme URL이 그대로 토스 앱에서 로드됨
 ```
 
@@ -212,7 +210,7 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 - ❌ 앱 등록 — `/ait register` skill의 역할 (사전 작업).
 - ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` skill의 역할.
 - ❌ 콘솔 로그인(`aitcc login`) — 이 skill은 `ait deploy --profile`(프로파일 인증) 또는 `--api-key`(env 인증)를 쓰므로 `aitcc` 세션이 필요 없다.
-- ❌ `test-push` 자동 호출 — 운영자가 기기 직접 확인 후 결정하는 흐름.
+- ❌ PREPARE 상태 실기기 dog-food — `/ait debug` 환경 3 경로(QR/deep-link relay 주입)가 담당.
 - ❌ `bundle:ait` 환경 설정 — `/ait setup-bundle` skill.
 - ❌ 리뷰 제출(`--request-review`) 자동화 — 릴리즈 노트 검토가 필요한 intentional 작업.
 
@@ -231,5 +229,5 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인 — 배포 전 점검).
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli
 - `@apps-in-toss/cli` (번들러): https://www.npmjs.com/package/@apps-in-toss/cli
-- test-push 배경: umbrella `CLAUDE.md` "Dog-food 흐름" 단락
+- 환경 3 dog-food(QR/deep-link relay) 배경: umbrella `CLAUDE.md` §3.2
 - 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow

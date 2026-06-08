@@ -1,5 +1,5 @@
 ---
-description: '(stub) Analyze live browser state via devtools MCP (or manual guide).'
+description: 'Analyze live browser state via devtools MCP (or manual guide).'
 argument-hint: ''
 ---
 
