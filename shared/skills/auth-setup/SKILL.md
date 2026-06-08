@@ -74,6 +74,31 @@ grep -r '@apps-in-toss/web-framework' package.json 2>/dev/null | head -1
 
 있으면 다음 단계로.
 
+### 2.5 사전 조건 확인 — bridge client_id · provider
+
+코드를 쓰기 전에, 아래 세 가지는 harness가 자동 생성하지 못하는 **외부 발급/설정**이다. 빠진 게 있으면 먼저 채우도록 안내한다(자동화하지 않고 경로만 인쇄 — 절벽이 아니라 seam):
+
+```
+auth-setup 사전 조건 (없으면 먼저 준비):
+
+  1. oidc-bridge client_id
+     - 공용 인스턴스(https://oidc-bridge.aitc.dev) 또는 자체 호스팅 bridge에
+       이 미니앱을 등록하고 client_id를 발급받는다.
+     - public client는 Origin allow-list, confidential client는 client_secret로
+       caller를 인증한다(§의존 참조). 발급 방법은 oidc-bridge 문서를 따른다:
+       https://github.com/apps-in-toss-community/oidc-bridge
+
+  2. (Supabase 경로) Supabase 프로젝트 + OIDC provider
+     - Supabase 대시보드 Auth 설정에서 bridge를 OIDC provider로 등록한다.
+     - VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY를 .env에 둔다.
+
+  3. consumer backend 배포 위치
+     - authorizationCode를 교환할 서버 사이드 엔드포인트(Supabase Edge Function /
+       Next.js API route / Cloudflare Worker 등). 아래 4단계가 그 코드를 안내한다.
+```
+
+이 값들은 아래 코드의 `OIDC_BRIDGE_CLIENT_ID`·Supabase 환경변수에 들어간다. placeholder를 그대로 두면 런타임에서 인증이 실패하므로, 코드 생성 시 어느 값을 실제 발급 값으로 채워야 하는지 명시한다.
+
 ### 3. appLogin() 호출 코드 안내
 
 ```ts

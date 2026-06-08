@@ -255,6 +255,7 @@ setup-bundle 완료
   pnpm bundle:ait        # ait build 실행 → <appName>.ait 생성
 
 다음 단계:
+  /ait design            # ./assets/ 이미지 자산 생성 (등록 규격 PNG — register 전 필요)
   /ait register          # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
   /ait deploy-key        # Deploy Key 발급 + ~/.ait/credentials 프로파일 저장 (처음이면 먼저)
   /ait deploy            # 번들을 앱인토스 콘솔에 업로드 (ait deploy --profile <name>)
