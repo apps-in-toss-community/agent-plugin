@@ -44,8 +44,8 @@ Apps in Toss 콘솔은 현재 런타임 로그 API를 공개하지 않습니다.
 런타임 로그는 아니지만 앱 등록·검토·상태 변경 등의 **이벤트 이력**을 확인할 수 있다.
 
 ```bash
-aitcc app events --json        # 현재 디렉토리의 aitcc.yaml 기준
-aitcc app events <appId>       # appId 직접 지정
+aitcc app events ls --json        # 현재 디렉토리의 aitcc.yaml 기준
+aitcc app events ls <appId>       # appId 직접 지정
 ```
 
 `aitcc`가 PATH에 없으면 설치 안내 (`npm i -g @ait-co/console-cli`).
@@ -58,9 +58,6 @@ aitcc app events <appId>       # appId 직접 지정
 ```bash
 aitcc app metrics --json
 ```
-
-> `aitcc app metrics`는 `console-cli`에서 제공 여부를 먼저 확인한다.
-> `command not found`이면 아직 구현되지 않은 것이다 — 대안 3으로 넘어간다.
 
 #### 대안 3: 브라우저 DevTools 콘솔 (로컬 개발)
 
@@ -105,13 +102,24 @@ Sentry.init({
 이 방법은 앱인토스 콘솔과 무관하게 작동하며, 프로덕션 배포 후에도 로그를
 수집할 수 있다.
 
-### 3. 후속 제안
+### 3. 다음 단계 (관측 결과에 따라 분기)
 
-대안 안내 후 다음 중 필요한 게 있는지 확인한다:
+대안 안내 후 관측 결과에 맞는 다음 단계를 코드블록으로 출력한다:
 
-- 이벤트/메트릭 결과를 보고 싶으면: `aitcc app events` / `aitcc app metrics` 실행 제안
-- 로컬 devtools 설정이 안 되어 있으면: `/ait inject-devtools` 제안
-- 앱 전체 상태가 궁금하면: `/ait status` 제안
+이벤트 이력을 바로 확인하고 싶으면:
+```
+aitcc app events ls --json
+```
+
+devtools가 설치되지 않아 브라우저 콘솔 관측이 안 된다면:
+```
+/ait inject-devtools
+```
+
+앱 콘솔 상태(serviceStatus, 검수 결과)를 함께 보려면:
+```
+/ait status
+```
 
 ## 하지 말아야 할 것
 

@@ -230,4 +230,3 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli
 - `@apps-in-toss/cli` (번들러): https://www.npmjs.com/package/@apps-in-toss/cli
 - 환경 3 dog-food(QR/deep-link relay) 배경: umbrella `CLAUDE.md` §3.2
-- 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow

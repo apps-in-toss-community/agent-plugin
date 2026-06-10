@@ -197,7 +197,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   /ait register     # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
   /ait deploy       # 번들을 콘솔에 업로드
 
-문서: https://docs.aitc.dev/      (커뮤니티 docs)
+문서: https://docs.aitc.dev/intro  (커뮤니티 docs)
 ```
 
 `pnpm install`을 건너뛰었으면 안내에 `pnpm install`을 한 줄 추가.
