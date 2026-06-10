@@ -324,26 +324,29 @@ cold-load할 수 있다.
    - attach 후: 연결된 페이지(WebView) 목록이 보인다.
 
 2. attach 성공 순간 서버가 `notifications/tools/list_changed`를 emit → Claude Code가
-   tool 목록을 자동 갱신한다. 다음 9종의 attach 의존 도구가 **같은 세션에서 즉시
+   tool 목록을 자동 갱신한다. 다음 12종의 attach 의존 도구가 **같은 세션에서 즉시
    callable**해진다 — 세션 재시작·재승인 불필요:
 
    | 도구 | 용도 |
    |---|---|
    | `list_console_messages` | WebView console 출력·예외 스택 읽기 |
    | `list_network_requests` | fetch/XHR 왕복·응답 상태 확인 |
+   | `list_exceptions` | 런타임 예외 ring buffer 읽기 |
    | `get_dom_document` | 현재 DOM 스냅샷 (ARIA tree 포함) |
    | `take_snapshot` | 페이지 접근성 트리 캡처 |
    | `take_screenshot` | 폰 화면 PNG 캡처 |
    | `measure_safe_area` | safe-area inset 측정 (노치·홈바 여백) |
    | `call_sdk` | SDK 메서드 직접 호출 — **환경 2(relay-sandbox)에서 불가** (SDK mock) |
    | `evaluate` | WebView JS 표현식 평가 — **환경 2(relay-sandbox)에서 실 SDK 접근 불가** (SDK mock) |
-   | `get_debug_status` | 현재 환경/모드·relay 연결 상태·세션 진단 스냅샷 |
+   | `AIT.getSdkCallHistory` | SDK 호출 이력 조회 |
+   | `AIT.getMockState` | devtools mock 상태 스냅샷 조회 |
+   | `AIT.getOperationalEnvironment` | 운영 환경 정보 + SDK 버전 조회 |
 
 3. 이 도구들로 폰 안 `.ait` 번들의 console/network/DOM/safe-area를 읽고 회귀를
    진단한다.
 
 **attach 전에 보이는 도구는 bootstrap 4종(`start_debug`·`build_attach_url`·
-`list_pages`·`get_debug_status`)뿐이다** — 그게 정상이다. 나머지 9종이 안 보이면 아직 폰이 안
+`list_pages`·`get_debug_status`)뿐이다** — 그게 정상이다. 나머지 12종이 안 보이면 아직 폰이 안
 붙은 것이니 5-C 스캔 단계로 돌아간다.
 
 > SECRET-HANDLING: relay attach에 시크릿/인증 코드가 쓰이더라도 그 값을
@@ -371,7 +374,7 @@ cold-load할 수 있다.
 
 - ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 4종
   (`start_debug`·`build_attach_url`·`list_pages`·`get_debug_status`)만 보이는 게 정상이고, 폰이
-  붙으면 나머지 9종이 동적 등록된다(5-D).
+  붙으면 나머지 12종이 동적 등록된다(5-D).
 - ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다(5-C).
 - ❌ 환경 2(`relay-sandbox`)에서 `call_sdk`/`evaluate`로 실 SDK 호출 시도. SDK가 mock이라
   불가하다. 실 SDK fidelity가 필요하면 환경 3(intoss-private dogfood)으로 올라간다.
@@ -409,7 +412,7 @@ cold-load할 수 있다.
 - **candidate scheme URL이 아직 없음** → `/ait setup-bundle` → `/ait register` →
   `/ait deploy`로 candidate를 만든 뒤 다시 `/ait debug`.
 - **`start_debug` 호출 후 `build_attach_url` 스캔 대기 중** → 폰 카메라로 QR 스캔.
-  attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 9종 도구로 디버깅 시작.
+  attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 12종 도구로 디버깅 시작.
 - **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
   Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
   다시 확인. 여전히 없으면 `get_debug_status`로 현재 환경/모드·relay 연결 상태 점검.

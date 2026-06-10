@@ -298,4 +298,3 @@ setup-bundle 완료
 - 짝 skill: `new-miniapp` (새 프로젝트 생성 — `granite.config.ts` 없는 상태에서 시작).
 - sdk-example 구현 사례: https://github.com/apps-in-toss-community/sdk-example
 - `@apps-in-toss/cli` (번들러 바이너리): https://www.npmjs.com/package/@apps-in-toss/cli
-- 커뮤니티 docs: https://docs.aitc.dev/guides/navigation-flow

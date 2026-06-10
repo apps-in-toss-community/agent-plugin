@@ -257,12 +257,13 @@ setup-phone-preview 완료
   을 환경에 주입합니다. launcher QR에 &debug=1&relay=<wss> 가 실려
   폰 PWA가 CDP relay에 attach됩니다.
 
-  이후 MCP를 --target=mobile 로 기동하면 /ait debug가 환경 2(AITC Sandbox PWA)
-  경로로 DOM·console·safe-area를 관측합니다.
+  이후 /ait debug를 실행하면 start_debug({mode:'relay-sandbox'}) 호출로
+  환경 2(AITC Sandbox PWA) 경로로 DOM·console·safe-area를 관측합니다.
+  (데몬 재시작 불필요 — 기본 데몬에서 in-place 진입.)
 
 다음 단계:
   screen-only 미리보기 후: /ait setup-bundle  # 배포 준비
-  CDP 디버깅으로 진행:    /ait debug           # --target=mobile 기동 후 환경 2 attach
+  CDP 디버깅으로 진행:    /ait debug           # start_debug({mode:'relay-sandbox'}) → 환경 2 attach
 
 참고:
   - tunnel URL은 실행마다 바뀝니다 (*.trycloudflare.com, 인증 없음).
@@ -272,61 +273,7 @@ setup-phone-preview 완료
   - 환경 4겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md
 ```
 
----
-
-영어 안내 (영어권 사용자가 물어보면 같은 정보를 영어로):
-
----
-
-```
-setup-phone-preview done
-
-Changes applied:
-  - vite.config.ts: added tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false
-  - pnpm-workspace.yaml: added cloudflared to onlyBuiltDependencies
-  - package.json: added scripts.dev:phone and scripts.dev:phone:cdp
-  - pnpm install finished (cloudflared binary cached)
-
-[One-time phone setup]
-  Open https://devtools.aitc.dev/launcher/ on your phone and add it to
-  your home screen.
-    iOS Safari: Share → "Add to Home Screen"
-    Android Chrome: ⋮ → "Install app" or "Add to Home Screen"
-
-  The launcher URL is fixed — you only need to install it once.
-
-[Screen-only preview]
-  pnpm dev:phone          # AIT_TUNNEL=1 only (app HTTP tunnel)
-
-  A quick tunnel URL + QR code will appear in the terminal.
-  Scan the QR (or paste the URL) in the launcher PWA to open the dev app
-  full-screen on your phone.
-
-[On-device CDP debugging — with CDP relay]
-  pnpm dev:phone:cdp      # AIT_TUNNEL=1 AIT_TUNNEL_CDP=1 (boots CDP relay too)
-
-  On first run, a TOTP secret is generated in the project-local .ait_relay file
-  (the value is never printed — only the file presence and 0600 permissions are shown).
-  Vite opens two cloudflared tunnels and injects AIT_RELAY_BASE_URL /
-  AIT_TUNNEL_BASE_URL into the environment. The launcher QR includes
-  &debug=1&relay=<wss> so your phone PWA attaches to the CDP relay.
-
-  Then start the MCP with --target=mobile so /ait debug can use the
-  Environment 2 (AITC Sandbox PWA) attach path for DOM/console/safe-area observation.
-
-Next steps:
-  After screen-only preview: /ait setup-bundle  # set up the .ait bundle build
-  For CDP debugging:         /ait debug          # start with --target=mobile, then env-2 attach
-
-Notes:
-  - The tunnel URL changes every run (*.trycloudflare.com, unauthenticated).
-  - pnpm dev is unchanged — the tunnel only starts when AIT_TUNNEL=1.
-  - Real SDK calls (call_sdk/evaluate) are not available in env 2 (SDK is mock).
-    For real Toss WebView fidelity, go to env 3: /ait deploy then /ait debug.
-  - Four-environments design: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md
-```
-
----
+영어권 사용자에게는 같은 정보를 영어로 제공한다.
 
 폰 PWA install은 OS gesture가 필요해 자동화할 수 없다. 이 skill은 데스크톱 셋업까지만 책임진다 — launcher 홈화면 추가는 사용자가 직접.
 
