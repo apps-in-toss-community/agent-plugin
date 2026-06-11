@@ -18,7 +18,7 @@ pnpm install
 pnpm dev
 ```
 
-브라우저에서 열리면 우하단의 devtools panel로 SDK mock 상태를 확인할 수 있습니다.
+브라우저에서 열리면 우하단의 devtools panel로 mock SDK 상태를 확인할 수 있습니다.
 
 ## 빌드
 

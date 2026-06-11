@@ -258,7 +258,7 @@ setup-phone-preview 완료
   폰 PWA가 CDP relay에 attach됩니다.
 
   이후 /ait debug를 실행하면 start_debug({mode:'relay-sandbox'}) 호출로
-  환경 2(AITC Sandbox PWA) 경로로 DOM·console·safe-area를 관측합니다.
+  환경 2(AITC Sandbox App (PWA)) 경로로 DOM·console·safe-area를 관측합니다.
   (데몬 재시작 불필요 — 기본 데몬에서 in-place 진입.)
 
 다음 단계:
@@ -268,7 +268,7 @@ setup-phone-preview 완료
 참고:
   - tunnel URL은 실행마다 바뀝니다 (*.trycloudflare.com, 인증 없음).
   - tunnel은 pnpm dev에는 영향 없습니다 (AIT_TUNNEL=1 일 때만 켜짐).
-  - 환경 2에서 실 SDK 호출(call_sdk/evaluate)은 불가합니다 (SDK mock).
+  - 환경 2에서 실 SDK 호출(call_sdk/evaluate)은 불가합니다 (mock SDK).
     실 토스 WebView fidelity가 필요하면 환경 3: /ait deploy 후 /ait debug.
   - 환경 4겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md
 ```
