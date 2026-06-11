@@ -1,5 +1,23 @@
 # @ait-co/agent-plugin
 
+## 0.1.17
+
+### Patch Changes
+
+- 409d210: `debug` skill의 환경 2(relay-sandbox) single/dual-connection 데몬 분기 안내 정정 — 이 분기는 사용자가 만나지 않는 허구였다.
+
+  devtools 소스 확인 결과 프로덕션 MCP bin 3개(`runDebugServer`/`runLocalDebugServer`/`runMobileDebugServer`)는 전부 `DualConnectionRouter`를 사용하므로, single-connection 데몬의 `relay-sandbox` 거부 에러는 테스트에서만 도달한다. plugin이 등록한 기본 데몬(`npx -y @ait-co/devtools devtools-mcp`)에서 `start_debug({mode:'relay-sandbox'})`는 재구동 없이 in-place 진입한다 — 진짜 전제는 외부 relay 주소(`AIT_RELAY_BASE_URL` 또는 `.ait_urls` 자동 발견)뿐이며, 이는 env-2가 unplugin이 띄운 외부 relay에 붙는 아키텍처 상수에서 온다. "데몬 재시작" 안내를 relay 주소 배선 안내(`/ait setup-phone-preview`)로 교체.
+
+- e40517a: harness 유저 시나리오 seam 끊김 5건 정리 — zero→ship 흐름이 각 station에서 다음 station을 in-flow로 가리키도록 보강:
+
+  - `new-miniapp` 다음-단계에 `/ait auth-setup` 추가 + `auth-setup`에 bridge client_id/Supabase provider 사전 조건 안내 단계(2.5) 신설 (코드 생성 전 외부 발급 경로를 인쇄)
+  - `register`의 `/ait design` "미착수" 오기 정정(실제 구현됨) + 이미지 에러 실패 표에 `/ait design` cross-ref, `setup-bundle` 다음-단계에 design 추가
+  - `ait-setup-bundle` 명령 description 파일명 오기(`apps-in-toss.config.ts` → `granite.config.ts`)
+  - `status` 분기 표에 `serviceStatus: PREPARE`(검수 미제출) 행 추가 → `/ait debug` 환경 3 dog-food로 라우팅
+  - 신규 `/ait welcome` skill — `/plugin install` 직후 station map + `/ait new`를 인쇄하는 station 0→1 hand-off
+
+- 9da2ca0: terminology drift 정리 — ait-deploy description CLI 오기(`via aitcc` → `via ait deploy`), `Apps In Toss Community` 전치사 소문자, `딥링크`/`deep link` → `deep-link`, `AITC Sandbox PWA` → `AITC Sandbox App (PWA)`, `SDK mock` → `mock SDK`.
+
 ## 0.1.16
 
 ### Patch Changes
