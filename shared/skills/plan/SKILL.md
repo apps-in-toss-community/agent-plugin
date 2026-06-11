@@ -64,7 +64,7 @@ argument-hint: '[requirements]'
 | 도메인 | 무엇에 쓰나 | 권한(런타임) | 약관(콘솔) | docs |
 |---|---|---|---|---|
 | `auth` | 토스 로그인 → id_token | — | `TOSS_LOGIN` | `guides/auth-flow` |
-| `navigation` | 화면 전환·딥링크·뒤로가기 | — | — | `guides/navigation-flow` |
+| `navigation` | 화면 전환·deep-link·뒤로가기 | — | — | `guides/navigation-flow` |
 | `environment` | 디바이스·앱 환경 정보 조회 | — | — | `api/environment` |
 | `permissions` | 권한 상태 조회·요청 | (요청하는 권한에 따름) | — | `guides/permissions-pattern` |
 | `storage` | 키-값 로컬 저장 | — | — | `api/storage` |

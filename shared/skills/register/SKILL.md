@@ -302,7 +302,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
   /ait deploy            # 번들을 이 앱에 업로드
 ```
 
-`consoleUrl`은 콘솔 딥링크다(서버가 miniAppId를 생략하면 null).
+`consoleUrl`은 콘솔 deep-link다(서버가 miniAppId를 생략하면 null).
 
 **실패** — 각 `reason`을 한국어 진단 + 수정 힌트로 매핑한다(특별히 명시한
 경우 외 exit 2):

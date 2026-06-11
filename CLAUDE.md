@@ -41,7 +41,7 @@
 | `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `Write`/`Bash`, console-cli |
 | `logs` / `status` | 콘솔 상태 조회 | `Bash`, console-cli |
 | `auth-setup` | oidc-bridge 연결 옵션 설정 | `Edit` |
-| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 — 환경 2(AITC Sandbox PWA) 진입, 실기기 WebKit dev 미리보기 | `Edit`, `Bash` |
+| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 — 환경 2(AITC Sandbox App (PWA)) 진입, 실기기 WebKit dev 미리보기 | `Edit`, `Bash` |
 | `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `Read`/`WebFetch` |
 | `debug` | 환경 4겹 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2: PWA Sandbox(`setup-phone-preview`). 환경 3·4: `ait-devtools` MCP의 `build_attach_url` QR로 on-device CDP relay attach | `Read`, `ait-devtools` MCP |
 | `welcome` | harness 진입 안내 — station 0 install 완료 후 station 1(scaffold)로 hand-off | (없음) |

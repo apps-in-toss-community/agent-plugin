@@ -176,7 +176,7 @@ scheme URL:
 scheme URL을 토스 앱에서 그냥 열어도 번들이 로드되지 않습니다.
 PREPARE 상태에서 실기기 확인이 필요하면 `/ait debug` 환경 3 경로를 사용하세요:
   intoss-private://…?_deploymentId=<deploymentId>&debug=1&relay=<wss>
-  위 deep link를 QR로 스캔하면 PREPARE 상태에서도 cold-load됩니다.
+  위 deep-link를 QR로 스캔하면 PREPARE 상태에서도 cold-load됩니다.
   → `/ait debug`를 실행하면 QR 발급까지 안내합니다.
 ```
 
