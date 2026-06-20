@@ -3,5 +3,4 @@ description: 'Wire up the native Apps in Toss bundle build (.ait) into the curre
 argument-hint: ''
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `setup-bundle` skill.
+Load the `setup-bundle` skill.

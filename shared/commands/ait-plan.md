@@ -3,5 +3,4 @@ description: Turn natural-language mini-app requirements into a plan — the SDK
 argument-hint: '[requirements]'
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `plan` skill and analyze the requirements in `$ARGUMENTS`.
+Load the `plan` skill and analyze the requirements in `$ARGUMENTS`.

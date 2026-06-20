@@ -3,5 +3,4 @@ description: 'Wire up the devtools quick-tunnel + launcher PWA flow for real-pho
 argument-hint: ''
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `setup-phone-preview` skill.
+Load the `setup-phone-preview` skill.
