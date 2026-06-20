@@ -1,5 +1,17 @@
 # @ait-co/agent-plugin
 
+## 0.1.18
+
+### Patch Changes
+
+- 4ef89c1: telemetry 코드 전면 제거 — 추후 일관된 단일 설계로 재구현 예정.
+
+  - `shared/telemetry.ts`, `telemetry-ping.ts`, `telemetry-state.ts`, `telemetry.test.ts`, `TELEMETRY.md` 삭제
+  - `shared/commands/ait-*.md` 16개에서 telemetry prelude 호출 배선 제거 (skill 본연 동작은 보존)
+  - `README.md`/`README.en.md` 텔레메트리 섹션 제거 (ko/en 동시)
+  - `CHANGELOG.md` telemetry 언급 정리
+  - `tsconfig.json` 제거, `package.json`의 `typecheck` 스크립트 제거 (TS 소스 없어짐), `test` 스크립트 `--passWithNoTests` 추가
+
 ## 0.1.17
 
 ### Patch Changes
@@ -149,7 +161,6 @@
   - `setup-bundle` skill: step-9 completion block now routes `register → deploy` instead of jumping straight to `deploy`
   - `plugin.json`: version synced to 0.1.8 (was stuck at 0.1.6, matching package.json and CHANGELOG)
 
-
 ## 0.1.7
 
 ### Patch Changes
@@ -192,7 +203,6 @@
   - `auth-setup` skill: drop the internal miniApp ID from the live-validation note and replace the `비공식` label with the calm community open-source identity.
   - `inject-devtools` / `new-miniapp` skills: replace remaining `비공식 커뮤니티` labels (forbidden by the tone guide) with `커뮤니티 오픈소스`.
   - `README.en.md`: refer to the deployment-phases section by English description instead of quoting the Korean heading verbatim.
-
 
 ## 0.1.5
 
