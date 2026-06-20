@@ -59,20 +59,6 @@ git config core.hooksPath .githooks
 
 This is a developer convenience for fast feedback before push. CI runs the same checks as the enforcement layer, so contributors who don't activate the hook will still see lint failures in their PR.
 
-## Telemetry
-
-When you run an `/ait` command, a daily anonymous usage signal (Tier 0) is sent automatically. It contains only `{version, platform}` — no IP address, username, or code is ever collected.
-
-**Opt out** — add the following to your shell profile or `.env`:
-
-```sh
-export AITC_TELEMETRY=off
-```
-
-You can also set `tier0OptOut: true` in `~/.config/aitc-agent-plugin/telemetry.json`.
-
-See [https://docs.aitc.dev/privacy](https://docs.aitc.dev/privacy) for the Tier 0 / Tier 1 comparison table, anon_id deletion endpoint, and full policy.
-
 ## Status
 
 See the [organization landing page](https://aitc.dev/) for the full roadmap.

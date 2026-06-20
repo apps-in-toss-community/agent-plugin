@@ -3,5 +3,4 @@ description: 'Print the harness entry-point map and point to /ait new — the st
 argument-hint: ''
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `welcome` skill.
+Load the `welcome` skill.

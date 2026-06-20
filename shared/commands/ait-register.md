@@ -3,5 +3,4 @@ description: 'Register the current mini-app with the Apps in Toss console — sc
 argument-hint: ''
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `register` skill.
+Load the `register` skill.

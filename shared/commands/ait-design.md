@@ -3,5 +3,4 @@ description: 'Bridge a Figma design into an Apps in Toss mini-app — maps it to
 argument-hint: '[figma-url]'
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `design` skill.
+Load the `design` skill.

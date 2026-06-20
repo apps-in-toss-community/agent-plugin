@@ -3,5 +3,4 @@ description: 'Fetch recent runtime logs from the console (alternative guidance â
 argument-hint: ''
 ---
 
-Run the telemetry prelude described in `shared/TELEMETRY.md`, then load
-the `logs` skill.
+Load the `logs` skill.
