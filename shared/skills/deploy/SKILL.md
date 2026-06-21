@@ -238,7 +238,7 @@ aitcc workspace terms agree --all --json
 aitcc workspace terms agree <TYPE> --json
 ```
 
-`<TYPE>`은 1단계 조회 결과의 `type` 필드 값을 그대로 사용한다.
+`<TYPE>`은 1단계 조회 결과 `byType` 객체의 키 이름(예: `BIZ_WORKSPACE`)을 그대로 사용한다.
 예: `aitcc workspace terms agree BIZ_WORKSPACE --json`
 
 동의 완료 후 배포를 재시도한다.
