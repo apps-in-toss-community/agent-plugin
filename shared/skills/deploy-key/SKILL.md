@@ -23,16 +23,44 @@ argument-hint: '[profile-name]'
 
 ## 확인 — 기존 프로파일 검사
 
-### 1. `aitcc` 세션 확인
+### 1. `aitcc` 설치 + 세션 확인
+
+먼저 `aitcc` CLI가 설치되어 있는지 확인한다:
+
+```bash
+command -v aitcc
+```
+
+없으면 중단하고 설치를 안내한다:
+
+```
+console-cli(aitcc)가 PATH에 없습니다. 먼저 설치해주세요:
+
+  npm i -g @ait-co/console-cli
+
+설치 후 `aitcc login`으로 로그인하고 /ait deploy-key 를 다시 실행해주세요.
+참고: https://github.com/apps-in-toss-community/console-cli
+```
+
+`aitcc`가 있으면 세션을 확인한다:
 
 ```bash
 aitcc whoami --json
 ```
 
-`authenticated: false`면 로그인이 필요하다:
+`aitcc`가 있는데도 비정상 exit(실행 오류)가 발생하면 stderr를 그대로 보여주고 중단한다.
+
+`{ok:true, authenticated:false}` (exit 10) — 미인증이면 로그인이 필요하다:
 
 ```
-aitcc login 을 먼저 실행한 뒤 /ait deploy-key 를 다시 실행해주세요.
+로그인이 필요합니다. 다음 명령을 직접 실행해주세요:
+
+  aitcc login
+
+`aitcc login`은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에 계정으로 로그인하세요.
+Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나 `AITCC_BROWSER`로 경로를 지정하세요.
+
+로그인 후 /ait deploy-key 를 다시 실행해주세요.
 ```
 
 ### 2. 기존 Deploy Key 목록 조회
@@ -99,17 +127,42 @@ aitcc keys create --name <label> --save-profile <profile-name> --json
 | `saveProfileWarning` | 파일 저장 실패. `apiKey` 는 발급됐으므로 수동 저장 필요 |
 | `ok: false` | 발급 실패 — `reason` 값으로 원인 판단 |
 
-`saveProfileWarning`이 있으면:
+`saveProfileWarning`이 있으면 — Deploy Key는 발급됐지만 `~/.ait/credentials` 저장에 실패한 상태다.
+(`aitcc`는 직접 쓰기를 먼저 시도하고, 실패하면 `ait token add` spawn 폴백을 시도한다. `saveProfileWarning`이 emit됐다면 두 경로 모두 실패한 것이다.)
 
+다음 순서로 진단 + 복구한다:
+
+**1단계: 권한 진단**
+
+```bash
+ls -la ~/.ait/
 ```
-Deploy Key 발급은 됐지만 ~/.ait/credentials 저장에 실패했습니다.
-  경고: <saveProfileWarning>
 
-수동으로 저장하려면:
-  ait token add --api-key <key-value> <profile-name>
+디렉토리 자체가 없거나 권한이 잘못됐으면 생성한다:
 
-(키 값은 이 화면에 출력하지 않으므로 aitcc keys create 를 다시 실행하세요.)
+```bash
+mkdir -p ~/.ait && chmod 700 ~/.ait
 ```
+
+**2단계: 저장 재시도**
+
+권한 해소 후 같은 명령을 다시 실행한다:
+
+```bash
+aitcc keys create --name <label> --save-profile <profile-name> --json
+```
+
+**3단계: 그래도 실패하면 외부 저장**
+
+`--save-profile` 없이 발급하고 GitHub secret 등 외부 저장소에 보관한다:
+
+```bash
+aitcc keys create --name <label> --json
+```
+
+발급된 키 값을 GitHub 레포의 시크릿(`AITCC_API_KEY`)에 저장하면 CI/CD에서 `ait deploy --api-key` 로 소비할 수 있다.
+
+키 값을 stdout/로그/채팅 화면에 평문으로 출력하지 않는다 — 발급 즉시 안전한 저장소로 옮긴다.
 
 `ok: false`면 `reason`에 따라 안내한다:
 
