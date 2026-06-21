@@ -244,7 +244,7 @@ await signInWithPopup(getAuth(), credential);
 3. 반환된 `id_token`을 디코딩(JWT)해 `sub` claim 확인
 
 **앱인토스 네이티브 검증**:
-1. `aitcc` CLI로 배포 (`/ait deploy` 참고)
+1. `/ait deploy` 실행 (번들러 `ait` CLI로 업로드 — `/ait deploy` 참고)
 2. 토스 앱에서 미니앱 열기 → `appLogin()` 실행 → 백엔드가 `referrer: "DEFAULT"`로 교환
 3. `id_token`의 `sub` claim이 실제 토스 계정 ID인지 확인
 

@@ -222,7 +222,7 @@ UX 매핑:
 ## 참고
 
 - 짝 skill: `register` (생성한 자산으로 콘솔 등록 — design 바로 뒤 단계).
-- 짝 skill: `new` (greenfield 프로젝트 생성 — 디자인을 입힐 대상이 없을 때 먼저).
+- 짝 skill: `new-miniapp` (greenfield 프로젝트 생성 — 디자인을 입힐 대상이 없을 때 먼저).
 - UX 패턴 근거 docs: `/ait docs navigation-flow`
   (https://docs.aitc.dev/guides/navigation-flow — 진입·종료·화면 컨텍스트, swipe-back/PageHeader).
 - 보조 UX docs: `/ait docs accessory-button-ux`

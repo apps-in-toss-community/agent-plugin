@@ -198,8 +198,8 @@ mkdir -p assets
 (이 skill은 이미지를 만들지 않는다 — 사용자가 배치):
 
 ```
-./assets/ 에 다음 PNG를 준비해주세요 (현재는 직접 준비하는 단계입니다 —
-디자인 station(/ait design)이 들어오면 이 자산을 자동 생성합니다):
+./assets/ 에 다음 PNG를 준비해주세요 (/ait design 으로 자산을 생성하거나
+직접 배치할 수 있습니다):
   - logo.png             600×600        (필수)
   - thumbnail.png        1932×828       (필수)
   - screenshot-1.png …   636×1048       (필수, 세로 ≥ 3장)
@@ -325,7 +325,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 이미지 생성·리사이즈 — 현재는 사용자가 `./assets/`에 규격대로 배치(디자인 station `/ait design` 미착수 동안의 수동 hand-off).
+- ❌ 이미지 생성·리사이즈 — 자산 생성은 `/ait design`(station 8)이 담당. 직접 준비할 경우 사용자가 `./assets/`에 규격대로 배치(수동 hand-off).
 - ❌ 번들 빌드(`/ait setup-bundle`)와 배포(`/ait deploy`) — register는 둘 **사이**의 단계. 두 짝 skill을 cross-ref.
 - ❌ Deploy Key 발급(`aitcc keys create`) — 등록은 세션, 배포는 Deploy Key.
 - ❌ 대화형 로그인(`aitcc login`) — skill 안에서 절대 호출하지 않는다.

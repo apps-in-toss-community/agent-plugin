@@ -35,8 +35,8 @@
 | `new-miniapp` | 템플릿 선택·파일 생성·dev-dep 주입 | `Write`/`Edit`, `templates/` |
 | `inject-devtools` | 기존 프로젝트에 devtools unplugin 설정 추가 | `Edit` |
 | `inject-polyfill` | polyfill 모드로 마이그레이션 | `Edit` |
-| `deploy-key` | Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장 (`aitcc keys create --save-profile`) — `aitcc app deploy` 인증 전제 조건 | `Bash`, console-cli |
-| `deploy` | 번들 확인 → `ait build` (번들러) → `aitcc app deploy <path.ait>` (업로드) → 결과 해석 + scheme URL 표시 | `Bash`, `@apps-in-toss/web-framework`, console-cli |
+| `deploy-key` | Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장 (`aitcc keys create --save-profile`) — `ait deploy --profile` 인증 전제 조건 | `Bash`, console-cli |
+| `deploy` | 번들 확인 → `ait build` (번들러) → `ait deploy --profile <name>` (번들 업로드) → 결과 해석 + scheme URL 표시. 검수 제출은 별도: `aitcc app deploy <path.ait> --request-review --release-notes "<text>"` | `Bash`, `@apps-in-toss/web-framework`, console-cli |
 | `setup-bundle` | 기존 프로젝트에 `.ait` 번들 빌드 환경 추가 (`granite.config.ts` + `bundle:ait` 스크립트) | `Write`/`Edit`, `@apps-in-toss/cli` |
 | `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `Write`/`Bash`, console-cli |
 | `logs` / `status` | 콘솔 상태 조회 | `Bash`, console-cli |
