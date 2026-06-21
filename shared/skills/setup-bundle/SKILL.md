@@ -47,12 +47,15 @@ argument-hint: ''
 | `appName` | 앱인토스 콘솔 등록명. 영문 소문자, 하이픈 허용. | `package.json`의 `name` 필드 |
 | `displayName` | 토스 앱 내에서 표시될 앱 이름(한국어 가능). | (없음, 필수 입력) |
 | `primaryColor` | 브랜드 주색상. `#RRGGBB` 형식. | `#3182F6` |
-| `icon` | 브랜드 아이콘 이미지 URL (https://…). 없으면 Enter로 건너뜀. | (없음, 선택) |
+| `icon` | 브랜드 아이콘 이미지 URL (https://…). SDK 2.x에서 `brand.icon`은 필수 필드다. URL을 제공하지 않으면 커뮤니티 플레이스홀더 URL이 자동으로 삽입된다. | (없음 → 플레이스홀더 자동 삽입) |
 
-**`icon` 주의사항**: 빈 문자열을 전달하면 `ait build` 실행 시
-`[Apps In Toss Plugin] 플러그인 옵션이 올바르지 않습니다.` 오류가 발생한다.
-실제 URL을 제공하지 않으면 `icon` 키 자체를 생략한다 — 절대 빈 문자열을
-`granite.config.ts`에 쓰지 않는다.
+**`icon` 주의사항**:
+- `brand.icon`은 `ait build`가 요구하는 **필수 필드**다 (SDK 2.x `@apps-in-toss/plugins`의 `brand: { displayName: string; primaryColor: string; icon: string }` 타입 기준). 키를 생략하거나 빈 문자열을 쓰면 `[Apps In Toss Plugin] 플러그인 옵션이 올바르지 않습니다.` 오류가 발생한다.
+- 사용자가 icon URL을 제공하지 않으면, 에이전트는 빌드가 통과하도록 다음 플레이스홀더 URL을 자동으로 삽입한다:
+  `https://assets.aitc.dev/placeholder-icon.png`
+  생성 직후 한 줄 안내를 출력한다: "이 아이콘은 플레이스홀더입니다 — 실제 브랜드 아이콘 URL로 교체하세요."
+- 실제 아이콘을 만들려면 `/ait design`을 실행하면 규격 PNG 자산을 생성할 수 있다. 단, `granite.config.ts`의 `icon` 필드는 **반드시 호스팅된 https URL**이어야 한다 — 로컬 PNG 경로는 유효하지 않으므로, 생성한 아이콘은 외부에 호스팅한 뒤 URL로 교체한다.
+- `ait build` 실행 후 `플러그인 옵션이 올바르지 않습니다` 오류가 나타나면, `granite.config.ts`의 `brand` 블록(특히 `icon`, `displayName`, `primaryColor`)이 모두 올바른 값으로 채워졌는지 다시 확인한다 — SDK 버전에 따라 필수 필드가 바뀔 수 있다.
 
 ## 실행 순서
 
@@ -121,9 +124,10 @@ ls pnpm-lock.yaml package-lock.json yarn.lock bun.lockb 2>/dev/null
    누르면 그대로 사용.
 2. **displayName**: 기본값 없음. 비워두면 다시 묻는다.
 3. **primaryColor**: 기본값 `#3182F6`. Enter 시 기본값 사용.
-4. **icon URL** (선택): "브랜드 아이콘 URL을 입력하세요 (없으면 Enter로 건너뜀)".
-   입력 없이 Enter → `icon` 키 생략.
+4. **icon URL**: "브랜드 아이콘 URL을 입력하세요 (없으면 Enter — 플레이스홀더가 자동 삽입됩니다)".
+   입력 없이 Enter → 플레이스홀더 URL `https://assets.aitc.dev/placeholder-icon.png` 사용.
    입력이 있으면 `https://`로 시작하는지 확인한다 — 아니면 다시 묻는다.
+   어느 경우든 `icon` 키는 반드시 granite.config.ts에 포함시킨다.
 
 Vite 설정 자동 감지:
 
@@ -163,7 +167,7 @@ bun add -d @apps-in-toss/cli@^2.5.2
 
 Step 2에서 파일이 없음을 이미 확인했으므로 `Write` tool로 바로 생성한다.
 
-**`icon`을 입력한 경우** — `brand` 블록에 `icon` 포함:
+`brand.icon`은 SDK 2.x에서 **필수 필드**이므로, 사용자가 URL을 제공하든 안 하든 항상 `icon` 키를 포함해 생성한다. 사용자가 제공하지 않은 경우 플레이스홀더 URL `https://assets.aitc.dev/placeholder-icon.png`를 사용한다.
 
 ```ts
 import { defineConfig } from '@apps-in-toss/web-framework/config';
@@ -173,7 +177,7 @@ export default defineConfig({
   brand: {
     displayName: '<displayName>',
     primaryColor: '<primaryColor>',
-    icon: '<icon URL>',
+    icon: '<icon URL 또는 https://assets.aitc.dev/placeholder-icon.png>',
   },
   web: {
     host: 'localhost',
@@ -188,28 +192,12 @@ export default defineConfig({
 });
 ```
 
-**`icon`을 입력하지 않은 경우** — `brand` 블록에서 `icon` 키 완전 생략:
+`icon`에 플레이스홀더를 삽입한 경우, 생성 직후 다음 안내를 출력한다:
 
-```ts
-import { defineConfig } from '@apps-in-toss/web-framework/config';
-
-export default defineConfig({
-  appName: '<appName>',
-  brand: {
-    displayName: '<displayName>',
-    primaryColor: '<primaryColor>',
-  },
-  web: {
-    host: 'localhost',
-    port: <port>,
-    commands: {
-      dev: 'vite',
-      build: 'vite build',
-    },
-  },
-  permissions: [],
-  outdir: 'dist',
-});
+```
+이 아이콘은 플레이스홀더입니다 — 실제 브랜드 아이콘 URL로 교체하세요.
+실제 아이콘이 준비되면 granite.config.ts의 brand.icon 값을 https:// 로 시작하는 호스팅 URL로 업데이트하세요.
+아이콘 PNG를 생성하려면 /ait design 을 실행하세요 (단, 생성 후 외부 호스팅이 필요합니다).
 ```
 
 `permissions: []`는 처음 빌드 통과용 placeholder다. SDK 호출에 권한 prompt가
@@ -283,7 +271,8 @@ setup-bundle 완료
 ## 하지 말아야 할 것
 
 - ❌ `granite.config.ts`가 이미 있으면 어떤 이유로도 덮어쓰기. 사용자 작업 보호 최우선.
-- ❌ `brand.icon`에 빈 문자열(`''`) 쓰기. 스키마 검증 실패 원인. 입력 없으면 키 생략.
+- ❌ `brand.icon`에 빈 문자열(`''`) 또는 로컬 파일 경로 쓰기. `ait build` 스키마 검증 실패 원인. 반드시 유효한 `https://` URL(또는 플레이스홀더 URL)을 사용한다.
+- ❌ `brand.icon` 키 자체를 생략하기. SDK 2.x에서 `icon`은 필수 필드 — 생략하면 `ait build`가 `플러그인 옵션이 올바르지 않습니다` 오류로 실패한다.
 - ❌ `@apps-in-toss/cli`를 `dependencies`에 추가. 반드시 `devDependencies`.
 - ❌ 생성되는 주석이나 메시지에 "공식(official)", "토스가 제공하는", "powered by Toss"
   등 제휴·후원·인증 암시 표현.
