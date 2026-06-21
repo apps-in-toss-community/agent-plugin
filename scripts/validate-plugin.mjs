@@ -2,11 +2,12 @@
  * validate-plugin.mjs
  *
  * 구조 검증기 — shared/{skills,commands,templates} + eval/ 의 정합성을 확인.
- * 4개 그룹으로 나뉜다:
- *   A1 — frontmatter + 1:1 매핑 (hard-fail)
- *   A2 — 본문 구조 (hard-fail)
+ * 5개 그룹으로 나뉜다:
+ *   A1 — frontmatter + 1:1 매핑 + 라우팅 스냅샷 (hard-fail)
+ *   A2 — 본문 구조 + seam 검사 (hard-fail)
  *   A3 — 템플릿 + eval 동기화 (hard-fail)
  *   A4 — CLI 토큰 크로스체크 (optional warn, ../console-cli 없으면 skip)
+ *   A5 — plugin.json ↔ package.json 버전 드리프트 (hard-fail)
  *
  * CLI: node scripts/validate-plugin.mjs
  * API: import { runChecks } from './scripts/validate-plugin.mjs'
@@ -318,12 +319,51 @@ function checkA1(root) {
     }
   }
 
+  // 라우팅 스냅샷 검증: commandMeta 가 EXPECTED_CMD_TO_SKILL 과 일치하는지
+  for (const [cmdFile, expectedSkill] of Object.entries(EXPECTED_CMD_TO_SKILL)) {
+    const actual = commandMeta.get(cmdFile);
+    if (!actual) {
+      violations.push(
+        mkv(
+          path.join('shared', 'commands', cmdFile),
+          1,
+          'A1/routing-mismatch',
+          `라우팅 스냅샷: '${cmdFile}' 가 shared/commands/ 에 없음 (fix: 파일 추가 또는 EXPECTED_CMD_TO_SKILL 갱신)`,
+        ),
+      );
+    } else if (actual.skillName !== expectedSkill) {
+      violations.push(
+        mkv(
+          actual.filePath,
+          1,
+          'A1/routing-mismatch',
+          `라우팅 스냅샷 불일치: '${cmdFile}' 가 skill '${actual.skillName}' 을 참조하지만 기대값은 '${expectedSkill}' (fix: skill 참조 또는 EXPECTED_CMD_TO_SKILL 갱신)`,
+        ),
+      );
+    }
+  }
+  for (const [cmdFile] of commandMeta) {
+    if (!(cmdFile in EXPECTED_CMD_TO_SKILL)) {
+      violations.push(
+        mkv(
+          path.join('shared', 'commands', cmdFile),
+          1,
+          'A1/routing-mismatch',
+          `라우팅 스냅샷: '${cmdFile}' 가 EXPECTED_CMD_TO_SKILL 에 없음 (fix: 상수에 항목 추가)`,
+        ),
+      );
+    }
+  }
+
   return violations;
 }
 
 // ---------------------------------------------------------------------------
 // A2 — 본문 구조
 // ---------------------------------------------------------------------------
+
+// seam 검사 면제 skill: harness 외부 메인테이너 도구 (next-station seam 없음이 정상)
+const SEAM_EXEMPT_SKILLS = new Set(['changeset']);
 
 /**
  * fenced code block 안에 있는 라인 번호(1-based) 집합을 반환한다.
@@ -361,6 +401,32 @@ function fencedCodeLineNumbers(lines) {
 
 // docs link allowlist: welcome + new-miniapp 는 /intro 링크 허용
 const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp']);
+
+// ---------------------------------------------------------------------------
+// A1 라우팅 스냅샷 — 명령 파일 ↔ skill 매핑 기대값
+// shared/commands/ 전수를 열거한다. 변경 시 이 상수도 함께 갱신.
+// ---------------------------------------------------------------------------
+
+/** @type {Record<string, string>} */
+const EXPECTED_CMD_TO_SKILL = {
+  'ait-auth-setup.md': 'auth-setup',
+  'ait-debug.md': 'debug',
+  'ait-deploy-key.md': 'deploy-key',
+  'ait-deploy.md': 'deploy',
+  'ait-design.md': 'design',
+  'ait-docs.md': 'docs',
+  'ait-inject-devtools.md': 'inject-devtools',
+  'ait-inject-polyfill.md': 'inject-polyfill',
+  'ait-logs.md': 'logs',
+  'ait-new.md': 'new-miniapp',
+  'ait-plan.md': 'plan',
+  'ait-register.md': 'register',
+  'ait-setup-bundle.md': 'setup-bundle',
+  'ait-setup-phone-preview.md': 'setup-phone-preview',
+  'ait-status.md': 'status',
+  'ait-welcome.md': 'welcome',
+  'changeset.md': 'changeset',
+};
 
 /** @param {string} root @returns {Violation[]} */
 function checkA2(root) {
@@ -462,6 +528,26 @@ function checkA2(root) {
         }
       }
     }
+
+    // next-station seam 검사: ## Out of scope / ## 참고 이전 본문에 /ait 가 있어야 한다.
+    // read-only skill(status·logs)도 분기 표에서 /ait 를 참조하므로 자연히 통과한다.
+    if (!SEAM_EXEMPT_SKILLS.has(skillName)) {
+      // 본문에서 ## Out of scope 또는 ## 참고 이전 영역만 검사
+      const seamBodyEndIdx = bodyLines.findIndex(
+        (l) => l.startsWith('## Out of scope') || l.startsWith('## 참고'),
+      );
+      const seamBody = seamBodyEndIdx === -1 ? body : bodyLines.slice(0, seamBodyEndIdx).join('\n');
+      if (!seamBody.includes('/ait ')) {
+        violations.push(
+          mkv(
+            relFile,
+            1,
+            'A2/no-seam',
+            `다음 station 세am 없음: skill 본문(## Out of scope / ## 참고 이전)에 '/ait ' 참조 필요 (umbrella §1.3 규칙 3)`,
+          ),
+        );
+      }
+    }
   }
 
   return violations;
@@ -536,7 +622,17 @@ function checkA3(root) {
     const foundTokensInSubFiles = new Set();
     for (const subFile of substituteFiles) {
       const subFilePath = path.join(tplDir, subFile);
-      if (!fs.existsSync(subFilePath)) continue;
+      if (!fs.existsSync(subFilePath)) {
+        violations.push(
+          mkv(
+            relJson,
+            1,
+            'A3/substitute-file-missing',
+            `substitute.files 의 '${subFile}' 이 템플릿 디렉터리에 없음 — template.json 갱신 또는 파일 복원`,
+          ),
+        );
+        continue;
+      }
       const content = readFile(subFilePath);
       for (const tok of extractTokens(content)) {
         foundTokensInSubFiles.add(tok);
@@ -681,33 +777,41 @@ function checkA4(root) {
 
   const violations = [];
 
-  // console-cli 명령 surface 추출
+  // console-cli 명령 surface 추출 (citty defineCommand 패턴)
+  // console-cli 의 실제 구조: export const fooCommand = defineCommand({ meta: { name: 'foo' }, ... })
+  // cli.ts 의 top-level subCommands 에 등록된 이름(key)이 실제 aitcc <subcmd> surface 다.
+  // 여기서는 meta.name 을 src/commands/*.ts 에서 수집해 Set 을 채운다.
   const cmdSrcDir = path.join(consoleCLIRoot, 'src', 'commands');
+  /** @type {Set<string>} */
   const aitccSubcmds = new Set();
   if (fs.existsSync(cmdSrcDir)) {
-    /** @param {string} dir */
-    function collectCmds(dir) {
-      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-        if (entry.isDirectory()) {
-          collectCmds(path.join(dir, entry.name));
-        } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
-          const content = readFile(path.join(dir, entry.name));
-          for (const m of content.matchAll(/\.command\(['"]([a-zA-Z0-9_-]+)/g)) {
-            aitccSubcmds.add(m[1]);
-          }
-        }
+    // citty pattern: meta: { ... name: 'foo' ... }
+    const cittyMetaNameRe = /meta:\s*\{[^}]*name:\s*['"]([a-zA-Z0-9_-]+)['"]/gs;
+    for (const entry of fs.readdirSync(cmdSrcDir, { withFileTypes: true })) {
+      if (!entry.isFile()) continue;
+      if (!entry.name.endsWith('.ts') && !entry.name.endsWith('.js')) continue;
+      if (entry.name.includes('.test.')) continue;
+      const content = readFile(path.join(cmdSrcDir, entry.name));
+      for (const m of content.matchAll(cittyMetaNameRe)) {
+        aitccSubcmds.add(m[1]);
       }
     }
-    collectCmds(cmdSrcDir);
   }
 
-  // SKILL.md 파일에서 CLI 혼동 패턴 검출
+  // SKILL.md 파일에서 CLI 혼동 패턴 + 알 수 없는 aitcc 서브커맨드 검출
+  // "현재 미구현" 문맥 또는 frontmatter `aitcc-surface-skip: true` 가 있으면 억제
   const skillsDir = path.join(root, 'shared', 'skills');
+  // aitcc <subcmd> 토큰에서 제외할 known-deferred/intentional 서브커맨드
+  // (console-cli 에 없지만 skill 에서 안내 목적으로 언급되는 것들)
+  const AITCC_SUBCMD_SKIP = new Set(['logs']);
   for (const skillName of listDirs(skillsDir)) {
     const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
     if (!fs.existsSync(skillFile)) continue;
     const relFile = path.relative(root, skillFile);
     const src = readFile(skillFile);
+    const parsed = parseFrontmatter(src);
+    // frontmatter 의 aitcc-surface-skip: true 가 있으면 unknown subcmd 경고 전체 억제
+    const skipSurfaceCheck = parsed?.fm?.['aitcc-surface-skip'] === 'true';
     const lines = src.split('\n');
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -738,10 +842,96 @@ function checkA4(root) {
           ),
         );
       }
+
+      // aitcc <subcmd> 토큰 크로스체크: console-cli 에 없는 서브커맨드 경고
+      if (!skipSurfaceCheck && aitccSubcmds.size > 0) {
+        const subcmdMatch = line.match(/\baitcc\s+([a-zA-Z][a-zA-Z0-9_-]*)\b/);
+        if (subcmdMatch) {
+          const subcmd = subcmdMatch[1];
+          // CLI 자체가 아니라 단어 "CLI" 등 제외; skip-list 및 already-known 도 제외
+          if (
+            !AITCC_SUBCMD_SKIP.has(subcmd) &&
+            !aitccSubcmds.has(subcmd) &&
+            subcmd !== 'CLI' &&
+            subcmd !== 'app' // app 은 subCommand 로 등록된 명령이지만 meta.name 은 subcommand 에 있을 수 있음
+          ) {
+            // "app" 은 cli.ts subCommands 키로 등록되지만 app.ts 내부 meta.name 은 다름
+            // → aitccSubcmds Set 에 없어도 cli.ts 의 키 목록에 있으면 허용
+            // cli.ts 를 직접 파싱하지 않으므로 hardcode 로 보완
+            const CLI_TOP_LEVEL = new Set([
+              'whoami',
+              'login',
+              'logout',
+              'auth',
+              'upgrade',
+              'workspace',
+              'app',
+              'members',
+              'keys',
+              'notices',
+              'me',
+              'completion',
+            ]);
+            if (!CLI_TOP_LEVEL.has(subcmd)) {
+              violations.push(
+                mkv(
+                  relFile,
+                  i + 1,
+                  'A4/aitcc-unknown-subcmd',
+                  `'aitcc ${subcmd}' — console-cli 에서 확인되지 않은 서브커맨드 (fix: 명령 확인 또는 frontmatter 에 'aitcc-surface-skip: true' 추가)`,
+                  'warn',
+                ),
+              );
+            }
+          }
+        }
+      }
     }
   }
 
   return violations;
+}
+
+// ---------------------------------------------------------------------------
+// A5 — plugin.json ↔ package.json 버전 드리프트
+// ---------------------------------------------------------------------------
+
+/** @param {string} root @returns {Violation[]} */
+function checkA5(root) {
+  const pkgPath = path.join(root, 'package.json');
+  const pluginPath = path.join(root, '.claude-plugin', 'plugin.json');
+  const relPlugin = path.relative(root, pluginPath);
+
+  /** @type {{ version?: string }} */
+  let pkg;
+  try {
+    pkg = JSON.parse(readFile(pkgPath));
+  } catch {
+    return [mkv('package.json', 1, 'A5/plugin-json-version-drift', 'package.json 파싱 실패')];
+  }
+
+  /** @type {{ version?: string }} */
+  let plugin;
+  try {
+    plugin = JSON.parse(readFile(pluginPath));
+  } catch {
+    return [
+      mkv(relPlugin, 1, 'A5/plugin-json-version-drift', '.claude-plugin/plugin.json 파싱 실패'),
+    ];
+  }
+
+  if (pkg.version !== plugin.version) {
+    return [
+      mkv(
+        relPlugin,
+        1,
+        'A5/plugin-json-version-drift',
+        `버전 불일치: .claude-plugin/plugin.json '${plugin.version}' vs package.json '${pkg.version}' (fix: pnpm sync:plugin-version 실행 또는 두 파일 직접 동기화)`,
+      ),
+    ];
+  }
+
+  return [];
 }
 
 // ---------------------------------------------------------------------------
@@ -755,7 +945,13 @@ function checkA4(root) {
 export function runChecks(repoRoot) {
   const root = repoRoot ?? path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-  const allViolations = [...checkA1(root), ...checkA2(root), ...checkA3(root), ...checkA4(root)];
+  const allViolations = [
+    ...checkA1(root),
+    ...checkA2(root),
+    ...checkA3(root),
+    ...checkA4(root),
+    ...checkA5(root),
+  ];
 
   const hasErrors = allViolations.some((viol) => viol.level === 'error');
   return { violations: allViolations, hasErrors };
@@ -780,10 +976,11 @@ function printViolations(violations) {
   }
 
   const groupLabels = {
-    A1: 'A1 — frontmatter + 1:1 매핑',
-    A2: 'A2 — 본문 구조',
+    A1: 'A1 — frontmatter + 1:1 매핑 + 라우팅 스냅샷',
+    A2: 'A2 — 본문 구조 + seam',
     A3: 'A3 — 템플릿 + eval 동기화',
     A4: 'A4 — CLI 토큰 크로스체크 (warn)',
+    A5: 'A5 — plugin.json ↔ package.json 버전 드리프트',
   };
 
   for (const [prefix, items] of groups) {

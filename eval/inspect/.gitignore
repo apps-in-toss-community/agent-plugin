@@ -1,7 +1,0 @@
-# Python 산출물 (inspect-ai 로컬 실행 시 생성)
-__pycache__/
-*.pyc
-
-# Inspect AI 실행 로그
-logs/
-.inspect/
