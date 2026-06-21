@@ -19,6 +19,12 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 
 커뮤니티 공용 인스턴스(`oidc-bridge.aitc.dev`)는 운영 중이며, 앱인토스 네이티브 환경에서의 end-to-end 검증은 진행 중이다.
 
+**이 명령이 필요한가?** 사용자를 식별하거나 사용자별 데이터를 저장해야 하면 이 명령을 쓴다. 로그인이 전혀 필요 없는 앱이라면 건너뛰어도 된다:
+
+```
+/ait setup-bundle    # 로그인 없이 번들 배포로 바로 건너뛰기
+```
+
 ## 아키텍처 요약 (M5 flow)
 
 미니앱은 bridge를 **직접 호출하지 않는다**. 올바른 흐름:
@@ -82,15 +88,28 @@ grep -r '@apps-in-toss/web-framework' package.json 2>/dev/null | head -1
 auth-setup 사전 조건 (없으면 먼저 준비):
 
   1. oidc-bridge client_id
-     - 공용 인스턴스(https://oidc-bridge.aitc.dev) 또는 자체 호스팅 bridge에
-       이 미니앱을 등록하고 client_id를 발급받는다.
+     - 공용 인스턴스(https://oidc-bridge.aitc.dev)를 쓰려면 operator에게
+       등록을 요청해야 한다 — client_id는 operator(bridge 관리자)만 발급할 수 있다.
+       아래 링크에서 Issue를 열어 다음 정보를 포함해 요청한다:
+         · 미니앱 ID (appIdToss, e.g. 31146)
+         · allowed origin (e.g. https://sdk-example.aitc.dev)
+         · public / confidential client 여부
+       https://github.com/apps-in-toss-community/oidc-bridge/issues/new
+     - 자체 호스팅 bridge라면 `cli/commands/app.ts`의 `app create` 명령으로
+       직접 발급한다 (`--cert <path> --key <path>` mTLS cert 필요).
      - public client는 Origin allow-list, confidential client는 client_secret로
-       caller를 인증한다(§의존 참조). 발급 방법은 oidc-bridge 문서를 따른다:
-       https://github.com/apps-in-toss-community/oidc-bridge
+       caller를 인증한다(§의존 참조).
 
   2. (Supabase 경로) Supabase 프로젝트 + OIDC provider
-     - Supabase 대시보드 Auth 설정에서 bridge를 OIDC provider로 등록한다.
-     - VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY를 .env에 둔다.
+     - 아래 링크에서 bridge를 OIDC provider로 등록한다:
+       https://supabase.com/dashboard/project/_/auth/providers
+       (URL의 `_`를 실제 project ref로 교체 — 프로젝트 Settings > General에서 확인)
+     - 경로: Authentication > Sign In Methods > Custom OIDC > Add provider
+     - 입력 필드:
+       1. Issuer URL: <bridge-url>  (e.g. https://oidc-bridge.aitc.dev)
+       2. Client ID: <등록된 client_id>  (위 item 1에서 발급받은 값)
+       3. Discovery URL은 자동 완성됨 (<issuer>/.well-known/openid-configuration)
+     - 저장 후 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY를 .env에 둔다.
 
   3. consumer backend 배포 위치
      - authorizationCode를 교환할 서버 사이드 엔드포인트(Supabase Edge Function /
@@ -189,6 +208,49 @@ Content-Type: application/json
 - `"DEFAULT"` — production / 실제 앱인토스 환경
 - `"SANDBOX"` — devtools sandbox (토스 앱 없이 테스트할 때)
 
+### 4.5 Edge Function 배포 (Supabase 경로)
+
+백엔드 코드를 작성했으면 배포해야 런타임에서 동작한다.
+
+**Supabase CLI 확인**:
+
+```bash
+supabase --version
+```
+
+없으면:
+
+```
+supabase CLI가 설치되어 있지 않습니다.
+
+설치:
+  brew install supabase/tap/supabase    # macOS
+  npm install -g supabase              # 또는 npm
+
+설치 후 다시 이 단계를 진행해주세요.
+```
+
+**함수 배포**:
+
+```bash
+supabase functions deploy toss-login --no-verify-jwt
+```
+
+**환경변수 설정** (`supabase secrets set`으로 Edge Function에 주입):
+
+```bash
+# 필수
+supabase secrets set OIDC_BRIDGE_BASE_URL=<bridge-url>
+supabase secrets set OIDC_BRIDGE_CLIENT_ID=<client_id>
+
+# confidential client인 경우만 추가
+# supabase secrets set OIDC_BRIDGE_CLIENT_SECRET=<client_secret>
+```
+
+`<bridge-url>`, `<client_id>`, `<client_secret>`은 반드시 실제 발급 값으로 교체한다 — 값을 예시 그대로 두면 런타임 인증이 실패한다. 발급 값은 §2.5 item 1에서 확보한 client_id와 bridge URL이다.
+
+배포가 완료되면 Supabase 대시보드 Edge Functions 탭에서 `toss-login` 함수가 `Active` 상태인지 확인한다.
+
 ### 5. 클라이언트 — id_token으로 로그인
 
 백엔드에서 `id_token`을 받으면 클라이언트에서 인증 공급자에 로그인한다.
@@ -260,6 +322,8 @@ auth-setup 완료
 배선된 것:
   - appLogin() → consumer backend → bridge /oidc/token → signInWithIdToken
   - bridge URL: <bridge-url> (기본 https://oidc-bridge.aitc.dev)
+  - 백엔드 배포: supabase functions deploy toss-login 완료
+  - 환경변수: OIDC_BRIDGE_BASE_URL, OIDC_BRIDGE_CLIENT_ID supabase secrets 등록
 
 다음 단계:
   pnpm dev            # devtools sandbox에서 appLogin() mock으로 흐름 확인
