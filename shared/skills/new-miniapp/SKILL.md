@@ -175,11 +175,10 @@ ls "<plugin-root>/shared/templates/<template-name>/template.json"
 ls "<plugin-root>/shared/templates/"
 ```
 
-> Claude Code 환경에서 plugin root는 보통 `~/.claude/plugins/<id>/` 또는
-> 사용자가 marketplace로 설치한 위치. 정확한 경로는 호출 시점에 알 수 있는
-> SKILL.md의 absolute path에서 거꾸로 세 단계(`../../..`) 올라가면 된다
-> (`shared/skills/new-miniapp/SKILL.md` → `shared/skills/` → `shared/` →
-> plugin root).
+> plugin root는 에이전트별 install prefix에 따라 다르다. 정확한 경로는
+> 호출 시점에 알 수 있는 SKILL.md의 absolute path에서 거꾸로 세 단계(`../../..`)
+> 올라가면 된다 (`shared/skills/new-miniapp/SKILL.md` → `shared/skills/` →
+> `shared/` → plugin root).
 
 ### 3. 디렉토리 복사
 

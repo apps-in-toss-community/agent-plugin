@@ -57,21 +57,23 @@
 
 ```
 agent-plugin/
-├── shared/                      # ✅ source of truth
+├── shared/                      # ✅ source of truth (debug §5는 Claude Code-only — 다른 타겟은 adapter overlay로 교체)
 │   ├── skills/                  # SKILL.md + 하위 리소스
 │   ├── commands/                # slash command 진입점
 │   └── templates/               # (README만, 실제 템플릿 계획)
 ├── .claude-plugin/              # ✅ Claude Code plugin + marketplace manifest (Phase 1)
-├── gemini-extension.json        # 🔜 Gemini CLI extension (Phase 2)
+├── gemini-extension.json        # 🔜 Gemini CLI extension (Phase 2, multi-target build harness 미착수 — harness M3 이후)
 ├── .codex-plugin/               # 🔜 Codex (Phase 3, 스펙 확정 후)
-├── .cursor-plugin/              # 🔜 Cursor (Phase 4)
-├── install/                     # 🔜 cursor.sh / windsurf.sh
-└── scripts/build.ts             # 🔜 shared/ → 각 타겟 생성
+├── .cursor-plugin/              # 🔜 Cursor (Phase 4, multi-target build harness 미착수 — harness M3 이후)
+├── install/                     # 🔜 cursor.sh / windsurf.sh (multi-target build harness 미착수 — harness M3 이후)
+└── scripts/build.ts             # 🔜 shared/ → 각 타겟 생성 (multi-target build harness 미착수 — harness M3 이후)
 ```
 
 `shared/`가 single source of truth. 각 도구별 어댑터 디렉토리는 파일 복사/변환만.
 
 ## 배포 phases (repo-specific)
+
+Phase 2-4 어댑터는 harness roadmap M3 달성 후 착수.
 
 단일 repo에서 지원 도구들 marketplace로 동시 배포 (Figma `mcp-server-guide`의 `.claude-plugin/` + `.cursor-plugin/` 패턴과 유사):
 
@@ -81,6 +83,44 @@ agent-plugin/
 4. **Cursor / Windsurf** — 공식 번들 포맷 부재. `install/*.sh`로 `.cursor/rules/`, `.windsurf/workflows/`에 파일을 꽂는 방식. 자동 업데이트 불가라 후순위.
 
 당장은 main branch + latest only, 태그/버전 없음. Changesets는 도입되어 있지만 npm publish는 skip (Git repo 자체가 배포 산출물).
+
+## adapter 계약 (multi-target)
+
+`shared/`는 모든 어댑터의 single source of truth다. 새 어댑터를 추가할 때 아래 계약을 따른다.
+
+**REQUIRED — skills · commands path 필드**
+
+어댑터 manifest는 반드시 `shared/skills/`와 `shared/commands/`를 가리켜야 한다. Claude Code adapter(`.claude-plugin/plugin.json`)의 실제 필드:
+
+```json
+{
+  "skills": "./shared/skills/",
+  "commands": "./shared/commands/"
+}
+```
+
+다른 어댑터도 같은 디렉토리를 참조한다(경로 형식은 어댑터 포맷에 따라 조정).
+
+**OPTIONAL — mcpServers (Claude Code-only)**
+
+`mcpServers`는 Claude Code manifest 전용이다. `ait-devtools` MCP server는 station 2·3의 live CDP attach를 위해 등록되며, 다른 어댑터는 이를 생략하거나 해당 에이전트의 MCP 등록 메커니즘으로 교체한다:
+
+```json
+{
+  "mcpServers": {
+    "ait-devtools": {
+      "command": "npx",
+      "args": ["-y", "@ait-co/devtools", "devtools-mcp"]
+    }
+  }
+}
+```
+
+`mcpServers.ait-devtools`는 Claude Code manifest에만 존재하는 항목이다 — `run_in_background`, `/mcp` auto-start, `notifications/tools/list_changed` 처리가 모두 Claude Code-specific이다. `debug/SKILL.md`의 §5(on-device MCP attach)는 이 메커니즘에 결합돼 있으므로, 다른 타겟 어댑터는 §5를 adapter-specific overlay로 교체해야 한다.
+
+**OPTIONAL — install script**
+
+`install/*.sh`는 `.cursor/rules/`·`.windsurf/workflows/` 같이 manifest 기반 설치가 없는 에이전트를 위한 파일 복사 스크립트다. Phase 4(Cursor/Windsurf) 착수 시 추가.
 
 ## Status
 

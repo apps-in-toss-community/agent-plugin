@@ -18,6 +18,7 @@ description: |
   same session. `/ait debug` branches by what it observes and prints the right
   path. Triggered by `/ait debug`.
 argument-hint: ''
+adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_background, /mcp auto-start, notifications/tools/list_changed handling are Claude Code-specific. Replace §5 with an adapter-specific overlay when targeting other agents.'
 ---
 
 # debug skill
