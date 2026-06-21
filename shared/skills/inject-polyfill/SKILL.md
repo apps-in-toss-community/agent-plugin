@@ -202,7 +202,7 @@ SDK 직접 호출 코드를 표준 API로 교체하는 것은 **자동 codemod �
 제시:
 
 ```
-✅ @ait-co/polyfill 설정 완료
+@ait-co/polyfill 설정 완료
 
 [완료된 것]
   - @ait-co/polyfill dependencies에 추가됨

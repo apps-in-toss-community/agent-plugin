@@ -183,7 +183,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
 생성이 끝나면 한 블록으로 마무리:
 
 ```
-✅ <app-name> 생성 완료 (./<package_name>/)
+<app-name> 생성 완료 (./<package_name>/)
 
 다음 단계:
   cd <package_name>
