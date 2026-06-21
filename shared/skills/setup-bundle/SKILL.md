@@ -52,7 +52,7 @@ argument-hint: ''
 **`icon` 주의사항**:
 - `brand.icon`은 `ait build`가 요구하는 **필수 필드**다 (SDK 2.x `@apps-in-toss/plugins`의 `brand: { displayName: string; primaryColor: string; icon: string }` 타입 기준). 키를 생략하거나 빈 문자열을 쓰면 `[Apps In Toss Plugin] 플러그인 옵션이 올바르지 않습니다.` 오류가 발생한다.
 - 사용자가 icon URL을 제공하지 않으면, 에이전트는 빌드가 통과하도록 다음 플레이스홀더 URL을 자동으로 삽입한다:
-  `https://assets.aitc.dev/placeholder-icon.png`
+  `https://aitc.dev/apple-touch-icon.png`
   생성 직후 한 줄 안내를 출력한다: "이 아이콘은 플레이스홀더입니다 — 실제 브랜드 아이콘 URL로 교체하세요."
 - 실제 아이콘을 만들려면 `/ait design`을 실행하면 규격 PNG 자산을 생성할 수 있다. 단, `granite.config.ts`의 `icon` 필드는 **반드시 호스팅된 https URL**이어야 한다 — 로컬 PNG 경로는 유효하지 않으므로, 생성한 아이콘은 외부에 호스팅한 뒤 URL로 교체한다.
 - `ait build` 실행 후 `플러그인 옵션이 올바르지 않습니다` 오류가 나타나면, `granite.config.ts`의 `brand` 블록(특히 `icon`, `displayName`, `primaryColor`)이 모두 올바른 값으로 채워졌는지 다시 확인한다 — SDK 버전에 따라 필수 필드가 바뀔 수 있다.
@@ -125,7 +125,7 @@ ls pnpm-lock.yaml package-lock.json yarn.lock bun.lockb 2>/dev/null
 2. **displayName**: 기본값 없음. 비워두면 다시 묻는다.
 3. **primaryColor**: 기본값 `#3182F6`. Enter 시 기본값 사용.
 4. **icon URL**: "브랜드 아이콘 URL을 입력하세요 (없으면 Enter — 플레이스홀더가 자동 삽입됩니다)".
-   입력 없이 Enter → 플레이스홀더 URL `https://assets.aitc.dev/placeholder-icon.png` 사용.
+   입력 없이 Enter → 플레이스홀더 URL `https://aitc.dev/apple-touch-icon.png` 사용.
    입력이 있으면 `https://`로 시작하는지 확인한다 — 아니면 다시 묻는다.
    어느 경우든 `icon` 키는 반드시 granite.config.ts에 포함시킨다.
 
@@ -167,7 +167,7 @@ bun add -d @apps-in-toss/cli@^2.5.2
 
 Step 2에서 파일이 없음을 이미 확인했으므로 `Write` tool로 바로 생성한다.
 
-`brand.icon`은 SDK 2.x에서 **필수 필드**이므로, 사용자가 URL을 제공하든 안 하든 항상 `icon` 키를 포함해 생성한다. 사용자가 제공하지 않은 경우 플레이스홀더 URL `https://assets.aitc.dev/placeholder-icon.png`를 사용한다.
+`brand.icon`은 SDK 2.x에서 **필수 필드**이므로, 사용자가 URL을 제공하든 안 하든 항상 `icon` 키를 포함해 생성한다. 사용자가 제공하지 않은 경우 플레이스홀더 URL `https://aitc.dev/apple-touch-icon.png`를 사용한다.
 
 ```ts
 import { defineConfig } from '@apps-in-toss/web-framework/config';
@@ -177,7 +177,7 @@ export default defineConfig({
   brand: {
     displayName: '<displayName>',
     primaryColor: '<primaryColor>',
-    icon: '<icon URL 또는 https://assets.aitc.dev/placeholder-icon.png>',
+    icon: '<icon URL 또는 https://aitc.dev/apple-touch-icon.png>',
   },
   web: {
     host: 'localhost',
