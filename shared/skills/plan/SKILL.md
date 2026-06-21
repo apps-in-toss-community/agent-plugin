@@ -173,7 +173,7 @@ SDK 도메인 (필요)
 
 다음 단계:
   /ait new <app-name>     # 이 계획대로 빈 프로젝트 생성 (scaffold)
-                          # 이후: pnpm dev → /ait setup-bundle → /ait register → /ait deploy
+                          # 이후: pnpm dev → /ait setup-bundle → /ait design (등록 이미지 자산) → /ait register → /ait deploy
 ```
 
 "확인이 필요한 항목"이 없으면 그 섹션은 생략한다. seam의 핵심은 **다음 station이

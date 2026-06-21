@@ -119,18 +119,51 @@ aitDevtools.vite({ panel: true })
 aitDevtools.vite({ panel: true, tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false })
 ```
 
-**`aitDevtools.vite(...)` 호출을 찾을 수 없는 경우**: `Read`로 파일 전체를 확인하고 사용자에게 수동 추가를 안내한다:
+**`aitDevtools.vite(...)` 호출을 찾을 수 없는 경우**: `inject-devtools` §6의 Vite 패치
+패턴을 적용해 `aitDevtools.vite({ tunnel: ... })`을 자동으로 추가한다.
 
-```
-vite.config.ts에서 aitDevtools.vite() 호출을 찾을 수 없습니다.
-수동으로 tunnel 옵션을 추가해주세요:
+파일 전체를 `Read`로 확인한 뒤:
 
-  aitDevtools.vite({
-    tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false
-  })
+- `plugins` 배열이 있는 경우 — import를 파일 맨 위에 추가하고 `plugins` 배열에
+  `aitDevtools.vite({ tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false })`를
+  삽입한다(`inject-devtools` §6 "plugins 배열이 이미 있는 경우" 패턴):
 
-추가 후 다시 /ait setup-phone-preview를 실행하거나, 다음 단계부터 수동으로 진행하세요.
-```
+  ```ts
+  // 추가 후
+  import aitDevtools from '@ait-co/devtools/unplugin';
+  import { defineConfig } from 'vite';
+
+  export default defineConfig({
+    plugins: [react(), aitDevtools.vite({ tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false })],
+  });
+  ```
+
+- `plugins`가 없는 경우 — `defineConfig({})` 객체에 `plugins` 키를 추가한다
+  (`inject-devtools` §6 "plugins가 없는 경우" 패턴):
+
+  ```ts
+  import aitDevtools from '@ait-co/devtools/unplugin';
+
+  export default defineConfig({
+    plugins: [aitDevtools.vite({ tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false })],
+    // 기존 키들 유지
+  });
+  ```
+
+- `defineConfig`를 쓰지 않는 비표준 동적 설정(함수 export, 조건 분기 최상위 등)이라
+  자동 파싱이 불가능한 경우에만 guide-and-stop:
+
+  ```
+  vite.config.ts가 비표준 동적 설정 구조라 자동 패치를 적용할 수 없습니다.
+  (이유: defineConfig 패턴이 없거나 최상위 조건 분기가 있음)
+  아래를 vite.config.ts의 aitDevtools.vite() 호출에 수동으로 추가해주세요:
+
+    aitDevtools.vite({
+      tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false
+    })
+
+  추가 후 다시 /ait setup-phone-preview를 실행하거나, 다음 단계부터 수동으로 진행하세요.
+  ```
 
 **수정 원칙**: `Edit` tool로 최소 변경. 기존 코드 포맷·주석·설정은 유지.
 
