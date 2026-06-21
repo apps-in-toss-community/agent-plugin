@@ -49,7 +49,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 ## 의존
 
 - 호스트에 **pnpm 10+ + Node 24+**가 있어야 `pnpm install`이 통과한다.
-  버전이 더 낮으면 사용자에게 알리고 `--no-install`로 진행하거나 중단한다.
+  **Step 0이 실행 전 자동으로 검사·안내**하므로 수동 확인 불필요.
 - 템플릿 자체는 plugin 패키지에 포함되어 있어 별도 다운로드가 없다.
 - 첫 install은 `@ait-co/devtools`(npm), `@apps-in-toss/web-framework`(npm),
   React 19, Vite 8을 받아온다 — 인터넷 필요.
@@ -78,6 +78,64 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 `Edit` 또는 `sed` 한 줄이면 충분.
 
 ## 실행 순서
+
+### Step 0 — toolchain 사전 검사
+
+`pnpm install`을 시도하기 전에 에이전트가 Node · pnpm 버전을 직접 확인한다.
+비개발자가 raw 셸 오류 메시지를 마주치지 않도록, 문제가 있으면 여기서 멈추고 한 블록으로 안내한다.
+
+```bash
+node --version   # v24.x.x 이어야 한다
+pnpm --version   # 10.x.x 이어야 한다 (또는 corepack이 활성화돼 있으면 OK)
+```
+
+검사 결과에 따른 분기:
+
+1. **Node 24+ & pnpm 10+ 모두 충족** — 침묵 통과. Step 1로 진행.
+
+2. **Node 없음 또는 24 미만** — 즉시 멈추고 아래 안내 후 종료:
+
+   ```
+   Node.js 24 이상이 필요합니다.
+
+   설치 방법:
+     • nvm 사용 중: nvm install 24 && nvm use 24
+     • nvm 없음: https://nodejs.org/en/download/ 에서 LTS 설치
+
+   설치 후 터미널을 재시작하고 /ait new 를 다시 실행하세요.
+   ```
+
+3. **pnpm 없음** — 에이전트가 먼저 자동으로 아래를 시도한다:
+
+   ```bash
+   corepack enable   # Node 16.10+ 에 동봉 — 추가 설치 불필요
+   ```
+
+   성공하면 침묵 통과해 Step 1로 진행. `corepack enable`이 실패하면 멈추고
+   안내 후 종료:
+
+   ```
+   pnpm이 설치돼 있지 않습니다.
+
+   설치 방법:
+     npm install -g pnpm
+
+   설치 후 /ait new 를 다시 실행하세요.
+   ```
+
+4. **pnpm 있지만 10 미만** — 멈추고 안내 후 종료:
+
+   ```
+   pnpm 10 이상이 필요합니다 (현재: <감지된 버전>).
+
+   업그레이드:
+     npm install -g pnpm@latest
+
+   업그레이드 후 /ait new 를 다시 실행하세요.
+   ```
+
+`--no-install` 플래그가 있으면 install이 없으므로 pnpm 버전 검사는 건너뛴다.
+Node 검사는 `--no-install`에서도 수행한다 (Vite 개발 서버가 Node에 의존).
 
 ### 1. 입력 정규화 + 충돌 검사
 
@@ -178,7 +236,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
 `--no-install`로 만든 뒤 `pnpm`을 설치하거나 본인 환경에 맞게 변경하세요"
 정도로 안내하고 종료.
 
-### 6. 다음 단계 안내
+### 6. 다음 단계 안내 + dev 서버 기동
 
 생성이 끝나면 한 블록으로 마무리:
 
@@ -193,20 +251,54 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   /ait auth-setup   # oidc-bridge로 로그인 배선 (appLogin → OIDC → 백엔드 세션)
 
 배포 준비가 되면:
-  /ait setup-bundle # .ait 번들 빌드 환경 추가 (granite.config.ts + bundle:ait 스크립트)
-  /ait register     # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
-  /ait deploy       # 번들을 콘솔에 업로드
+  /ait setup-bundle  # .ait 번들 빌드 환경 추가 (granite.config.ts + bundle:ait 스크립트)
+  /ait design        # 등록용 이미지 자산 생성 (앱 아이콘·스크린샷 — register 전제)
+  /ait register      # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
+  /ait deploy-key    # Deploy Key 발급 — 처음 배포면 deploy 전에
+  /ait deploy        # 번들을 콘솔에 업로드 (ait build → ait deploy --profile <name>)
 
 문서: https://docs.aitc.dev/intro  (커뮤니티 docs)
 ```
 
 `pnpm install`을 건너뛰었으면 안내에 `pnpm install`을 한 줄 추가.
 
+#### dev 서버 자동 기동
+
+안내 블록을 인쇄한 직후, 에이전트가 dev 서버를 백그라운드로 직접 기동한다.
+Step 5에서 `cd ./<package_name>` 으로 이동했지만 Bash 호출 간 cwd가 유지되지
+않으므로 **절대 경로**를 써야 한다.
+
+```bash
+# <project_abs_path> = cwd(scaffold 시점) + "/" + package_name
+pnpm --dir <project_abs_path> dev
+```
+
+이 명령은 `run_in_background: true`로 실행한다.
+
+기동 후 dev 서버 stdout에서 로컬 URL을 파싱해 사용자에게 알린다:
+
+```
+패턴: "Local:   http://localhost:<port>"
+→ 감지되면: "dev 서버가 http://localhost:<port> 에서 실행 중입니다."
+```
+
+`--no-install`로 진행한 경우 `pnpm install`이 없었으므로 dev 서버 기동 전에
+먼저 install을 수행한다:
+
+```bash
+pnpm --dir <project_abs_path> install
+```
+
+install이 끝난 후 위와 같은 방식으로 dev를 기동한다.
+
+> (장기적으로 `/ait dev` 명령 신설이 station 1→2 hand-off를 더 명시적으로
+> 담당할 수 있으나, 이번 PR 범위에는 포함하지 않는다 — follow-up 이슈로.)
+
 ## 다른 템플릿이 추가될 때
 
 `shared/templates/<name>/template.json`의 `tokens` + `substitute.files`
 정의만 따르면 된다 — 이 skill은 템플릿별 분기를 두지 않는다. 모든 템플릿이
-같은 6단계(검사 → 위치 → 복사 → 치환 → install → 안내)로 동작.
+같은 7단계(toolchain 검사 → 입력 정규화 → 위치 → 복사 → 치환 → install → 안내+dev)로 동작.
 
 각 템플릿에 별도 post-install 절차(예: 환경변수 안내, supabase 프로젝트
 링크)가 필요하면, 그 안내 문구는 해당 템플릿의 `README.md`에 두고 Step 6
