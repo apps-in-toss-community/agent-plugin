@@ -148,7 +148,7 @@ Deploy Key 저장 완료 · 프로파일: <profile-name>
 ## 참고
 
 - console-cli keys 명령: https://github.com/apps-in-toss-community/console-cli
+- Deploy Key 운영 인스턴스 레퍼런스: https://github.com/apps-in-toss-community/console-cli/blob/main/docs/api/api-keys.md
 - 짝 skill: `deploy` — 이 skill로 저장한 프로파일을 `ait deploy --profile` 로 소비.
 - 짝 skill: `setup-bundle` — 번들 빌드 환경 설정 (이 skill의 전제 조건).
 - 짝 skill: `register` — 앱인토스 콘솔 앱 등록.
-- console-cli keys 명령 레퍼런스: https://github.com/apps-in-toss-community/console-cli
