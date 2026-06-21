@@ -151,9 +151,64 @@ mkdir -p assets
   sips -z 600 600 source-logo.png --out assets/logo.png
   ```
 
-- **이미지 도구가 없거나 소스가 없는 경우**: 위 규격표를 그대로 안내하고, 사용자가
-  Figma에서 해당 규격으로 export해 `./assets/`에 두도록 한다(register와 같은
-  hand-off). 가능하면 Figma export 설정(프레임 크기 → 배율)을 규격에 맞춰 제안한다.
+- **이미지 도구가 없고 소스도 없는 경우 (디자인 자산 전무)**: 에이전트가 직접
+  단색 플레이스홀더 PNG를 생성해 `./assets/`에 배치한다. 생성 전에 앱 이름·
+  주 색상(hex, 예: `#0064FF`)·카테고리를 묻는다. 플레이스홀더 생성 우선순위:
+
+  1. **ImageMagick** (`magick` 명령이 있으면):
+
+     ```bash
+     mkdir -p assets
+     magick -size 600x600 xc:#0064FF assets/logo.png
+     magick -size 1932x828 xc:#0064FF assets/thumbnail.png
+     magick -size 636x1048 xc:#0064FF assets/screenshot-1.png
+     magick -size 636x1048 xc:#0064FF assets/screenshot-2.png
+     magick -size 636x1048 xc:#0064FF assets/screenshot-3.png
+     ```
+
+  2. **Python Pillow** (`python3 -c "from PIL import Image"` 성공하면):
+
+     ```python
+     from PIL import Image
+     import os
+     os.makedirs("assets", exist_ok=True)
+     color = (0, 100, 255)  # 사용자가 입력한 hex → RGB
+     for spec in [("assets/logo.png", 600, 600),
+                  ("assets/thumbnail.png", 1932, 828),
+                  ("assets/screenshot-1.png", 636, 1048),
+                  ("assets/screenshot-2.png", 636, 1048),
+                  ("assets/screenshot-3.png", 636, 1048)]:
+         Image.new("RGB", (spec[1], spec[2]), color).save(spec[0])
+     ```
+
+  3. **Node canvas** (`node -e "require('canvas')"` 성공하면):
+     canvas API로 동일 규격 PNG를 생성.
+
+  플레이스홀더 생성 후에도 4단계 규격 검증을 동일하게 통과해야 한다.
+  완료 안내에 다음 한 줄을 반드시 추가한다:
+
+  ```
+  이 자산은 플레이스홀더입니다. /ait register 후 실제 디자인으로 교체하세요.
+  ```
+
+  > 참고: `sips`는 기존 파일 리사이즈 전용이므로 소스 파일이 없는 합성에는
+  > 사용하지 않는다.
+
+- **이미지 도구는 없지만 Figma에서 직접 export하려는 경우**: 위 플레이스홀더
+  자동 생성이 1차 경로이지만, 사용자가 Figma를 직접 활용하려는 경우 각 자산별
+  export 설정을 구체적으로 안내한다 — Figma export는 "가능하면" 제안이 아니라
+  **반드시** 다음 설정을 명시한다:
+
+  | 자산 | Figma export 설정 |
+  |---|---|
+  | `logo.png` | 프레임을 600×600으로 지정, Export → PNG |
+  | `thumbnail.png` | 프레임을 1932×828로 지정, Export → PNG |
+  | `screenshot-*.png` | 프레임을 636×1048로 지정, Export → PNG (≥3장) |
+  | `logo-dark.png` | 프레임을 600×600으로 지정, Export → PNG (선택) |
+  | `screenshot-h-*.png` | 프레임을 1504×741로 지정, Export → PNG (선택) |
+
+  `Export → Custom size → <W>×<H>px` 설정으로도 동일하게 맞출 수 있다.
+  export 후 `./assets/`에 배치하면 4단계 규격 검증이 치수를 잡아준다.
 
 세로 스크린샷은 **최소 3장**이 필수다. 2단계에서 "스크린샷으로 쓸 화면"으로 고른
 프레임을 우선 후보로 삼는다.
@@ -202,8 +257,10 @@ UX 매핑:
   Figma MCP는 **소비만** 한다(있으면 쓰고 없으면 수동 경로). 설치를 강요하지 않는다.
 - ❌ 등록·배포 — design은 그 **앞** 단계(자산 생산자). 등록은 `/ait register`,
   배포는 `/ait deploy`.
-- ❌ 이미지 렌더링 백엔드 노릇 — 디자인을 픽셀부터 합성하지 않는다. 가용 로컬
-  도구로 규격에 맞춰 리사이즈/검증하거나, 없으면 규격을 안내해 사용자가 export.
+- ❌ 이미지 렌더링 백엔드 노릇 — 임의 디자인을 픽셀부터 창작하지 않는다. 가용
+  로컬 도구로 규격에 맞춰 리사이즈/검증하거나, 소스가 없으면 단색 플레이스홀더를
+  자동 생성한다(사용자가 이후 실제 디자인으로 교체). Figma export를 직접 실행하지
+  않는다.
 - ❌ 화면 코드 수정 — UX 제약 매핑은 진단·산출이지 자동 리팩터가 아니다. 실제
   화면 회귀 점검은 `/ait debug`.
 - ❌ 종횡비 왜곡 — 규격에 안 맞는 소스를 임의로 늘려 채우지 않는다. 크롭/패딩
