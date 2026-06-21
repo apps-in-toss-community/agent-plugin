@@ -62,6 +62,7 @@ providers:
         - setup-bundle
         - setup-phone-preview
         - status
+        - welcome
 
 # 기본 assertion 은 각 test 에 직접 둔다 (skill 마다 기대 skill 이 다름).
 defaultTest:
