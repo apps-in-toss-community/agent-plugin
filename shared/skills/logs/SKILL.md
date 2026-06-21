@@ -52,12 +52,16 @@ aitcc app events ls <appId>       # appId 직접 지정
 
 #### 대안 2: 앱 메트릭 — `aitcc app metrics`
 
-배포된 미니앱의 **성능·사용량 지표**(요청 수, 오류율, 응답 시간 등)를
-콘솔에서 조회한다.
+배포된 미니앱의 **전환 지표**(노출·전환 등 날짜 범위별 집계)를
+콘솔에서 조회한다. 런타임 성능·오류율·응답 시간은 이 명령의 범위 밖이다.
 
 ```bash
 aitcc app metrics --json
+# 날짜 범위·버킷 단위 지정
+aitcc app metrics --time-unit DAY|WEEK|MONTH --start YYYY-MM-DD --end YYYY-MM-DD --json
 ```
+
+기본 조회 범위는 오늘 기준 최근 30일(`--time-unit DAY`). `PREPARE` 상태(미출시)이면 `metrics` 배열이 비어 있는 것이 정상이다.
 
 #### 대안 3: 브라우저 DevTools 콘솔 (로컬 개발)
 
@@ -133,4 +137,4 @@ devtools가 설치되지 않아 브라우저 콘솔 관측이 안 된다면:
 - console-cli: https://github.com/apps-in-toss-community/console-cli
 - 짝 skill: `status` (앱 리뷰 상태 + serviceStatus 확인)
 - 짝 skill: `debug` (devtools MCP가 있을 때 브라우저 상태 분석)
-- 배경: umbrella TODO console-cli Medium Priority — `aitcc logs` deferred (2026-05-02, endpoint 부재 확정)
+- 배경: GitHub Project harness roadmap — `aitcc logs` deferred (2026-05-02, 콘솔 측 런타임 로그 endpoint 부재 확정)
