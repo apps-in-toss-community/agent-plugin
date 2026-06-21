@@ -19,14 +19,9 @@
 #   npx promptfoo@latest eval -c eval/promptfoo/promptfooconfig.yaml
 #   npx promptfoo@latest view                   # 결과 브라우저로
 #
-# VERIFY (첫 실행 시 확인):
-#   - `skill-used` / `not-skill-used` assertion 타입은 비교적 최근 추가되어
-#     문서화가 얕다. `npx promptfoo@latest eval --help` 또는 결과 상세에서
-#     metadata 가 실제로 채워지는지 한 번 확인하라. 안 채워지면 provider 의
-#     `@anthropic-ai/claude-agent-sdk` 버전이 0.2.120 미만일 가능성이 높다.
-#   - claude-agent-sdk provider 는 working_dir 의 .claude/skills/ 를
-#     setting_sources: ['project'] 로 발견한다. setup-fixture.sh 를 먼저
-#     돌리지 않으면 skill 이 0개라 모든 positive 가 실패한다.
+# 주의: setup-fixture.sh 를 먼저 돌리지 않으면 skill 이 0개라 모든 positive 가 실패한다.
+#   claude-agent-sdk provider 는 working_dir 의 .claude/skills/ 를
+#   setting_sources: ['project'] 로 발견한다.
 
 description: ait 플러그인 skill 트리거링 정합성 (positive + negative control)
 
@@ -36,13 +31,13 @@ description: ait 플러그인 skill 트리거링 정합성 (positive + negative 
 providers:
   - id: anthropic:claude-agent-sdk
     config:
-      # VERIFY: 작업 기준선은 stable(web-framework 2.x). eval 모델은
+      # 확인됨: 작업 기준선은 stable(web-framework 2.x). eval 모델은
       # scaffold 흐름과 무관하니 일상 개발 모델을 쓰면 된다.
       model: claude-sonnet-4-5
       # working_dir 안의 .claude/skills/ 에서 skill 을 발견한다.
       setting_sources: ['project']
-      # VERIFY: working_dir 키 이름이 provider 버전에 따라 cwd / workingDir
-      # 일 수 있다. metadata 에 skill 이 안 잡히면 이 키부터 확인하라.
+      # 확인됨: working_dir 키 이름. skill 이 0개로 잡히면 이 키를 확인하라
+      # (provider 버전에 따라 cwd / workingDir 일 수 있음).
       working_dir: ./fixture
       # 16개 skill을 명시적으로 노출 (setting_sources 발견과 병행 — 안전).
       skills:

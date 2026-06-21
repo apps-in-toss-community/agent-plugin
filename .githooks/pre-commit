@@ -29,3 +29,10 @@ fi
 git diff --cached --name-only --diff-filter=ACMR -z \
   | grep -z -E '\.(ts|tsx|js|jsx|mjs|cjs|json|jsonc)$' \
   | xargs -0 pnpm exec biome check --no-errors-on-unmatched
+
+# agent-plugin–specific addition (intentional divergence from cross-repo hook canonical):
+# Run the structural validator when shared/ or scripts/validate are touched.
+# A1/A2/A3/A5 hard-fail violations are caught locally before push to CI.
+if git diff --cached --name-only --diff-filter=ACMR | grep -qE 'shared/|scripts/validate'; then
+  node scripts/validate-plugin.mjs || exit 1
+fi
