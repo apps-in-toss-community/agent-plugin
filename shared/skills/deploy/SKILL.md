@@ -90,9 +90,17 @@ aitcc.yaml이 없습니다. 앱인토스 콘솔에 앱이 등록되지 않았습
 `~/.ait/credentials`에 프로파일이 저장돼 있으면 `ait deploy --profile <name>`이
 argv에 키 값을 노출하지 않고 바로 사용할 수 있다.
 
+`~/.ait/credentials`는 `{ "<profile>": "<key>" }` 형태의 JSON 파일이다.
+`ait` 번들러 바이너리는 프로젝트 `node_modules` 안에 있어 global PATH에 없는
+경우가 많으므로, 프로파일 목록은 파일을 직접 읽어 **키 이름(프로파일명)만** 추출한다
+(비밀값은 읽지 않는다):
+
 ```bash
-ait token list 2>/dev/null
+cat ~/.ait/credentials 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print('\n'.join(d.keys()))" 2>/dev/null || true
 ```
+
+파일이 없거나 파싱에 실패하면 빈 출력이 나오며 이는 자연스럽게 "프로파일 없음"
+분기로 이어진다.
 
 사용할 프로파일 이름을 확인한다. 프로파일이 없으면 `/ait deploy-key`를 먼저
 실행해 저장한다:
@@ -187,10 +195,53 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 | 에러 패턴 | 힌트 |
 |---|---|
 | `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `aitcc keys create`로 재발급. |
-| `4037` / `4040` / `4099` / `5001` (약관 미체결) | 해당 약관을 `aitcc workspace terms agree <TYPE>`으로 동의 후 재시도. |
+| `4037` / `4039` / `4040` / `4099` / `5001` (약관 미체결) | 아래 복구 시퀀스를 따른다. |
 | `4046` (REVIEW lock) | 앱이 리뷰 중입니다. 운영팀 처리를 기다린 후 재시도. 새 앱 생성으로 우회 금지. |
 | `bundle not found` / `*.ait 없음` | Step 3 빌드 단계를 건너뛰었거나 빌드가 실패함. `pnpm bundle:ait` 재실행. |
 | 기타 | 에러 메시지를 그대로 보여주고 `aitcc` 로그 / GitHub Issues 안내. |
+
+#### 약관 미체결 복구 시퀀스 (에러 코드 → TYPE 매핑)
+
+에러 코드별 해당 약관 TYPE:
+
+| 에러 코드 | TYPE | 설명 |
+|---|---|---|
+| `4037` | `TOSS_LOGIN` | 토스 로그인(OIDC) 약관 |
+| `4039` | `TOSS_PROMOTION_MONEY` | 프로모션 머니 약관 |
+| `4040` | `BIZ_WORKSPACE` | 워크스페이스 단위 약관 |
+| `4099` | `IAA` | 광고 관리 약관 |
+| `5001` | `IAP` | 인앱결제 상품 약관 |
+
+TYPE 값은 `aitcc workspace terms --json` 결과의 `byType` 키와 동일한 enum이다:
+`TOSS_LOGIN` / `BIZ_WORKSPACE` / `TOSS_PROMOTION_MONEY` / `IAA` / `IAP`.
+
+**1단계: 미체결 약관 조회**
+
+```bash
+aitcc workspace terms --json
+```
+
+응답 `byType.<TYPE>` 배열에서 `isAgreed: false`인 항목을 확인한다.
+
+**2단계: 일괄 동의 (권장)**
+
+```bash
+aitcc workspace terms agree --all --json
+```
+
+이미 동의한 약관은 건너뛰고(idempotent), 미동의 약관만 일괄 처리한다.
+성공 시 `ok: true`이고 `failed` 배열이 비어 있다.
+
+**3단계: TYPE별 개별 동의 (일괄 실패 시)**
+
+```bash
+aitcc workspace terms agree <TYPE> --json
+```
+
+`<TYPE>`은 1단계 조회 결과의 `type` 필드 값을 그대로 사용한다.
+예: `aitcc workspace terms agree BIZ_WORKSPACE --json`
+
+동의 완료 후 배포를 재시도한다.
 
 ### 6. 완료 요약 + 다음 단계
 
