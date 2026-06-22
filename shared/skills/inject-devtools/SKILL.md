@@ -160,8 +160,10 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [react(), aitDevtools.vite()],
   // SDK와 bridge/analytics 엔트리를 Vite dep pre-bundle에서 제외한다.
-  // 안 하면 Vite가 실 @apps-in-toss/web-*를 pre-bundle해서 서빙하고,
-  // unplugin(소스 resolve 시점에만 동작)이 mock으로 rewrite할 기회를 잃는다.
+  // unplugin의 resolveId가 enforce:'pre'라 이게 없어도 source import는
+  // mock으로 정상 rewrite되지만, 빼두면 Vite가 실 @apps-in-toss/web-*를
+  // 쓸데없이 pre-bundle하지 않고(orphan dead weight 방지) 향후 번들러
+  // ordering 변화에도 안전하다. greenfield 템플릿과 동일하게 맞춘다.
   optimizeDeps: {
     exclude: [
       '@apps-in-toss/web-framework',
