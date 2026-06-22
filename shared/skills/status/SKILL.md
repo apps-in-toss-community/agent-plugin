@@ -96,7 +96,7 @@ aitcc app bundles ls --json
 
 두 결과를 묶어서 보여준다:
 
-- **review state** (`under-review` / `rejected` / `approved`) — `app status`
+- **review state** (`not-submitted` / `under-review` / `rejected` / `approved` / `approved-with-edits` / `unknown`) — `app status`
 - **runtime state** (`serviceStatus`, shutdown 일정) — `app service-status`
 
 `aitcc.yaml`이 없으면 이 step은 skip하고, "이 디렉토리는 등록된 미니앱이
@@ -146,10 +146,11 @@ you@example.com / workspace <번호> <이름> · 앱 N개 ·
 | 미인증 (authenticated:false — reason 없으면 최초 미로그인, reason:"session-expired"면 만료) | `aitcc login`은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에 계정으로 로그인하세요. Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나 `AITCC_BROWSER`로 경로를 지정하세요. |
 | `4010` (한국 외 IP) — whoami는 OK인데 명령이 막힘 | 세션 쿠키는 한국 IP 전용입니다. 재로그인 불필요 — 한국 네트워크(KR 거주 IP)에서 명령을 실행하세요. 클라우드 CI runner(US/EU)·VPN이 원인입니다. |
 | cwd에 `aitcc.yaml` 없음 (미등록) | `/ait register`로 콘솔 등록 |
-| 등록됨 · `serviceStatus: PREPARE` (검수 미제출) | 배포된 번들은 있으나 아직 검수를 제출하지 않은 상태. 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(단일 명령 — 업로드+검수요청 동시, 비가역, --release-notes 필수; `<번들파일>`은 `ait build`(번들러) 산출물 `.ait` 경로). |
+| 등록됨 · review state `not-submitted` (검수 미제출) | 앱은 등록됐으나 검수를 한 번도 제출하지 않은 상태. 번들을 빌드(`ait build`)하고 검수 제출: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(단일 명령 — 업로드+검수요청 동시, 비가역, --release-notes 필수; `<번들파일>`은 `ait build`(번들러) 산출물 `.ait` 경로). |
+| 등록됨 · `serviceStatus: PREPARE` (런타임 미출시) | 배포된 번들은 있으나 아직 서비스가 시작되지 않은 상태. 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(단일 명령 — 업로드+검수요청 동시, 비가역, --release-notes 필수; `<번들파일>`은 `ait build`(번들러) 산출물 `.ait` 경로). |
 | 등록됨 · `under-review` | 운영팀 처리 대기. 그 사이 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load) |
 | 등록됨 · `rejected` | `aitcc app status --json`의 `rejectedMessage` 필드에서 반려 사유를 확인하고 수정 → `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(`ait build` 산출물 `.ait` 파일 경로 지정)로 재업로드 |
-| 등록됨 · `approved` / `OPENED` | `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`로 새 번들 배포 |
+| 등록됨 · `approved` / `approved-with-edits` / `OPENED` | `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`로 새 번들 배포 (`approved-with-edits`는 조건부 승인 — 요청된 수정 후 재배포) |
 | `app status` api-error (review 상태 조회 불가) · `serviceStatus: PREPARE` | review 상태는 일시 불명. 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면 `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`로 진행 가능. |
 | `app status` api-error (review 상태 조회 불가) · 번들 없음 또는 serviceStatus 미확인 | review 상태 일시 불명. 번들을 먼저 빌드하고 (`ait build`) 검수 제출: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`. API 장애가 지속되면 잠시 후 `/ait status`를 다시 실행하세요. |
 
