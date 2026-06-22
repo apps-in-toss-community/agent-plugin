@@ -256,7 +256,7 @@ pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   /ait deploy-key    # Deploy Key 발급 — 처음 배포면 deploy 전에
   /ait deploy        # 번들을 콘솔에 업로드 (ait build → ait deploy --profile <name>)
 
-문서: https://docs.aitc.dev/intro  (커뮤니티 docs)
+문서: https://docs.aitc.dev/  (커뮤니티 docs)
 ```
 
 `pnpm install`을 건너뛰었으면 안내에 `pnpm install`을 한 줄 추가.
