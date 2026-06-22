@@ -181,5 +181,5 @@ changeset 생성 완료 (stage됨, 커밋은 안 함)
 이 skill의 정책은 아래 커뮤니티 SKILL.md 선례들을 참고:
 
 - [majiayu000/claude-skill-registry pr-changeset](https://github.com/majiayu000/claude-skill-registry/blob/main/skills/data/pr-changeset/SKILL.md) — "major only when explicitly requested" 원칙
-- [daangn/seed-design changeset](https://github.com/daangn/seed-design/blob/main/skills/changeset/SKILL.md) — 한국어 스타일 참고
+- [daangn/seed-design](https://github.com/daangn/seed-design) — 한국어 changeset 스타일 참고
 - [lowdefy l-changeset](https://github.com/lowdefy/lowdefy/blob/main/.claude/skills/l-changeset/SKILL.md) — argument-hint override 패턴
