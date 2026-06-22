@@ -2,9 +2,10 @@
 name: deploy-key
 description: |
   Issue a Deploy Key and save it to `~/.ait/credentials` so
-  `ait deploy --profile <name>` works immediately — no plaintext echo, no
-  argv exposure. Checks for a usable existing profile first; if one is
-  valid and expires in 7+ days, skips issuance and reports the name.
+  `ait deploy --profile <name>` works immediately. The key is written
+  directly to `~/.ait/credentials`; the skill never re-echoes it.
+  Checks for a usable existing profile first; if one is valid and expires
+  in 7+ days, skips issuance and reports the name.
   Triggered by `/ait deploy-key`.
 argument-hint: '[profile-name]'
 ---
@@ -18,8 +19,11 @@ argument-hint: '[profile-name]'
 
 - 기존 프로파일이 유효하면(만료 7일+ 이상) 재발급 없이 그 이름을 안내하고 종료.
 - 프로파일이 없거나 만료 임박이면 `aitcc keys create --save-profile <name>`으로
-  새 키를 발급한다. 발급된 키 값은 `aitcc`가 직접 파일로 저장하므로 model
-  transcript나 stdout에 평문이 노출되지 않는다.
+  새 키를 발급한다. `aitcc keys create --json` 출력에는 `apiKey` 평문이
+  포함된다(이것이 키를 받는 1회 전달 채널이다). 에이전트는 그 값을 채팅·로그·
+  명령문에 다시 출력하면 안 된다 — `--save-profile`이 주는 보장은 에이전트가
+  raw 값을 직접 다뤄 파일에 쓸 필요가 없다는 것이지(aitcc가 `~/.ait/credentials`에
+  직접 기록), stdout이 깨끗하다는 것이 아니다.
 
 ## 확인 — 기존 프로파일 검사
 
@@ -114,8 +118,9 @@ aitcc keys create --name <label> --save-profile <profile-name> --json
 
 - `<label>`: 콘솔 UI용 레이블. 기본값 = `<profile-name>`.
 - `--save-profile`: 발급 즉시 `~/.ait/credentials`에 `[<profile-name>]` 섹션을
-  쓴다. `aitcc`가 직접 파일을 작성하므로 키 값이 stdout이나 model transcript에
-  남지 않는다.
+  쓴다. `aitcc`가 직접 파일을 작성하므로 에이전트가 raw 값을 직접 다룰 필요가 없다.
+  단, `--json` 응답의 `apiKey` 필드에는 평문이 포함된다 — 상태 확인 시 `ok`·
+  `savedProfile`·`saveProfileWarning` 필드만 읽고, `apiKey` 값은 surface하지 않는다.
 - `--json`: 결과를 파싱해 성공 여부·profile 저장 상태를 확인한다.
 
 응답 확인 포인트:
@@ -163,6 +168,17 @@ aitcc keys create --name <label> --json
 발급된 키 값을 GitHub 레포의 시크릿(`AITCC_API_KEY`)에 저장하면 CI/CD에서 `ait deploy --api-key` 로 소비할 수 있다.
 
 키 값을 stdout/로그/채팅 화면에 평문으로 출력하지 않는다 — 발급 즉시 안전한 저장소로 옮긴다.
+
+**no-echo 전송 레시피** — `apiKey`를 명령행 인자나 채팅에 찍지 않고 GitHub secret으로 바로 넘기는 방법:
+
+```bash
+# --json 응답에서 apiKey만 파싱해 stdin으로 파이프한다 (평문을 args/화면에 노출하지 않음)
+aitcc keys create --name <label> --json | \
+  node -e "process.stdout.write(JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).apiKey)" | \
+  gh secret set AITCC_API_KEY --body-file -
+```
+
+위 명령은 `apiKey` 값을 에이전트 채팅·argv·로그에 노출하지 않고 GitHub secret에 직접 저장한다. `gh secret set --body-file -`은 stdin에서 값을 읽으므로 argv에 평문이 남지 않는다.
 
 `ok: false`면 `reason`에 따라 안내한다:
 
