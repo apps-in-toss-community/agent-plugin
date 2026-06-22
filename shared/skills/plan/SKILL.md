@@ -68,10 +68,10 @@ argument-hint: '[requirements]'
 | `environment` | 디바이스·앱 환경 정보 조회 | — | — | `api/environment` |
 | `permissions` | 권한 상태 조회·요청 | (요청하는 권한에 따름) | — | `guides/permissions-pattern` |
 | `storage` | 키-값 로컬 저장 | — | — | `api/storage` |
-| `location` | 현재 위치 | location | — | `guides/location-permission-fallback` |
+| `location` | 현재 위치 | geolocation | — | `guides/location-permission-fallback` |
 | `camera` | 카메라 촬영·스캔 | camera (스캔 시 microphone 가능) | — | `guides/camera-album-ux` |
 | `contacts` | 연락처 읽기/쓰기 | contacts | — | `api/contacts` |
-| `clipboard` | 클립보드 읽기/쓰기 | — | — | `api/clipboard` |
+| `clipboard` | 클립보드 읽기/쓰기 | clipboard | — | `api/clipboard` |
 | `haptic` | 진동 피드백 | — | — | `api/haptic` |
 | `iap` | 인앱 디지털 재화 결제 | — | `IAP` | `guides/iap-payment-flow` |
 | `payment` | 토스페이 체크아웃(실물·외부 결제) | — | (결제 유형에 따라 콘솔 확인) | `guides/tosspay-checkout-flow` |
@@ -80,7 +80,7 @@ argument-hint: '[requirements]'
 | `analytics` | 이벤트 로깅 | — | — | `guides/event-logging` |
 | `partner` | 파트너 연동 기능 | (기능별 확인) | (기능별 확인) | `api/partner` |
 | `events` | SDK 이벤트 구독 | — | — | `guides/event-subscription` |
-| `notification` | 푸시/로컬 알림 | notification | — | `api/notification` |
+| `notification` | 푸시/로컬 알림 | — (OS 권한 없음 — `requestNotificationAgreement()` SDK 동의) | — | `api/notification` |
 
 > `photos`(앨범) 권한은 카메라로 찍은 이미지를 앨범에서 고르거나 저장하는
 > 흐름에서 함께 등장한다 — `camera`/`contacts`처럼 도메인에 1:1로 묶이기보다
@@ -129,8 +129,8 @@ argument-hint: '[requirements]'
 ### 3. 도메인 → 권한 도출
 
 매핑된 각 도메인의 "권한" 열을 모아 **중복 제거**한 런타임 권한 목록을 만든다
-(예: `location`, `camera`, `contacts`, `microphone`, `notification`, `photos`).
-권한이 없는 도메인(clipboard, haptic, storage 등)은 권한 목록에 기여하지 않는다.
+(예: `geolocation`, `camera`, `contacts`, `microphone`, `photos`).
+권한이 없는 도메인(haptic, storage 등)은 권한 목록에 기여하지 않는다.
 권한 상수의 정확한 이름이 필요하면 `/ait docs permissions`로 확인한다.
 
 ### 4. 능력(capability) → 약관 도출
@@ -160,7 +160,7 @@ SDK 도메인 (필요)
 | navigation  | 목록 ↔ 상세 화면 전환                   | /ait docs guides/navigation-flow |
 
 런타임 권한 (사용자에게 요청)
-  - location        # 위치 기반 정렬
+  - geolocation     # 위치 기반 정렬
 
 콘솔 약관 (등록·배포 시 게이트)
   - BIZ_WORKSPACE   # 모든 미니앱 출시의 기본 약관
