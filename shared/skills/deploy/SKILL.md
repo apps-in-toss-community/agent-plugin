@@ -195,8 +195,9 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 | 에러 패턴 | 힌트 |
 |---|---|
 | `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `aitcc keys create`로 재발급. |
-| `4037` / `4039` / `4040` / `4099` / `5001` (약관 미체결) | 아래 복구 시퀀스를 따른다. |
+| `4037` / `4039` / `4040` / `4099` / `5001` (약관 미체결) | 아래 약관 미체결 복구 시퀀스를 따른다(워크스페이스 단위). |
 | `4046` (REVIEW lock) | 앱이 리뷰 중입니다. 운영팀 처리를 기다린 후 재시도. 새 앱 생성으로 우회 금지. |
+| `5010` (AI 위험 고지·이용약관 미동의) | 계정 단위 AI_RISK_USE 약관 미동의. 아래 5010 복구 경로를 따른다(워크스페이스 약관 시퀀스와 별개). |
 | `bundle not found` / `*.ait 없음` | Step 3 빌드 단계를 건너뛰었거나 빌드가 실패함. `pnpm bundle:ait` 재실행. |
 | 기타 | 에러 메시지를 그대로 보여주고 `aitcc` 로그 / GitHub Issues 안내. |
 
@@ -240,6 +241,50 @@ aitcc workspace terms agree <TYPE> --json
 
 `<TYPE>`은 1단계 조회 결과 `byType` 객체의 키 이름(예: `BIZ_WORKSPACE`)을 그대로 사용한다.
 예: `aitcc workspace terms agree BIZ_WORKSPACE --json`
+
+동의 완료 후 배포를 재시도한다.
+
+#### 5010 — AI 위험 고지·이용약관(AI_RISK_USE) 복구
+
+`5010`은 **계정 단위** AI_RISK_USE 약관 미동의 게이트다 — 위의 4037/4039/4040/4099/5001
+워크스페이스 약관 시퀀스와 **완전히 별개**다. 사용하는 명령도 다르다:
+워크스페이스 약관은 `aitcc workspace terms`를 쓰지만, 이건 `aitcc me terms`를 쓴다.
+
+**1단계: 동의 상태 확인**
+
+```bash
+aitcc me terms --scope AI_RISK_USE
+```
+
+또는:
+
+```bash
+aitcc me terms show --scope AI_RISK_USE
+```
+
+**2단계: 약관 동의**
+
+동의는 법적 행위다. `--yes`로 대행하기 전에 사용자에게 다음을 명시하고
+**명시적 확인**을 반드시 받는다:
+
+```
+AI 위험 고지·이용약관(AI_RISK_USE)에 동의합니다.
+이는 법적 효력이 있는 동의 행위입니다.
+진행하려면 확인해주세요.
+```
+
+사용자가 확인한 뒤에만 실행한다:
+
+```bash
+aitcc me terms agree --scope AI_RISK_USE
+```
+
+비대화형/CI 환경에서는 `--yes`를 추가한다 — 단, 위와 같이 사용자의 명시적 확인을
+받은 경우에만:
+
+```bash
+aitcc me terms agree --scope AI_RISK_USE --yes
+```
 
 동의 완료 후 배포를 재시도한다.
 
