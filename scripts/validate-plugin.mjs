@@ -407,6 +407,36 @@ function fencedCodeLineNumbers(lines) {
 // docs link allowlist: welcome + new-miniapp 는 /intro 링크 허용
 const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp']);
 
+// A2 deep-link-required (positive) allowlist — §1.3.4("skill 말미 docs 링크는
+// docs.aitc.dev/<주제>로 deep-link 필수")를 코드로 강제하되, deep-link 의무가
+// 면제되는 skill 을 명시한다. 면제 사유 3종 + 임시 1종:
+//   1. entry/scaffold (welcome·new-miniapp): docs 루트 링크가 적절 (§1.2 예외)
+//   2. harness-external (changeset): /ait prefix 예외, docs 주제 페이지 무관
+//   3. docs 로더 자체 (docs): self-link 가 무의미
+//   4. [임시] 대상 docs 페이지 미존재 (ship/operate/dev-setup 8종):
+//      deploy·deploy-key·register·setup-bundle·setup-phone-preview·status·
+//      inject-devtools·inject-polyfill. 지금 deep-link 를 박으면 404 — 무링크보다
+//      나쁘다. docs repo 에 해당 guide 가 authoring 되면(issue #200 Layer 3) 이
+//      8개를 이 set 에서 제거한다. 그때까지 "링크 없음"은 의도된 상태.
+const DOCS_DEEPLINK_EXEMPT = new Set([
+  'welcome',
+  'new-miniapp',
+  'changeset',
+  'docs',
+  // 임시 — issue #200 Layer 3 (docs page authoring) 완료 시 제거
+  'deploy',
+  'deploy-key',
+  'register',
+  'setup-bundle',
+  'setup-phone-preview',
+  'status',
+  'inject-devtools',
+  'inject-polyfill',
+]);
+
+// docs deep-link 형태: docs.aitc.dev/guides/<slug> 또는 docs.aitc.dev/api/<group>[/<method>]
+const DOCS_DEEPLINK_RE = /docs\.aitc\.dev\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_-]*/;
+
 // ---------------------------------------------------------------------------
 // A1 라우팅 스냅샷 — 명령 파일 ↔ skill 매핑 기대값
 // shared/commands/ 전수를 열거한다. 변경 시 이 상수도 함께 갱신.
@@ -531,6 +561,23 @@ function checkA2(root) {
             ),
           );
         }
+      }
+    }
+
+    // docs deep-link 존재 강제 (positive — §1.3.4 "deep-link 필수"를 코드로):
+    // exempt 가 아닌 skill 은 본문 어딘가에 docs.aitc.dev/(guides|api)/<slug>
+    // deep-link 가 최소 1개 있어야 한다. (음성 검사 A2/docs-root-link 와 짝 — 그건
+    // "루트 링크 금지", 이건 "deep-link 있어야 함". 둘 다 통과해야 §1.3.4 충족.)
+    if (!DOCS_DEEPLINK_EXEMPT.has(skillName)) {
+      if (!DOCS_DEEPLINK_RE.test(src)) {
+        violations.push(
+          mkv(
+            relFile,
+            1,
+            'A2/docs-deeplink-required',
+            `docs deep-link 없음 — §1.3.4 위반. 본문에 docs.aitc.dev/guides/<slug> 또는 docs.aitc.dev/api/<group> 링크 필요 (대상 페이지가 아직 없으면 DOCS_DEEPLINK_EXEMPT 에 임시 등재 + issue #200 Layer 3 추적)`,
+          ),
+        );
       }
     }
 
