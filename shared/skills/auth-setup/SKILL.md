@@ -3,7 +3,8 @@ name: auth-setup
 description: |
   Wire up oidc-bridge authentication into the current project — guides the
   user through calling `appLogin()`, exchanging the authorization code via
-  a consumer backend that calls oidc-bridge `/oidc/token`, and signing in
+  a consumer backend that calls oidc-bridge (public instance:
+  `/t/<tenantId>/oidc/token`; self-host: `/oidc/token`), and signing in
   with the resulting `id_token` (Supabase or Firebase). Triggered by
   `/ait auth-setup`.
 argument-hint: '[--firebase] [--bridge-url <url>]'
@@ -13,7 +14,7 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 
 ## 목적
 
-`/ait auth-setup` 한 번으로 사용자 프로젝트에 **토스 로그인 → consumer backend → oidc-bridge `/oidc/token` 교환 → id_token으로 로그인** 흐름을 설정한다.
+`/ait auth-setup` 한 번으로 사용자 프로젝트에 **토스 로그인 → consumer backend → oidc-bridge token 교환 → id_token으로 로그인** 흐름을 설정한다. token 엔드포인트 경로는 배포 형태에 따라 다르다 — 공용 인스턴스(`oidc-bridge.aitc.dev`)는 tenant-scoped dispatcher(`/t/<tenantId>/oidc/token`), self-host는 루트 마운트(`/oidc/token`).
 
 이 흐름은 커뮤니티 오픈소스다. "공식 토스 로그인 SDK", "토스가 제공하는" 같은 표현은 사용하지 않는다. `@apps-in-toss/web-framework`는 원본 SDK 이름이라 그대로 사용한다.
 
@@ -32,7 +33,8 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 ```
 mini-app → appLogin() → authorizationCode
          → POST /your-backend (authorizationCode)
-             → backend calls bridge POST /oidc/token
+             → backend calls bridge POST /t/<tenantId>/oidc/token  (공용)
+             →                        POST /oidc/token             (self-host)
              ← bridge returns { access_token, id_token, ... }
          ← backend returns { id_token }
          → client signInWithIdToken(id_token)  ← Supabase 또는 Firebase
@@ -87,16 +89,20 @@ grep -r '@apps-in-toss/web-framework' package.json 2>/dev/null | head -1
 ```
 auth-setup 사전 조건 (없으면 먼저 준비):
 
-  1. oidc-bridge client_id
+  1. oidc-bridge client_id (+ 공용 인스턴스의 경우 tenantId)
      - 공용 인스턴스(https://oidc-bridge.aitc.dev)를 쓰려면 operator에게
-       등록을 요청해야 한다 — client_id는 operator(bridge 관리자)만 발급할 수 있다.
+       등록을 요청해야 한다 — client_id와 tenantId는 operator(bridge 관리자)만 발급할 수 있다.
        아래 링크에서 Issue를 열어 다음 정보를 포함해 요청한다:
          · 미니앱 ID (appIdToss, e.g. 31146)
          · allowed origin (e.g. https://sdk-example.aitc.dev)
          · public / confidential client 여부
        https://github.com/apps-in-toss-community/oidc-bridge/issues/new
+       operator는 `client_id`와 함께 `tenantId`를 발급한다 — 공용 인스턴스는
+       tenant-scoped dispatcher이므로 token URL이 `/t/<tenantId>/oidc/token` 형태다.
+       두 값을 모두 기록해둔다.
      - 자체 호스팅 bridge라면 `cli/commands/app.ts`의 `app create` 명령으로
        직접 발급한다 (`--cert <path> --key <path>` mTLS cert 필요).
+       self-host는 루트 마운트이므로 tenantId 없음 — token URL은 `/oidc/token`.
      - public client는 Origin allow-list, confidential client는 client_secret로
        caller를 인증한다(§의존 참조).
 
@@ -106,7 +112,10 @@ auth-setup 사전 조건 (없으면 먼저 준비):
        (URL의 `_`를 실제 project ref로 교체 — 프로젝트 Settings > General에서 확인)
      - 경로: Authentication > Sign In Methods > Custom OIDC > Add provider
      - 입력 필드:
-       1. Issuer URL: <bridge-url>  (e.g. https://oidc-bridge.aitc.dev)
+       1. Issuer URL:
+          - 공용 인스턴스: https://oidc-bridge.aitc.dev/t/<tenantId>
+            (tenant-scoped — discovery가 <issuer>/.well-known/openid-configuration으로 자동 완성됨)
+          - self-host: <bridge-url>  (루트 마운트, tenantId 없음)
        2. Client ID: <등록된 client_id>  (위 item 1에서 발급받은 값)
        3. Discovery URL은 자동 완성됨 (<issuer>/.well-known/openid-configuration)
      - 저장 후 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY를 .env에 둔다.
@@ -140,8 +149,9 @@ mini-app은 authorizationCode를 **자신의 백엔드**로 전달하고, 백엔
 ```ts
 // supabase/functions/toss-login/index.ts
 // 필수 환경변수(supabase secrets set으로 설정):
-//   OIDC_BRIDGE_BASE_URL   e.g. https://oidc-bridge.aitc.dev
-//   OIDC_BRIDGE_CLIENT_ID  bridge에 등록된 client_id
+//   OIDC_BRIDGE_BASE_URL       e.g. https://oidc-bridge.aitc.dev
+//   OIDC_BRIDGE_CLIENT_ID      bridge에 등록된 client_id
+//   OIDC_BRIDGE_TENANT_ID      공용 인스턴스만; self-host는 비움 (루트 마운트)
 //   OIDC_BRIDGE_CLIENT_SECRET  (optional) confidential client만
 
 Deno.serve(async (req) => {
@@ -149,7 +159,14 @@ Deno.serve(async (req) => {
 
   const baseUrl = Deno.env.get('OIDC_BRIDGE_BASE_URL');
   const clientId = Deno.env.get('OIDC_BRIDGE_CLIENT_ID');
+  const tenantId = Deno.env.get('OIDC_BRIDGE_TENANT_ID'); // 공용 인스턴스만; self-host는 비움
   const clientSecret = Deno.env.get('OIDC_BRIDGE_CLIENT_SECRET');
+
+  // 공용 인스턴스는 tenant-scoped dispatcher → /t/<tenantId>/oidc/token
+  // self-host는 루트 마운트 → /oidc/token
+  const tokenUrl = tenantId
+    ? `${baseUrl}/t/${tenantId}/oidc/token`
+    : `${baseUrl}/oidc/token`;
 
   const tokenRequest: Record<string, string> = {
     grant_type: 'authorization_code',
@@ -159,7 +176,7 @@ Deno.serve(async (req) => {
   };
   if (clientSecret) tokenRequest.client_secret = clientSecret;
 
-  const res = await fetch(`${baseUrl}/oidc/token`, {
+  const res = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(tokenRequest),
@@ -176,10 +193,12 @@ Deno.serve(async (req) => {
 });
 ```
 
-**bridge `/oidc/token` 요청 형태**:
+**bridge token 엔드포인트 요청 형태**:
+`POST /t/<tenantId>/oidc/token  (공용 인스턴스)  ·  POST /oidc/token  (self-host)`
 
 ```jsonc
-POST /oidc/token
+POST /t/<tenantId>/oidc/token   // 공용 인스턴스 — tenant-scoped dispatch
+// POST /oidc/token              // self-host — 루트 마운트
 Content-Type: application/json
 
 {
@@ -243,11 +262,14 @@ supabase functions deploy toss-login --no-verify-jwt
 supabase secrets set OIDC_BRIDGE_BASE_URL=<bridge-url>
 supabase secrets set OIDC_BRIDGE_CLIENT_ID=<client_id>
 
+# 공용 인스턴스(oidc-bridge.aitc.dev)인 경우만 추가 — self-host는 생략
+# supabase secrets set OIDC_BRIDGE_TENANT_ID=<tenantId>
+
 # confidential client인 경우만 추가
 # supabase secrets set OIDC_BRIDGE_CLIENT_SECRET=<client_secret>
 ```
 
-`<bridge-url>`, `<client_id>`, `<client_secret>`은 반드시 실제 발급 값으로 교체한다 — 값을 예시 그대로 두면 런타임 인증이 실패한다. 발급 값은 §2.5 item 1에서 확보한 client_id와 bridge URL이다.
+`<bridge-url>`, `<client_id>`, `<tenantId>`, `<client_secret>`은 반드시 실제 발급 값으로 교체한다 — 값을 예시 그대로 두면 런타임 인증이 실패한다. 발급 값은 §2.5 item 1에서 확보한 client_id·tenantId와 bridge URL이다.
 
 배포가 완료되면 Supabase 대시보드 Edge Functions 탭에서 `toss-login` 함수가 `Active` 상태인지 확인한다.
 
@@ -290,7 +312,8 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 import { signInWithPopup, OAuthProvider, getAuth } from 'firebase/auth';
 
 // Firebase 프로젝트에서 OIDC provider를 등록해야 한다.
-// issuer: https://oidc-bridge.aitc.dev (또는 self-host URL)
+// issuer — 공용 인스턴스: https://oidc-bridge.aitc.dev/t/<tenantId>
+//         self-host:     <bridge-url>  (루트 마운트, tenantId 없음)
 const provider = new OAuthProvider('oidc.<your-provider-id>');
 // id_token을 credential로 변환
 const credential = provider.credential({ idToken: id_token });
@@ -310,7 +333,7 @@ await signInWithPopup(getAuth(), credential);
 2. 토스 앱에서 미니앱 열기 → `appLogin()` 실행 → 백엔드가 `referrer: "DEFAULT"`로 교환
 3. `id_token`의 `sub` claim이 실제 토스 계정 ID인지 확인
 
-sdk-example의 Auth 페이지(`AuthPage → OidcBridgeSection`)에서 `/oidc/token` 흐름을 인터랙티브하게 테스트해볼 수 있다.
+sdk-example의 Auth 페이지(`AuthPage → OidcBridgeSection`)에서 bridge token 교환 흐름을 인터랙티브하게 테스트해볼 수 있다.
 
 ### 7. 완료 요약 + 다음 단계
 
@@ -320,10 +343,12 @@ sdk-example의 Auth 페이지(`AuthPage → OidcBridgeSection`)에서 `/oidc/tok
 auth-setup 완료
 
 배선된 것:
-  - appLogin() → consumer backend → bridge /oidc/token → signInWithIdToken
+  - appLogin() → consumer backend → bridge token 교환 → signInWithIdToken
+    공용 인스턴스: /t/<tenantId>/oidc/token  /  self-host: /oidc/token
   - bridge URL: <bridge-url> (기본 https://oidc-bridge.aitc.dev)
   - 백엔드 배포: supabase functions deploy toss-login 완료
   - 환경변수: OIDC_BRIDGE_BASE_URL, OIDC_BRIDGE_CLIENT_ID supabase secrets 등록
+    (공용 인스턴스의 경우 OIDC_BRIDGE_TENANT_ID 추가)
 
 다음 단계:
   pnpm dev            # devtools sandbox에서 appLogin() mock으로 흐름 확인
