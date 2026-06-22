@@ -206,9 +206,29 @@ aitcc whoami --json
 aitcc app categories --selectable --json
 ```
 
-`{ok:true, categories:[…]}`의 selectable leaf들(숫자 id 포함)을 사용자에게
-제시하고 ≥ 1개를 고르게 한다. **id를 하드코딩하지 않는다** — 매번 라이브
-서버 값을 조회한다.
+응답 구조는 두 단계 중첩이다 — `categories[]`는 그룹 래퍼이지 leaf가 아니다:
+
+```
+{
+  ok: true,
+  categories: [
+    {
+      categoryGroup: { id, name, isSelectable },   // 그룹(선택 불가)
+      categoryList: [                               // 실제 leaf 후보
+        { id, name, isSelectable, subCategoryList: [...] }
+      ]
+    }
+  ]
+}
+```
+
+**leaf 판별**: `isSelectable === true` AND `subCategoryList`가 비어 있거나 없음.
+`subCategoryList`에 항목이 있으면 그 안으로 재귀한다.
+
+leaf를 수집한 뒤 "그룹명 › leaf명 = id" 형태로 사용자에게 제시하고
+≥ 1개를 고르게 한다(예: `생활 › 교육 = 82`, `게임 › 액션 = 3836`).
+`categoryIds`에는 **leaf의 `id`**를 넣는다(그룹 id 아님).
+**id를 하드코딩하지 않는다** — 매번 라이브 서버 값을 조회한다.
 
 **나머지 필드**를 사용자에게 묻는다(기본값 제안):
 
