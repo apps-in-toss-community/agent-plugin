@@ -37,7 +37,8 @@ docs/                              # repo root
     │       │                      # contacts, environment, events, game, haptic,
     │       │                      # iap, location, navigation, notification,
     │       │                      # partner, payment, permissions, storage (18개+)
-    │       ├── index.mdx          # 그룹 개요
+    │       ├── index.mdx          # 그룹 개요 (메서드 ≥2개 그룹만 — 단일메서드
+    │       │                      #   그룹 contacts·haptic은 index 없음)
     │       └── <method>.mdx       # 예: api/clipboard/setClipboardText.mdx
     ├── guides/                    # "왜/언제" 패턴
     │   └── <guide>.mdx            # 예: auth-flow, iap-payment-flow, permissions-pattern
@@ -65,9 +66,12 @@ docs/                              # repo root
    `.mdx`를 먼저 시도 (현재 `docs/intro.md` 하나만 해당).
 2. `docs/api/<topic>/` — 디렉토리면 다음 우선순위로 해석:
    1. `index.md` 또는 `index.mdx`가 있으면 **그것을 로드** (그룹 개요 페이지)
-   2. 그 외에 파일이 **정확히 하나**면 그 파일을 로드 (현재는 모든 그룹이
-      `index.mdx`를 가지므로 도달하지 않지만, 신규 그룹이 index 없이
-      method 단일 파일로 추가될 가능성을 위한 safety net)
+   2. 그 외에 파일이 **정확히 하나**면 그 파일을 로드 — **단일 메서드 그룹**의
+      live 경로다. docs 규칙상 overview(`index.mdx`)는 메서드 ≥2개 그룹만
+      두므로(docs `CLAUDE.md`), 메서드가 하나뿐인 그룹(현재 `contacts` →
+      `fetchContacts`, `haptic` → `generateHapticFeedback`)은 index 없이
+      method 파일 하나만 있어 이 경로로 해석된다. 예: `/ait docs contacts`
+      → `api/contacts/fetchContacts.mdx`
    3. 여러 파일이면 목록을 사용자에게 제시하고 **되묻는다** ("이 중 어느 것을
       볼까요?")
 3. `docs/guides/<topic>.md` / `.mdx` — "왜/언제" 패턴 (예:
