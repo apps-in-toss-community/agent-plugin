@@ -159,15 +159,28 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react(), aitDevtools.vite()],
+  // SDK와 bridge/analytics 엔트리를 Vite dep pre-bundle에서 제외한다.
+  // unplugin의 resolveId가 enforce:'pre'라 이게 없어도 source import는
+  // mock으로 정상 rewrite되지만, 빼두면 Vite가 실 @apps-in-toss/web-*를
+  // 쓸데없이 pre-bundle하지 않고(orphan dead weight 방지) 향후 번들러
+  // ordering 변화에도 안전하다. greenfield 템플릿과 동일하게 맞춘다.
+  optimizeDeps: {
+    exclude: [
+      '@apps-in-toss/web-framework',
+      '@apps-in-toss/web-bridge',
+      '@apps-in-toss/web-analytics',
+    ],
+  },
 });
 ```
 
-**패턴: `plugins`가 없는 경우** — `defineConfig({})` 객체에 `plugins` 키를 추가:
+**패턴: `plugins`가 없는 경우** — `defineConfig({})` 객체에 `plugins` 키를 추가. `optimizeDeps.exclude`도 위 패턴과 동일하게 함께 추가해야 한다:
 
 ```ts
 export default defineConfig({
   plugins: [aitDevtools.vite()],
   // 기존 키들 유지
+  // optimizeDeps.exclude도 위 패턴 참고하여 반드시 추가
 });
 ```
 
@@ -282,8 +295,9 @@ module.exports = {
 
 - ❌ config 파일을 완전히 재작성. **최소 변경 only** (`Edit` tool 사용).
 - ❌ `devDependencies`에서 `dependencies`로 옮기기. devtools는 반드시 `devDependencies`.
-- ❌ `production` 모드 강제 활성화(`forceEnable: true`) — 빌드 산출물에 mock이
-  포함되어 앱 스토어 심사에서 문제가 될 수 있다.
+- ❌ production 빌드에 devtools를 강제로 포함시키기 — devtools는 `NODE_ENV=development`
+  에서만 활성화되도록 두어야 한다(production 산출물에 mock이 섞이면 앱 스토어 심사에서
+  문제가 될 수 있다). 옵션으로 dev-mode를 강제하지 말 것.
 - ❌ `@ait-co/devtools` 외의 다른 패키지 설치·변경.
 - ❌ 생성되는 주석이나 메시지에 "공식(official)", "토스가 제공하는", "powered by Toss"
   등 제휴·후원·인증 암시 표현. 커뮤니티 오픈소스 도구다.
