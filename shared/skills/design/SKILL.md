@@ -283,4 +283,4 @@ UX 매핑:
 - UX 패턴 근거 docs: `/ait docs navigation-flow`
   (https://docs.aitc.dev/guides/navigation-flow — 진입·종료·화면 컨텍스트, swipe-back/PageHeader).
 - 보조 UX docs: `/ait docs accessory-button-ux`
-  (https://docs.aitc.dev/guides/accessory-button-ux — 하단 고정 버튼/safe-area 패턴).
+  (https://docs.aitc.dev/guides/accessory-button-ux — 상단 네비게이션 바 악세서리 버튼 — `partner.addAccessoryButton` 라이프사이클).
