@@ -171,6 +171,7 @@ aitcc keys create --name <label> --json
 | `no-workspace-selected` | `aitcc workspace use <workspaceId>` 후 재시도 |
 | `invalid-name` | 프로파일 이름 규칙(ASCII 16자 이내) 확인 후 재시도 |
 | auth/network 실패 | `aitcc login` 후 재시도 |
+| `4010` (한국 외 IP) | 재로그인이 아니라 한국 네트워크(KR 거주 IP)에서 실행하세요 — 세션 쿠키는 KR 전용입니다(클라우드 runner·VPN이 원인). |
 | errorCode `5010` (AI 위험 고지·이용약관 미동의) | `aitcc keys create`도 AI_RISK_USE 약관 미동의 시 5010으로 게이트된다. 계정 단위 약관 미동의 — `aitcc me terms agree --scope AI_RISK_USE` 로 동의 후 재시도. 동의는 법적 행위이므로 사용자의 명시적 확인을 먼저 받는다. 자세한 복구 순서는 `/ait deploy` skill의 "5010 — AI 위험 고지·이용약관(AI_RISK_USE) 복구" 섹션을 따른다. |
 
 ### 5. 발급 확인
