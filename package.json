@@ -12,6 +12,7 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "test": "vitest run --passWithNoTests",
+    "test:links": "VALIDATE_LINKS=1 node scripts/validate-plugin.mjs",
     "sync:plugin-version": "node scripts/sync-plugin-version.mjs",
     "release:version": "changeset version && pnpm sync:plugin-version",
     "eval:promptfoo": "bash eval/promptfoo/setup-fixture.sh && npx promptfoo@latest eval -c eval/promptfoo/promptfooconfig.yaml"

@@ -2,16 +2,21 @@
  * validate-plugin.mjs
  *
  * 구조 검증기 — shared/{skills,commands,templates} + eval/ 의 정합성을 확인.
- * 5개 그룹으로 나뉜다:
+ * 6개 그룹으로 나뉜다:
  *   A1 — frontmatter + 1:1 매핑 + 라우팅 스냅샷 (hard-fail)
  *   A2 — 본문 구조 + seam 검사 (hard-fail)
  *   A3 — 템플릿 + eval 동기화 (hard-fail)
  *   A4 — CLI 토큰 크로스체크 (optional warn, ../console-cli 없으면 skip)
  *   A5 — plugin.json ↔ package.json 버전 드리프트 (hard-fail)
+ *   A6 — 링크 liveness (opt-in warn, VALIDATE_LINKS=1 일 때만 — *.aitc.dev 200 확인)
  *
- * CLI: node scripts/validate-plugin.mjs
+ * A1–A5 는 runChecks() 가 동기로 돈다(기본 `pnpm test` 경로, 네트워크 비의존).
+ * A6 는 네트워크라 CLI 진입점에서만 비동기로 돌고, VALIDATE_LINKS=1 이 아니면 skip.
+ *
+ * CLI:           node scripts/validate-plugin.mjs        (A1–A5; A6 skip)
+ *                VALIDATE_LINKS=1 node scripts/validate-plugin.mjs   (+ A6 링크 sweep)
  * API: import { runChecks } from './scripts/validate-plugin.mjs'
- *      const { violations } = await runChecks(repoRoot)
+ *      const { violations } = runChecks(repoRoot)        (A1–A5, 동기)
  */
 
 import fs from 'node:fs';
@@ -935,6 +940,146 @@ function checkA5(root) {
 }
 
 // ---------------------------------------------------------------------------
+// A6 — 링크 liveness (opt-in, warn-only, 네트워크)
+// ---------------------------------------------------------------------------
+//
+// 기본은 SKIP — 네트워크 비의존·결정적 CI 경로를 보존한다(A4 graceful-skip 동형).
+// VALIDATE_LINKS=1 일 때만 실행해 skill 전반의 *.aitc.dev 링크가 실제로
+// 200을 반환하는지 검사한다. 절대 error 로 올리지 않는다 — 외부 호스트라
+// 비결정적이고, 어디까지나 수동 link-sweep 자동화(advisory)다.
+// (#183 docs /intro 404, #185 외부 링크 rot 가 A2 정적 검사를 빠져나간 갭을 닫는다.)
+
+// 추출했지만 검사에서 제외하는 링크 패턴 (확인된 false-positive — #181·#185 triage):
+//   - placeholder/template 토큰(<...>) 포함 링크
+//   - oidc-bridge.aitc.dev bare-root: tenant dispatcher 라 루트 404 가 정상 동작
+const A6_SKIP_LINK_RES = [
+  /[<>]/, // <tenantId>, <resolved-path> 등 placeholder
+  /^https:\/\/oidc-bridge\.aitc\.dev\/?$/, // bare-root = tenant dispatcher 정상 404
+];
+
+/**
+ * skills 전반에서 *.aitc.dev 링크를 파일:행과 함께 추출한다.
+ * @param {string} root
+ * @returns {{ url: string, file: string, line: number }[]}
+ */
+function collectAitcLinks(root) {
+  const skillsDir = path.join(root, 'shared', 'skills');
+  /** @type {{ url: string, file: string, line: number }[]} */
+  const out = [];
+  const linkRe = /https:\/\/[a-z0-9.-]*aitc\.dev[a-zA-Z0-9./_-]*/g;
+  for (const skillName of listDirs(skillsDir)) {
+    const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) continue;
+    const relFile = path.relative(root, skillFile);
+    const lines = readFile(skillFile).split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      for (const m of line.matchAll(linkRe)) {
+        const url = m[0].replace(/[.,)]+$/, ''); // 문장부호 trailing 제거
+        // URL 바로 뒤가 placeholder 토큰(<...>)이면 잘린 prefix 라 검사 제외.
+        // (linkRe 가 '<' 에서 멈추므로 https://.../t/<tenantId> 가 '.../t/' 로 캡처됨)
+        const after = line.slice(m.index + m[0].length);
+        if (after.startsWith('<')) continue;
+        if (A6_SKIP_LINK_RES.some((re) => re.test(url))) continue;
+        out.push({ url, file: relFile, line: i + 1 });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * 단일 URL liveness 확인. HEAD 우선, 405/501 등엔 GET fallback.
+ * @param {string} url
+ * @returns {Promise<{ ok: boolean, status: number | string }>}
+ */
+async function probeUrl(url) {
+  const tryFetch = async (method) => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    try {
+      const res = await fetch(url, {
+        method,
+        redirect: 'follow',
+        signal: ctrl.signal,
+      });
+      return res.status;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  try {
+    let status = await tryFetch('HEAD');
+    // 일부 호스트는 HEAD 미지원 → GET 재시도
+    if (status === 405 || status === 501 || status === 403) {
+      status = await tryFetch('GET');
+    }
+    return { ok: status >= 200 && status < 400, status };
+  } catch (err) {
+    return { ok: false, status: err instanceof Error ? err.name : 'fetch-error' };
+  }
+}
+
+/**
+ * @param {string} root
+ * @returns {Promise<Violation[]>}
+ */
+async function checkA6(root) {
+  if (process.env.VALIDATE_LINKS !== '1') {
+    return [
+      mkv(
+        '',
+        0,
+        'A6/skipped',
+        'VALIDATE_LINKS=1 이 아니라 링크 liveness 검사 건너뜀 (기본 동작)',
+        'warn',
+      ),
+    ];
+  }
+
+  const links = collectAitcLinks(root);
+  // 같은 URL 중복 제거하되 첫 등장 위치 보존
+  /** @type {Map<string, { file: string, line: number }>} */
+  const unique = new Map();
+  for (const l of links) {
+    if (!unique.has(l.url)) unique.set(l.url, { file: l.file, line: l.line });
+  }
+
+  const entries = [...unique.entries()];
+  const results = await Promise.all(
+    entries.map(async ([url, loc]) => ({ url, loc, ...(await probeUrl(url)) })),
+  );
+
+  /** @type {Violation[]} */
+  const violations = [];
+  for (const r of results) {
+    if (!r.ok) {
+      violations.push(
+        mkv(
+          r.loc.file,
+          r.loc.line,
+          'A6/dead-link',
+          `링크 비정상 응답 (${r.status}): ${r.url} (fix: 살아있는 경로로 교체하거나 placeholder 면 A6_SKIP_LINK_RES 에 추가)`,
+          'warn',
+        ),
+      );
+    }
+  }
+  if (violations.length === 0) {
+    violations.push(
+      mkv(
+        '',
+        0,
+        'A6/ok',
+        `링크 liveness 통과 (${unique.size}개 *.aitc.dev 링크 전부 2xx/3xx)`,
+        'warn',
+      ),
+    );
+  }
+  return violations;
+}
+
+// ---------------------------------------------------------------------------
 // 메인 실행 함수 (export)
 // ---------------------------------------------------------------------------
 
@@ -981,6 +1126,7 @@ function printViolations(violations) {
     A3: 'A3 — 템플릿 + eval 동기화',
     A4: 'A4 — CLI 토큰 크로스체크 (warn)',
     A5: 'A5 — plugin.json ↔ package.json 버전 드리프트',
+    A6: 'A6 — 링크 liveness (opt-in, warn)',
   };
 
   for (const [prefix, items] of groups) {
@@ -1009,6 +1155,12 @@ const isMain =
 
 if (isMain) {
   const { violations, hasErrors } = runChecks();
-  printViolations(violations);
+  // A6 (링크 liveness)는 opt-in async 검사 — CLI 진입점에서만 실행한다.
+  // 기본은 VALIDATE_LINKS!=1 이라 즉시 skip warn 을 반환하고, runChecks 의
+  // 동기 계약(vitest wrapper 가 의존)은 건드리지 않는다.
+  const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const a6 = await checkA6(root);
+  const all = [...violations, ...a6];
+  printViolations(all);
   if (hasErrors) process.exit(1);
 }
