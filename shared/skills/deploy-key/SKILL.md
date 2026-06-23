@@ -117,8 +117,9 @@ aitcc keys create --name <label> --save-profile <profile-name> --json
 ```
 
 - `<label>`: 콘솔 UI용 레이블. 기본값 = `<profile-name>`.
-- `--save-profile`: 발급 즉시 `~/.ait/credentials`에 `[<profile-name>]` 섹션을
-  쓴다. `aitcc`가 직접 파일을 작성하므로 에이전트가 raw 값을 직접 다룰 필요가 없다.
+- `--save-profile`: 발급 즉시 `~/.ait/credentials`의 JSON map에
+  `"<profile-name>": "<key>"` 항목을 추가한다(파일은 `{ "<profile>": "<key>" }`
+  형태의 JSON, mode 0600). `aitcc`가 직접 파일을 작성하므로 에이전트가 raw 값을 직접 다룰 필요가 없다.
   단, `--json` 응답의 `apiKey` 필드에는 평문이 포함된다 — 상태 확인 시 `ok`·
   `savedProfile`·`saveProfileWarning` 필드만 읽고, `apiKey` 값은 surface하지 않는다.
 - `--json`: 결과를 파싱해 성공 여부·profile 저장 상태를 확인한다.

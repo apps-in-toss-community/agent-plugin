@@ -44,7 +44,7 @@ argument-hint: ''
 
 | 항목 | 설명 | 기본값 |
 |---|---|---|
-| `appName` | 앱인토스 콘솔 등록명. 영문 소문자, 하이픈 허용. | `package.json`의 `name` 필드 |
+| `appName` | 앱인토스 콘솔 등록명. `^[a-z][a-z0-9-]*$` (소문자로 시작, kebab-case — register 단계가 이 패턴을 강제한다). | `package.json`의 `name` 필드 |
 | `displayName` | 토스 앱 내에서 표시될 앱 이름(한국어 가능). | (없음, 필수 입력) |
 | `primaryColor` | 브랜드 주색상. `#RRGGBB` 형식. | `#3182F6` |
 | `icon` | 브랜드 아이콘 이미지 URL (https://…). SDK 2.x에서 `brand.icon`은 필수 필드다. URL을 제공하지 않으면 커뮤니티 플레이스홀더 URL이 자동으로 삽입된다. | (없음 → 플레이스홀더 자동 삽입) |
@@ -282,6 +282,7 @@ setup-bundle 완료
 
 ## 참고
 
+- 짝 skill: `register` (앱인토스 콘솔 앱 등록 — setup-bundle 다음 단계, `aitcc.yaml` 생성).
 - 짝 skill: `deploy` (`bundle:ait` 빌드 후 콘솔에 업로드 — `ait deploy --profile <name>`).
 - 짝 skill: `deploy-key` (Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장).
 - 짝 skill: `new-miniapp` (새 프로젝트 생성 — `granite.config.ts` 없는 상태에서 시작).

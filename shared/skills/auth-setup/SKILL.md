@@ -356,11 +356,15 @@ auth-setup 완료
 
 다음 단계:
   pnpm dev            # devtools sandbox에서 appLogin() mock으로 흐름 확인
-  /ait deploy         # 앱인토스에 배포해 native end-to-end 검증
+  /ait setup-bundle   # .ait 번들 빌드 환경 추가 (granite.config.ts — deploy 전제)
+  /ait register       # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 — deploy 전제)
+  /ait deploy         # 번들 업로드 → native end-to-end 검증
   /ait status         # 배포 후 콘솔 상태 확인
 ```
 
-native 검증은 배포가 선행되어야 하므로, sandbox 확인이 끝나면 `/ait deploy`로 넘어간다.
+native 검증은 번들·등록이 선행되어야 하므로, sandbox 확인이 끝나면 `/ait setup-bundle`
+→ `/ait register` → `/ait deploy` 순으로 station 5를 진행한다(`/ait deploy`는
+`granite.config.ts`와 `aitcc.yaml`이 없으면 hard-stop한다).
 
 ## 하지 말아야 할 것
 

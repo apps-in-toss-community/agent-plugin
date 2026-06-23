@@ -294,13 +294,16 @@ setup-phone-preview 완료
   AIT_TUNNEL_BASE_URL env var로 명시 override 시 그쪽이 파일보다 우선).
   launcher QR에 &debug=1&relay=<wss> 가 실려 폰 PWA가 CDP relay에 attach됩니다.
 
-  이후 /ait debug를 실행하면 start_debug({mode:'relay-sandbox'}) 호출로
-  환경 2(AITC Sandbox App (PWA)) 경로로 DOM·console·safe-area를 관측합니다.
-  (데몬 재시작 불필요 — 기본 데몬에서 in-place 진입.)
+  이후 환경 2 CDP 관측(start_debug({mode:'relay-sandbox'}))을 하려면 MCP 데몬을
+  dual-connection(--target=mobile)으로 구성해야 합니다. plugin 기본 데몬은
+  --target=relay(single-connection)로 기동돼 relay-sandbox 동적 전환을 거부하므로,
+  기본 데몬에서 in-place 진입은 되지 않습니다. relay 배선(위 단계) 후 /mcp 설정에서
+  --target=mobile 데몬으로 조정한 뒤 /ait debug를 실행합니다 — 구체 절차는 debug
+  skill §5-A 참조.
 
 다음 단계:
   screen-only 미리보기 후: /ait setup-bundle  # 배포 준비
-  CDP 디버깅으로 진행:    /ait debug           # start_debug({mode:'relay-sandbox'}) → 환경 2 attach
+  CDP 디버깅으로 진행:    /ait debug           # 단, 먼저 --target=mobile 데몬 구성 (debug §5-A)
 
 참고:
   - tunnel URL은 실행마다 바뀝니다 (*.trycloudflare.com, 인증 없음).
