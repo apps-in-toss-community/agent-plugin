@@ -313,4 +313,4 @@ Tier-1 매핑:
 - 짝 skill: `inject-devtools` (devtools unplugin 추가 — 함께 쓰면 브라우저에서도 표준 API 경로로 동작 확인), `new-miniapp` (polyfill 포함 템플릿 `react-vite-polyfill` 추가 예정), `deploy` (설정 완료 후 콘솔 배포).
 - `@ait-co/polyfill` 패키지: <https://github.com/apps-in-toss-community/polyfill>
 - 통합 가이드: [`polyfill/INTEGRATION.md`](https://github.com/apps-in-toss-community/polyfill/blob/main/INTEGRATION.md)
-- 지원 API 전체 표: [`polyfill/README.md#supported-apis`](https://github.com/apps-in-toss-community/polyfill/blob/main/README.md#supported-apis)
+- 지원 API 전체 표: [`polyfill/README.md#지원-api`](https://github.com/apps-in-toss-community/polyfill/blob/main/README.md#%EC%A7%80%EC%9B%90-api)
