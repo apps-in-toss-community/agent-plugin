@@ -39,7 +39,7 @@ argument-hint: '[--entry <path>]'
 
 ## 의존
 
-- **`pnpm` 10+, Node 24+** 가 있어야 install이 통과한다.
+- **pnpm / npm / yarn / bun 중 하나, Node 24+** 가 있어야 install이 통과한다(설치 명령은 프로젝트 lockfile로 감지 — 2단계).
 - `@ait-co/polyfill`은 npm에 배포되어 있다. 인터넷 필요.
 - `@apps-in-toss/web-framework`는 optional peer dep — 없어도 polyfill이 설치되고
   동작하지만, 토스 WebView 안에서는 SDK가 있어야 shim이 활성화된다.
@@ -78,10 +78,17 @@ Step 3(진입점 와이어업)으로 건너뛴다.
 
 ### 2. 패키지 설치
 
-`@ait-co/polyfill`은 **runtime dependency** (dev가 아님):
+`@ait-co/polyfill`은 **runtime dependency** (dev가 아님). 프로젝트의 lockfile로
+패키지 매니저를 먼저 감지해(`inject-devtools`와 동일 우선순위: `pnpm-lock.yaml` →
+`package-lock.json` → `yarn.lock` → `bun.lockb`, 없으면 pnpm) 그에 맞는 명령을 쓴다 —
+다른 PM 프로젝트에 `pnpm add`를 박으면 lockfile이 깨진다:
 
 ```bash
-pnpm add @ait-co/polyfill
+# 감지된 PM에 맞춰 하나만 실행
+pnpm add @ait-co/polyfill      # pnpm-lock.yaml
+npm install @ait-co/polyfill   # package-lock.json
+yarn add @ait-co/polyfill      # yarn.lock
+bun add @ait-co/polyfill       # bun.lockb
 ```
 
 설치 중 SDK peer dep 경고(`unmet peer @apps-in-toss/web-framework`)가 나타날 수
