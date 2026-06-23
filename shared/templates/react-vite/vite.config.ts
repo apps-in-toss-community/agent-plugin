@@ -11,8 +11,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: [
       '@apps-in-toss/web-framework',
-      '@apps-in-toss/web-bridge',
-      '@apps-in-toss/web-analytics',
+      '@apps-in-toss/web-bridge', // 2.x back-compat
+      '@apps-in-toss/web-analytics', // 2.x back-compat
+      '@apps-in-toss/webview-bridge', // 3.0+ (unplugin also intercepts this)
     ],
   },
 });

@@ -49,8 +49,9 @@ docs/                              # repo root
 파일 확장자는 `.md` 또는 `.mdx` 혼용(특히 `api/`는 `.mdx`가 흔하다). 리졸버는
 둘 다 시도하며, **`.mdx` 먼저** (`api/` 관례).
 
-> docs repo는 지속적으로 확장 중이다 (`getting-started/`, `reference/`는 아직 없음
-> — 향후 추가될 수 있다). 토픽이 안 잡히면 graceful fallback으로 안내한다.
+> docs repo는 지속적으로 확장 중이다 (`reference/`는 존재 — glossary 등;
+> `getting-started/`는 아직 없음 — 향후 추가될 수 있다). 토픽이 안 잡히면
+> graceful fallback으로 안내한다.
 
 ## 토픽 → 경로 리졸빙
 
@@ -78,12 +79,14 @@ docs/                              # repo root
    `permissions-pattern`)
 4. `docs/recipes/<topic>.md` / `.mdx` — 실제 구현 패턴 레시피 (예:
    `haptic-feedback`, `copy-paste-ux`, `deeplink-routing`). 현재 20+ 파일 존재.
-5. (향후 확장) `docs/getting-started/`, `docs/reference/` —
-   현재 미존재. 디렉토리가 추가되면 같은 `<topic>.{md,mdx}` 패턴으로 시도.
-6. (드물다) `docs/api/<topic>.md` / `.mdx` — 현재 모든 `api/` 항목이
+5. `docs/reference/<topic>.md` / `.mdx` — glossary 등 레퍼런스 (예:
+   `/ait docs glossary` → `reference/glossary.md`). 현재 존재.
+6. (향후 확장) `docs/getting-started/` — 현재 미존재. 디렉토리가 추가되면 같은
+   `<topic>.{md,mdx}` 패턴으로 시도.
+7. (드물다) `docs/api/<topic>.md` / `.mdx` — 현재 모든 `api/` 항목이
    디렉토리 구조라 거의 안 맞지만, 단일 파일 컨벤션이 들어올 수 있어 후순위
    safety net.
-7. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
+8. 위 모두 실패 → "토픽 찾지 못함" 처리 (아래 "Graceful fallback" 참고)
 
 `.md`와 `.mdx`를 시도할 때는 **`.mdx` 먼저**. `api/`는 `.mdx`가 관례.
 
