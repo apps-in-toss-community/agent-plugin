@@ -374,7 +374,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 | `terms-not-accepted` (2, `message`) | 사용자 동의를 다시 받아 `--accept-terms`로 재실행. |
 | `ok:true · authenticated:false` (10) | 세션 없음(reason 필드 없음 — `ok:true`로 다른 실패와 구별됨). `aitcc login` 직접 실행 후 재시도. |
 | `network-error` (11, `message`) | 네트워크 오류. `message`를 보여주고 재시도. |
-| `api-error` (17, `status?`,`errorCode?`,`message`) | 서버 `errorCode`를 surface. **`4046` = REVIEW lock** → 운영팀 처리 대기. **새 앱 생성으로 우회하지 않는다**(anti-pattern). **`5010` = 계정 단위 AI_RISK_USE 약관 미동의** → `aitcc me terms agree --scope AI_RISK_USE` 로 동의 후 재시도. 동의는 법적 행위이므로 사용자의 명시적 확인 후 실행(`--accept-terms`의 동의 책임 경계와 동일). |
+| `api-error` (17, `status?`,`errorCode?`,`message`) | 서버 `errorCode`를 surface. **`4046` = REVIEW lock** → 운영팀 처리 대기. **새 앱 생성으로 우회하지 않는다**(anti-pattern). **`5010` = 계정 단위 AI_RISK_USE 약관 미동의** → `aitcc me terms agree --scope AI_RISK_USE --yes` 로 동의 후 재시도(`--yes`는 비대화형 환경에서 필수 — 없으면 hang). 동의는 법적 행위이므로 `--yes`를 붙이기 전 약관 내용을 사용자에게 보이고 명시적 확인을 받는다(`--accept-terms`의 동의 책임 경계와 동일). |
 
 `api-error`는 항상 `errorCode`를 그대로 보여준다. `4046`이 오면 앱이
 리뷰 잠금 상태이므로 업데이트가 막힌 것 — 운영팀 처리를 기다리고, 우회용으로

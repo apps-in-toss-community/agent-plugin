@@ -194,7 +194,7 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 
 | 에러 패턴 | 힌트 |
 |---|---|
-| `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `aitcc keys create`로 재발급. |
+| `unauthorized` / `401` | Deploy Key가 잘못되었거나 만료됨. `/ait deploy-key`로 재발급(`aitcc keys create`는 `--name` 필수 + 프로파일 저장까지 그 skill이 처리). |
 | `4010` / 한국 외 IP에서 `401` | 세션 쿠키는 한국 IP 전용입니다(country-bound). 재로그인이 아니라 **한국 네트워크(KR 거주 IP)에서** 콘솔 명령을 실행하세요 — 클라우드 CI runner(US/EU)·VPN이 원인입니다. 쿠키는 무효화되지 않으니 한국 IP로 돌아오면 기존 세션 그대로 동작합니다. |
 | `4037` / `4039` / `4040` / `4099` / `5001` (약관 미체결) | 아래 약관 미체결 복구 시퀀스를 따른다(워크스페이스 단위). |
 | `4046` (REVIEW lock) | 앱이 리뷰 중입니다. 운영팀 처리를 기다린 후 재시도. 새 앱 생성으로 우회 금지. |
@@ -320,6 +320,7 @@ exit 2 실패한다. 따라서 약관을 채팅으로 먼저 제시하고 사용
 
 ## 참고
 
+- 짝 skill: `register` (앱인토스 콘솔 앱 등록 — 이 skill의 전제 조건, `aitcc.yaml` 없으면 선행).
 - 짝 skill: `deploy-key` (Deploy Key 발급 + 프로파일 저장 — 이 skill의 전제 조건).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — 이 skill의 전제 조건).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인 — 배포 전 점검).

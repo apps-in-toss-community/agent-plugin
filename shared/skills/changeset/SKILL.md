@@ -176,7 +176,7 @@ changeset 생성 완료 (stage됨, 커밋은 안 함)
 - ❌ git tag 수동 생성 — Action이 함
 - ❌ 사용자 지시 없이 minor/major 선택
 
-## 참고 선례
+## 참고
 
 이 skill의 정책은 아래 커뮤니티 SKILL.md 선례들을 참고:
 
