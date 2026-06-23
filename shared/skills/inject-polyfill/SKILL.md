@@ -288,7 +288,7 @@ Tier-1 매핑:
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- 에이전트가 Tier-1 Grep+Edit 자동 변환 수행; Tier-1 외 API는 수동 유지.
+- ❌ Tier-1 외 API 자동 변환 — 이 skill의 Grep+Edit 자동 변환은 Tier-1 범위에 한정한다. 그 외 API는 수동 유지.
 - ❌ `@ait-co/devtools` 설치 / `vite.config.ts` 수정 — `/ait inject-devtools` skill.
 - ❌ `@apps-in-toss/web-framework` 제거 — polyfill은 peer dep으로 optional하게
   공존한다. 제거 여부는 소비자가 결정.
@@ -310,7 +310,7 @@ Tier-1 매핑:
 
 ## 참고
 
-- 짝 skill: `inject-devtools` (devtools unplugin 추가 — 함께 쓰면 브라우저에서도 표준 API 경로로 동작 확인), `new-miniapp` (polyfill 포함 템플릿 `react-vite-polyfill` 추가 예정), `deploy` (설정 완료 후 콘솔 배포).
+- 짝 skill: `inject-devtools` (devtools unplugin 추가 — 함께 쓰면 브라우저에서도 표준 API 경로로 동작 확인), `setup-phone-preview` (실기기 WebKit 미리보기 병행 시), `new-miniapp` (polyfill 포함 템플릿 `react-vite-polyfill` 추가 예정), `deploy` (설정 완료 후 콘솔 배포).
 - `@ait-co/polyfill` 패키지: <https://github.com/apps-in-toss-community/polyfill>
 - 통합 가이드: [`polyfill/INTEGRATION.md`](https://github.com/apps-in-toss-community/polyfill/blob/main/INTEGRATION.md)
 - 지원 API 전체 표: [`polyfill/README.md#지원-api`](https://github.com/apps-in-toss-community/polyfill/blob/main/README.md#%EC%A7%80%EC%9B%90-api)

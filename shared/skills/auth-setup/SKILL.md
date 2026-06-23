@@ -101,7 +101,9 @@ auth-setup 사전 조건 (없으면 먼저 준비):
        tenant-scoped dispatcher이므로 token URL이 `/t/<tenantId>/oidc/token` 형태다.
        두 값을 모두 기록해둔다.
      - 자체 호스팅 bridge라면 `cli/commands/app.ts`의 `app create` 명령으로
-       직접 발급한다 (`--cert <path> --key <path>` mTLS cert 필요).
+       직접 발급한다 — 필수 플래그 5개
+       (`--workspace-id <id> --app-id-toss <id> --title <title> --cert <path> --key <path>`,
+       `--cert`·`--key`는 mTLS cert PEM 경로).
        self-host는 루트 마운트이므로 tenantId 없음 — token URL은 `/oidc/token`.
      - public client는 Origin allow-list, confidential client는 client_secret로
        caller를 인증한다(§의존 참조).

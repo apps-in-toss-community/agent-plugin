@@ -281,14 +281,15 @@ pnpm --dir <project_abs_path> dev
 → 감지되면: "dev 서버가 http://localhost:<port> 에서 실행 중입니다."
 ```
 
-`--no-install`로 진행한 경우 `pnpm install`이 없었으므로 dev 서버 기동 전에
-먼저 install을 수행한다:
+`--no-install`로 진행한 경우 의존성이 없으므로 dev 서버를 자동 기동하지
+**않는다** — `--no-install`은 사용자가 workspace 통합·lockfile 수동 관리를
+의도한 신호이므로 에이전트가 임의로 install을 끼워넣지 않는다. 대신 안내
+블록에 직접 실행 단계만 인쇄한다:
 
-```bash
-pnpm --dir <project_abs_path> install
 ```
-
-install이 끝난 후 위와 같은 방식으로 dev를 기동한다.
+의존성 설치 후 dev 서버를 직접 기동하세요:
+  cd ./<package_name> && pnpm install && pnpm dev
+```
 
 > (장기적으로 `/ait dev` 명령 신설이 station 1→2 hand-off를 더 명시적으로
 > 담당할 수 있으나, 이번 PR 범위에는 포함하지 않는다 — follow-up 이슈로.)
@@ -332,7 +333,7 @@ install이 끝난 후 위와 같은 방식으로 dev를 기동한다.
 ## 참고
 
 - 짝 skill: `inject-devtools` (기존 프로젝트에 devtools 추가),
-  `inject-polyfill` (polyfill 모드 마이그레이션), `deploy`.
+  `inject-polyfill` (polyfill 모드 마이그레이션), `design` (등록 이미지 자산 생성), `deploy`.
 - devtools 사용법 / 지원 SDK 버전: https://github.com/apps-in-toss-community/devtools
 - SDK 레퍼런스 앱: https://sdk-example.aitc.dev/ (이 템플릿의 dog-fooded
   consumer)

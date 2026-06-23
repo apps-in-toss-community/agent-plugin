@@ -211,4 +211,4 @@ deep-link한다. 관련 카드가 있으면 링크로 제안한다:
 - docs repo (Docusaurus 3): https://github.com/apps-in-toss-community/docs
 - sdk-example (문서와 양방향 deep-link 관계): https://github.com/apps-in-toss-community/sdk-example
 - 문서 IA와 API 페이지 템플릿은 `docs/CLAUDE.md`의 "정보 아키텍처 (IA)" 섹션
-- 짝 repo 관계는 umbrella `../CLAUDE.md`의 "의존성 지도" 참고
+- 짝 repo 관계는 umbrella `../CLAUDE.md` §1.5 "station을 떠받치는 짝(pair) 관계" 참고

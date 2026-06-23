@@ -70,9 +70,9 @@ argument-hint: '[requirements]'
 | `storage` | 키-값 로컬 저장 | — | — | `api/storage` |
 | `location` | 현재 위치 | geolocation | — | `guides/location-permission-fallback` |
 | `camera` | 카메라 촬영·스캔 | camera (스캔 시 microphone 가능) | — | `guides/camera-album-ux` |
-| `contacts` | 연락처 읽기/쓰기 | contacts | — | `api/contacts` |
+| `contacts` | 연락처 읽기/쓰기 | contacts | — | `api/contacts/fetchContacts` |
 | `clipboard` | 클립보드 읽기/쓰기 | clipboard | — | `api/clipboard` |
-| `haptic` | 진동 피드백 | — | — | `api/haptic` |
+| `haptic` | 진동 피드백 | — | — | `api/haptic/generateHapticFeedback` |
 | `iap` | 인앱 디지털 재화 결제 | — | `IAP` | `guides/iap-payment-flow` |
 | `payment` | 토스페이 체크아웃(실물·외부 결제) | — | (결제 유형에 따라 콘솔 확인) | `guides/tosspay-checkout-flow` |
 | `ads` | 인앱 광고 게재 | — | `IAA` | `guides/ads-integration` |
@@ -173,7 +173,7 @@ SDK 도메인 (필요)
 
 다음 단계:
   /ait new <app-name>     # 이 계획대로 빈 프로젝트 생성 (scaffold)
-                          # 이후: pnpm dev → /ait setup-bundle → /ait design (등록 이미지 자산) → /ait register → /ait deploy
+                          # 이후: pnpm dev → /ait setup-bundle → /ait design (등록 이미지 자산) → /ait register → /ait deploy-key → /ait deploy
 ```
 
 "확인이 필요한 항목"이 없으면 그 섹션은 생략한다. seam의 핵심은 **다음 station이

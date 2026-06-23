@@ -343,7 +343,7 @@ setup-phone-preview 완료
 
 ## 참고
 
-- 짝 skill: `inject-devtools` (`@ait-co/devtools` 신규 설치 + vite.config 기본 설정 — `setup-phone-preview`보다 먼저 실행), `inject-polyfill` (polyfill 병행 사용 시), `deploy` (tunnel 검증 후 앱인토스 배포).
+- 짝 skill: `inject-devtools` (`@ait-co/devtools` 신규 설치 + vite.config 기본 설정 — `setup-phone-preview`보다 먼저 실행), `inject-polyfill` (polyfill 병행 사용 시), `debug` (이 skill의 tunnel 위에서 도는 relay-sandbox on-device 디버깅), `deploy` (tunnel 검증 후 앱인토스 배포).
 - devtools tunnel 구현 (PR #131): https://github.com/apps-in-toss-community/devtools/pull/131
 - sdk-example wiring 사례 (PR #59): https://github.com/apps-in-toss-community/sdk-example/pull/59
 - devtools README "Run on a real phone" 섹션: https://github.com/apps-in-toss-community/devtools
