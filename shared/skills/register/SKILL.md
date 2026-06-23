@@ -342,7 +342,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 ### 7. 결과 해석
 
-**성공** — `{ok:true, workspaceId, appId, reviewState, consoleUrl}` (exit 0):
+**성공** — `{ok:true, workspaceId, appId: number|null, reviewState: string|null, consoleUrl: string|null}` (exit 0). 서버가 `miniAppId`를 생략하면 `appId`·`reviewState`·`consoleUrl` 셋 다 `null`일 수 있다:
 
 ```
 등록 완료

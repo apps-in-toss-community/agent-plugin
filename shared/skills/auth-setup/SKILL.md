@@ -48,7 +48,7 @@ mini-app이 bridge를 직접 호출하도록 안내하지 말 것. bridge는 등
 - **consumer backend** — mini-app이 authorizationCode를 넘길 서버 사이드 엔드포인트. Supabase Edge Function, Next.js API route, Cloudflare Worker 등 어느 것이든 가능.
 - `oidc-bridge` 인스턴스 — 커뮤니티 공용(`https://oidc-bridge.aitc.dev`) 또는 자체 호스팅.
   - bridge의 `/verify` 엔드포인트는 **제거됨**(HTTP 404). 반드시 `/oidc/token`을 사용할 것.
-  - `/firebase-token`은 self-host 전용 — Firebase 서비스 계정을 공용 인스턴스에 저장하지 않음(501 반환).
+  - `/firebase-token`은 아직 미구현(M2 예정) — 어느 인스턴스에서 호출해도 라우트가 없어 404. Firebase는 위 OIDC id_token 경로(`/oidc/token` → `signInWithCredential`)로 로그인한다. (Custom Token이 필요한 환경은 Firebase 서비스 계정을 custody하는 self-host bridge가 전제이며, 공용 인스턴스는 end-user 서비스 계정을 보관하지 않는다.)
 - (Supabase 경로) Supabase 프로젝트 + `@supabase/supabase-js`.
 - (Firebase 경로, `--firebase`) Firebase 프로젝트 + `firebase` JS SDK.
 
@@ -309,17 +309,21 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 **Firebase (`--firebase` 경로)**:
 
 ```ts
-import { signInWithPopup, OAuthProvider, getAuth } from 'firebase/auth';
+import { OAuthProvider, getAuth, signInWithCredential } from 'firebase/auth';
 
 // Firebase 프로젝트에서 OIDC provider를 등록해야 한다.
 // issuer — 공용 인스턴스: https://oidc-bridge.aitc.dev/t/<tenantId>
 //         self-host:     <bridge-url>  (루트 마운트, tenantId 없음)
 const provider = new OAuthProvider('oidc.<your-provider-id>');
-// id_token을 credential로 변환
+// id_token을 credential로 변환해 그대로 로그인한다.
 const credential = provider.credential({ idToken: id_token });
-await signInWithPopup(getAuth(), credential);
-// 또는 signInWithCredential(getAuth(), credential)
+const userCredential = await signInWithCredential(getAuth(), credential);
 ```
+
+> `signInWithPopup`이 아니라 `signInWithCredential`을 쓴다. `signInWithPopup(auth,
+> provider)`는 두 번째 인자로 `AuthProvider`를 받지(credential이 아님), 여기처럼
+> 이미 발급된 id_token credential로 로그인할 땐 타입이 맞지 않아 런타임 에러가 난다.
+> sdk-example 정본(`src/snippets/auth/oidcFirebaseToken.ts`)도 `signInWithCredential`만 쓴다.
 
 ### 6. 검증 안내
 

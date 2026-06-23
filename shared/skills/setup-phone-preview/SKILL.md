@@ -214,8 +214,10 @@ scripts.dev:phone:cdp이 이미 있습니다. 이 단계를 건너뜁니다.
 ```
 
 `dev:phone`은 화면 미리보기만 필요할 때, `dev:phone:cdp`는 on-device CDP 디버깅이
-필요할 때 쓴다 — 두 스크립트는 tunnel 설정 형태(`{ cdp: !!process.env.AIT_TUNNEL_CDP }`)와
-연동해 자동으로 분기된다.
+필요할 때 쓴다 — 두 스크립트가 설정하는 `AIT_TUNNEL` / `AIT_TUNNEL_CDP` env var를
+unplugin이 직접 읽어 분기한다. (devtools PR #425부터 unplugin이 `tunnel` 옵션이
+없을 때 이 env var를 네이티브로 읽으므로, 아래 vite.config의 `tunnel` 패치는
+**선택**이다 — 명시적 선언으로 남겨두지만 스크립트 동작의 전제 조건은 아니다.)
 
 수정된 JSON을 파일에 다시 쓸 때는 `JSON.stringify(pkg, null, 2) + '\n'`으로
 2-space indent + newline 유지. 주석(JSON5) 불필요 — 기존 파일이 표준 JSON이면
@@ -286,9 +288,11 @@ setup-phone-preview 완료
 
   처음 실행하면 프로젝트-로컬 .ait_relay에 TOTP 시크릿이 자동 발급됩니다
   (값은 출력되지 않습니다 — 파일 존재 + 0600 권한으로만 확인).
-  Vite가 두 개의 cloudflared 터널을 열고 AIT_RELAY_BASE_URL / AIT_TUNNEL_BASE_URL
-  을 환경에 주입합니다. launcher QR에 &debug=1&relay=<wss> 가 실려
-  폰 PWA가 CDP relay에 attach됩니다.
+  Vite(unplugin)가 두 개의 cloudflared 터널을 열고 tunnel·relay URL을 프로젝트
+  루트의 .ait_urls 파일(0600)에 기록합니다 — process.env에 주입하는 게 아닙니다.
+  MCP 데몬은 이 파일을 자동으로 읽어 relay URL을 발견합니다(AIT_RELAY_BASE_URL /
+  AIT_TUNNEL_BASE_URL env var로 명시 override 시 그쪽이 파일보다 우선).
+  launcher QR에 &debug=1&relay=<wss> 가 실려 폰 PWA가 CDP relay에 attach됩니다.
 
   이후 /ait debug를 실행하면 start_debug({mode:'relay-sandbox'}) 호출로
   환경 2(AITC Sandbox App (PWA)) 경로로 DOM·console·safe-area를 관측합니다.

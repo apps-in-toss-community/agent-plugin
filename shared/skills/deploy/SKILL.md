@@ -274,18 +274,17 @@ AI 위험 고지·이용약관(AI_RISK_USE)에 동의합니다.
 진행하려면 확인해주세요.
 ```
 
-사용자가 확인한 뒤에만 실행한다:
-
-```bash
-aitcc me terms agree --scope AI_RISK_USE
-```
-
-비대화형/CI 환경에서는 `--yes`를 추가한다 — 단, 위와 같이 사용자의 명시적 확인을
-받은 경우에만:
+사용자가 확인한 뒤에만, `--yes`와 함께 실행한다:
 
 ```bash
 aitcc me terms agree --scope AI_RISK_USE --yes
 ```
+
+`--yes`가 필요한 이유: 이 명령은 stdin·stderr가 **둘 다 TTY**일 때만 대화형 y/N
+프롬프트로 분기한다(`me.ts`의 `interactive` 게이트). 에이전트가 Bash로 호출하면
+항상 non-TTY이므로 `--yes` 없이는 `{ok:false, reason:'confirmation-required'}`로
+exit 2 실패한다. 따라서 약관을 채팅으로 먼저 제시하고 사용자의 명시적 동의를 받은
+뒤에만 `--yes`를 붙여 실행한다 — 동의 없이 자동으로 붙이지 않는다.
 
 동의 완료 후 배포를 재시도한다.
 
