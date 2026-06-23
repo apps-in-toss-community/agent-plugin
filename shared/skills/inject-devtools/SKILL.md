@@ -158,7 +158,7 @@ import aitDevtools from '@ait-co/devtools/unplugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react(), aitDevtools.vite()],
+  plugins: [react(), aitDevtools.vite({ panel: true })],
   // SDK와 bridge/analytics 엔트리를 Vite dep pre-bundle에서 제외한다.
   // unplugin의 resolveId가 enforce:'pre'라 이게 없어도 source import는
   // mock으로 정상 rewrite되지만, 빼두면 Vite가 실 @apps-in-toss/web-*를
@@ -179,7 +179,7 @@ export default defineConfig({
 
 ```ts
 export default defineConfig({
-  plugins: [aitDevtools.vite()],
+  plugins: [aitDevtools.vite({ panel: true })],
   // 기존 키들 유지
   // optimizeDeps.exclude도 위 패턴 참고하여 반드시 추가
 });
@@ -251,7 +251,7 @@ module.exports = {
 
 **config 파일 수정 원칙**:
 - `Edit` tool로 최소 변경. 기존 코드 포맷·주석·설정은 유지.
-- `aitDevtools.vite()`는 인수 없이 쓴다 (실기기 미리보기 tunnel이 필요하면
+- `aitDevtools.vite({ panel: true })`로 쓴다 — `panel: true`가 정본이며 템플릿·sdk-example과 동일하게 맞춘다 (실기기 미리보기 tunnel이 필요하면
   `/ait setup-phone-preview`가 별도로 `tunnel` 옵션을 설정).
 - `production` 빌드에서는 unplugin이 자동으로 비활성화된다(`NODE_ENV=production`
   감지). 빌드 결과물에 mock이 포함되지 않으므로 추가 조건 분기는 불필요.
@@ -276,7 +276,8 @@ module.exports = {
 패널에서 mock 상태(권한, 위치, IAP 등)를 실시간으로 제어할 수 있습니다.
 
 참고:
-  - 패널이 보이지 않으면 진입점(main.ts / index.ts)에 아래를 추가하세요:
+  - AIT DevTools 패널은 진입점(main/index/entry/app.{ts,tsx,js,jsx})에 자동으로 마운트됩니다 — 별도 설정 불필요.
+  - 진입점 파일명이 위 패턴과 다르면 패널이 자동 주입되지 않을 수 있습니다. 그럴 때만 진입점에 수동으로 추가하세요:
       import '@ait-co/devtools/panel';
   - devtools는 NODE_ENV=development 에서만 활성화됩니다 (production 빌드엔 미포함).
   - 문서: https://github.com/apps-in-toss-community/devtools
