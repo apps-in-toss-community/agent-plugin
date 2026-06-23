@@ -20,7 +20,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
   바로 `pnpm dev`가 도는 빈 프로젝트가 만들어져 있다.
 - `@ait-co/devtools`가 dev 시점에 SDK를 mock해주므로, 토스 앱 없이
   브라우저에서 개발할 수 있다.
-- 다음 단계(`pnpm dev` → 코드 수정 → `/ait setup-bundle` → `/ait register` → `/ait deploy`)가 명확히 안내된다.
+- 다음 단계(`pnpm dev` → 코드 수정 → `/ait setup-bundle` → `/ait design` → `/ait register` → `/ait deploy-key` → `/ait deploy`)가 명확히 안내된다.
 
 이 skill은 **단순 파일 복사 + 토큰 치환 + 1회 install**만 담당한다. 콘솔
 등록(`aitcc app register`), 로그인, 배포는 다른 skill 또는 console-cli의
