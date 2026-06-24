@@ -122,6 +122,21 @@ Phase 2-4 어댑터는 harness roadmap M3 달성 후 착수.
 
 `install/*.sh`는 `.cursor/rules/`·`.windsurf/workflows/` 같이 manifest 기반 설치가 없는 에이전트를 위한 파일 복사 스크립트다. Phase 4(Cursor/Windsurf) 착수 시 추가.
 
+## eval (성능 측정) — 두 슈트로 분업
+
+`eval/`은 플러그인이 **에이전트 안에서 실제로 동작하는가**를 두 각도로 검증한다. 둘은 형제이고 서로 안 건드린다.
+
+- **슈트 A — `eval/promptfoo/`** (라우팅 정합성): 맞는 발화에서 맞는 skill이 뜨고(positive) off-topic에선 안 뜨는가(negative control)를 **single-turn**으로 결정적 판정(`skill-used` metadata, LLM-judge 아님). `pnpm eval:promptfoo`.
+- **슈트 B — `eval/e2e/`** (완주·비용·분산): "작은 아이디어 → 작동하는 미니앱"(`/ait new`→번들 빌드)을 **멀티턴**으로 자율 완주시켜 **완주율·성공당 토큰·run-to-run 분산**을 모델·공급자별로 측정. **공급자 축 포함** — Anthropic tier(opus/sonnet/haiku)와 Qwen 등 비-Anthropic(`--base-url`로 Anthropic-호환 게이트웨이 라우팅) 둘 다. Claude Agent SDK 직접 드라이버(신규 의존성 0 — promptfoo가 이미 끌어오는 동일 패키지). `pnpm eval:e2e --task <id> --model <id> --n <int> [--base-url <url> --auth-token-env <NAME>]`. 상세는 `eval/e2e/README.md`.
+
+  가변성 두 결을 분리: (1) 같은 모델 반복 흔들림(run-to-run, 토큰 CV — 한 공급자 안에서) vs (2) 모델·공급자 간 차이(셀 비교). (1)을 깨끗이 재려고 한 run 안에서 공급자를 안 섞는다. 게이트웨이 경로는 미문서·실험적 — 슬래시 디스패치·tool-use·캐시 토큰 계약이 모델 구현에 의존(캐시 토큰 ≈0 → 캐시 기반 USD 무의미, 토큰 KPI는 유효). 게이트웨이 토큰은 `--auth-token-env`로 *이름*만 받아 값은 출력 안 함.
+
+슈트 B 불변(반드시 지킨다):
+
+- **build-only가 기본 — 콘솔 무접촉.** 드라이버는 콘솔 API를 안 부른다(dog-food `31146` 구조적 무접촉). `register`/`deploy`/`auth-setup` 디스패치 **금지** — 특히 `register`는 매 run 새 `miniAppId`를 서버 발급·자동 기록(= "lock 풀려고 새 앱 만들기" 반-패턴). deploy 격리 경로는 P2 opt-in.
+- **1차 신호는 토큰**(USD 아님). `total_cost_usd`는 클라이언트 추정치라 참고로만 기록하고, `runs.jsonl`의 토큰을 `pricing.json`으로 리포트 시점에 재계산한다. 가격이 바뀌면 `pricing.json`만 고쳐 과거를 다시 돈다.
+- **메인테이너 수동·오프라인** harness — runtime telemetry 아님, CI gate 아님(조직 telemetry 전면 제거 원칙). 시크릿 값은 어떤 출력에도 싣지 않는다.
+
 ## Status
 
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/{plugin.json,marketplace.json}` 존재 — `marketplace.json`이 `/plugin marketplace add apps-in-toss-community/agent-plugin` 설치 경로(harness station 0)를 지탱한다. `plugin.json`의 `mcpServers."ait-devtools"`가 `devtools-mcp`를 상시 기동해 station 2·3을 단일 MCP surface로 묶는다.
