@@ -4,7 +4,7 @@
 // 리포트 시점에 재계산한다 — 가격이 바뀌면 pricing.json만 고쳐 과거를 다시 돈다.
 
 import { coefficientOfVariation, median, quantile, wilsonInterval } from './stats.ts';
-import type { ModelUsageEntry, Pricing, RunRecord } from './types.ts';
+import type { ModelUsageEntry, Pricing, Provider, RunRecord } from './types.ts';
 
 /** 한 run의 총 토큰 (in+out+cache, 모든 모델 합산). */
 export function totalTokens(usage: Record<string, ModelUsageEntry>): number {
@@ -42,6 +42,8 @@ export interface CellSummary {
   model: string;
   n: number;
   successes: number;
+  // 공급자 축 — 셀 내 run들의 provider (혼재 시 'mixed').
+  provider: Provider | 'mixed' | 'unknown';
   // KPI 1: 완주율 + Wilson CI
   completion: { rate: number; low: number; high: number };
   // KPI 2: 성공당 토큰 (중앙값 + IQR)
@@ -50,6 +52,8 @@ export interface CellSummary {
   tokenCv: number;
   // 파생 USD (pricing.json 재계산)
   usd: { medianPerSuccess: number | null; totalAll: number };
+  // pricing.json에 단가가 없는 모델들 (USD가 0으로 깔려 과소계상 — 경고용).
+  pricingMissing: string[];
   // 진단
   stations: Record<string, number>;
   failClasses: Record<string, number>;
@@ -83,20 +87,31 @@ export function summarizeCell(
 
   const stations: Record<string, number> = {};
   const failClasses: Record<string, number> = {};
+  const providers = new Set<Provider>();
+  const pricingMissing = new Set<string>();
   for (const r of cell) {
     stations[r.station] = (stations[r.station] ?? 0) + 1;
     if (r.failClass) failClasses[r.failClass] = (failClasses[r.failClass] ?? 0) + 1;
+    if (r.provider) providers.add(r.provider);
+    // pricing.json에 단가가 없는 모델 — USD 재계산에서 0으로 깔린다.
+    for (const m of Object.keys(r.modelUsage)) {
+      if (!rateFor(m, pricing)) pricingMissing.add(m);
+    }
   }
+  const provider: CellSummary['provider'] =
+    providers.size === 0 ? 'unknown' : providers.size === 1 ? [...providers][0] : 'mixed';
 
   return {
     taskId,
     model,
     n,
     successes,
+    provider,
     completion,
     tokensPerSuccess,
     tokenCv: coefficientOfVariation(allTokens),
     usd: { medianPerSuccess: successUsd.length ? median(successUsd) : null, totalAll: totalUsd },
+    pricingMissing: [...pricingMissing],
     stations,
     failClasses,
   };
@@ -115,7 +130,8 @@ function usd(x: number | null | undefined): string {
 /** 사람이 읽는 KPI 요약 (stdout). */
 export function formatSummary(s: CellSummary): string {
   const lines: string[] = [];
-  lines.push(`── ${s.taskId} × ${s.model}  (n=${s.n})`);
+  const provTag = s.provider === 'anthropic' ? '' : `  [${s.provider}]`;
+  lines.push(`── ${s.taskId} × ${s.model}${provTag}  (n=${s.n})`);
   lines.push(
     `   완주율        ${pct(s.completion.rate)}  ` +
       `[95% CI ${pct(s.completion.low)}–${pct(s.completion.high)}]  (${s.successes}/${s.n})`,
@@ -140,5 +156,16 @@ export function formatSummary(s: CellSummary): string {
     .map(([k, v]) => `${k}:${v}`)
     .join(' ');
   if (failStr) lines.push(`   실패 분류     ${failStr}`);
+  // 비용 KPI 신뢰도 경고.
+  if (s.pricingMissing.length) {
+    lines.push(
+      `   ⚠ 단가 미상    ${s.pricingMissing.join(', ')} — USD 과소계상(pricing.json 보강)`,
+    );
+  }
+  if (s.provider === 'gateway' || s.provider === 'mixed') {
+    lines.push(
+      `   ⚠ gateway     캐시 토큰 ≈0(first-party 밖) → 캐시 기반 USD 무의미. 토큰 KPI는 유효.`,
+    );
+  }
   return lines.join('\n');
 }

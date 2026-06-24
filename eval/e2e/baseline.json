@@ -11,12 +11,14 @@
     }
   },
   "kpi": {
-    "_shape": "<taskId>.<model> = { n, completionRate, tokensPerSuccessMedian, tokenCv, usdPerSuccess }",
+    "_shape": "<taskId>.<model> = { n, provider, completionRate, tokensPerSuccessMedian, tokenCv, usdPerSuccess }. qwen 등 게이트웨이 셀은 usdPerSuccess가 캐시 제외 부분값(캐시 토큰 ≈0).",
     "timer.claude-haiku-4-5": null,
     "timer.claude-sonnet-4-6": null,
     "timer.claude-opus-4-8": null,
+    "timer.qwen3-coder": null,
     "coupon-shop.claude-haiku-4-5": null,
     "coupon-shop.claude-sonnet-4-6": null,
-    "coupon-shop.claude-opus-4-8": null
+    "coupon-shop.claude-opus-4-8": null,
+    "coupon-shop.qwen3-coder": null
   }
 }

@@ -51,6 +51,18 @@ export interface DriverOptions {
   logInit?: boolean;
   /** 안전 상한. 초과 시 error_max_turns 로 종료. */
   maxTurns?: number;
+  /**
+   * Anthropic-호환 게이트웨이(LiteLLM 등) base URL. 주면 provider='gateway'로
+   * 비-Anthropic 모델(Qwen 등)에 라우팅한다. 없으면 first-party Anthropic.
+   * SDK는 options.model에 endpoint를 안 받으므로 ANTHROPIC_BASE_URL 환경변수로 꽂는다.
+   */
+  baseUrl?: string;
+  /**
+   * gateway 인증 토큰을 담은 환경변수 *이름* (값 아님 — 값은 로그/레코드에 절대
+   * 안 싣는다). 예: 'OPENROUTER_API_KEY'. driver가 그 값을 ANTHROPIC_AUTH_TOKEN으로
+   * 전달한다. 미지정이면 ANTHROPIC_API_KEY를 그대로 쓴다.
+   */
+  authTokenEnv?: string;
 }
 
 /** 격리 cwd에 .claude/{skills,commands} symlink를 깐다 (setup-fixture.sh 패턴). */
@@ -70,6 +82,24 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
   const maxTurns = opts.maxTurns ?? 60;
   const startedAt = Date.now();
   const workDir = mkdtempSync(join(tmpdir(), `ait-e2e-${task.id}-`));
+
+  // 공급자 축. baseUrl이 있으면 gateway(비-Anthropic), 없으면 first-party.
+  const provider: RunRecord['provider'] = opts.baseUrl ? 'gateway' : 'anthropic';
+  const baseUrl = opts.baseUrl ?? null;
+
+  // SDK env — process.env를 spread하고 게이트웨이 라우팅 변수를 덮어쓴다.
+  // SDK는 env를 process.env와 자동 머지하지 않으므로 직접 spread한다.
+  // 시크릿(토큰 값)은 env로만 전달하고 RunRecord/로그엔 절대 안 싣는다.
+  const childEnv: Record<string, string> = { ...(process.env as Record<string, string>) };
+  if (opts.baseUrl) {
+    childEnv.ANTHROPIC_BASE_URL = opts.baseUrl;
+    // 인증 토큰: 지정된 환경변수 *이름*에서 값을 읽어 ANTHROPIC_AUTH_TOKEN으로 전달.
+    // 값 자체는 여기서만 만지고 어디에도 출력하지 않는다.
+    if (opts.authTokenEnv) {
+      const tok = process.env[opts.authTokenEnv];
+      if (tok) childEnv.ANTHROPIC_AUTH_TOKEN = tok;
+    }
+  }
 
   // 누적 신호.
   let initSeen = false;
@@ -112,6 +142,8 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
         settingSources: ['project'],
         permissionMode: 'bypassPermissions',
         maxTurns,
+        // gateway 라우팅 변수가 들어간 환경. anthropic이면 process.env 그대로.
+        env: childEnv,
         // 콘솔 자동화 CLI(aitcc) 호출을 막는 2차 게이트. 번들러(ait build)는
         // Bash로 돌지만 aitcc 콘솔 명령은 build-only 경로에 불필요.
         disallowedTools: ['mcp__ait-devtools'],
@@ -165,6 +197,8 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
       ts: startedAt,
       taskId: task.id,
       model,
+      provider,
+      baseUrl,
       iteration,
       success,
       station: score.station,
@@ -183,6 +217,8 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
       ts: startedAt,
       taskId: task.id,
       model,
+      provider,
+      baseUrl,
       iteration,
       success: false,
       station: 'none',

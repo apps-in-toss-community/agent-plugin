@@ -43,11 +43,28 @@ export interface ModelUsageEntry {
   costUSD: number;
 }
 
+/**
+ * 모델 공급자 축 (plan §9 P3가 P1로 당겨짐 — 사용자 결정).
+ *   - 'anthropic': first-party API. 슬래시 디스패치·스킬 라우팅·캐시 토큰 계약이
+ *     검증된 기준선.
+ *   - 'gateway': ANTHROPIC_BASE_URL로 꽂는 Anthropic-호환 게이트웨이(LiteLLM 등)
+ *     뒤의 비-Anthropic 모델(Qwen 등). 주의(미문서·실험적):
+ *       ① 슬래시 디스패치+스킬 라우팅은 모델 학습 행동이라 돌지 미문서.
+ *       ② tool-use 능력이 약하면 명령 디스패치 후 툴 루프를 못 돈다.
+ *       ③ 캐시 토큰 필드(cacheRead/Creation)가 ≈0 → 캐시 기반 USD 무의미.
+ *       ④ 비-Anthropic 모델 공식 지원 서술 없음.
+ */
+export type Provider = 'anthropic' | 'gateway';
+
 /** runs.jsonl 의 한 줄. */
 export interface RunRecord {
   ts: number;
   taskId: string;
   model: string;
+  /** 공급자 축 — 'anthropic'(first-party) | 'gateway'(BASE_URL 뒤 비-Anthropic). */
+  provider: Provider;
+  /** gateway일 때 라우팅 base URL (시크릿 아님 — 호스트만). anthropic이면 null. */
+  baseUrl: string | null;
   iteration: number;
   success: boolean;
   station: Station;

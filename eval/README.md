@@ -6,7 +6,7 @@
 | 슈트 | 프레임워크 | 무엇을 보나 | 채점 방식 | 모델 |
 |---|---|---|---|---|
 | **A** (`promptfoo/`) | promptfoo | skill 트리거링 **정합성** — 맞는 발화에서 맞는 skill 이 뜨고(positive), off-topic 발화에서 안 뜨는가(negative control). single-turn 라우팅 판정 | **deterministic** — `skill-used` / `not-skill-used` metadata assertion (LLM-judge 아님) | `claude-sonnet-4-5` |
-| **B** (`e2e/`) | Claude Agent SDK 직접 드라이버 | **완주·비용·분산** — "작은 아이디어 → 작동하는 미니앱"(`/ait new`→번들 빌드)을 멀티턴으로 자율 완주시켜 완주율·성공당 토큰·run-to-run 분산을 모델 tier별로 측정. **build-only 기본(콘솔 무접촉)** | **deterministic** — 파일 존재 + dep + `.ait` 산출 여부(LLM-judge 아님) | tier 가변(opus/sonnet/haiku) |
+| **B** (`e2e/`) | Claude Agent SDK 직접 드라이버 | **완주·비용·분산** — "작은 아이디어 → 작동하는 미니앱"(`/ait new`→번들 빌드)을 멀티턴으로 자율 완주시켜 완주율·성공당 토큰·run-to-run 분산을 모델·공급자별로 측정. **build-only 기본(콘솔 무접촉)** | **deterministic** — 파일 존재 + dep + `.ait` 산출 여부(LLM-judge 아님) | Anthropic tier(opus/sonnet/haiku) + Qwen 등 비-Anthropic(게이트웨이) |
 
 > **이 슈트는 CI 에 묶여 있지 않다.** 메인테이너가 clean 세션에서 로컬로 수동 실행한다.
 > API 키·모델 호출 비용·약한 모델 run-to-run 변동 때문에 PR gate 로 두지 않는다. 회귀가

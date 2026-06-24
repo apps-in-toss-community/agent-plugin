@@ -32,6 +32,10 @@ interface Args {
   maxTurns: number;
   keep: boolean;
   logInit: boolean;
+  /** Anthropic-호환 게이트웨이 base URL (Qwen 등 비-Anthropic). 없으면 first-party. */
+  baseUrl: string;
+  /** gateway 인증 토큰을 담은 환경변수 *이름* (값 아님). 기본 ANTHROPIC_API_KEY. */
+  authTokenEnv: string;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -42,6 +46,8 @@ function parseArgs(argv: string[]): Args {
     maxTurns: 60,
     keep: false,
     logInit: false,
+    baseUrl: '',
+    authTokenEnv: '',
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -63,6 +69,12 @@ function parseArgs(argv: string[]): Args {
         break;
       case '--log-init':
         out.logInit = true;
+        break;
+      case '--base-url':
+        out.baseUrl = argv[++i] ?? '';
+        break;
+      case '--auth-token-env':
+        out.authTokenEnv = argv[++i] ?? '';
         break;
       default:
         process.stderr.write(`알 수 없는 인자: ${a}\n`);
@@ -92,9 +104,12 @@ async function main(): Promise<void> {
     process.stderr.write('필수: --task <id> (예: --task timer)\n');
     process.exit(2);
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // 인증 토큰: gateway면 --auth-token-env가 가리키는 환경변수, 아니면 ANTHROPIC_API_KEY.
+  // 토큰 *값*은 driver가 env로만 전달하고 어디에도 출력하지 않는다 — 여기선 존재만 본다.
+  const tokenEnvName = args.authTokenEnv || 'ANTHROPIC_API_KEY';
+  if (!process.env[tokenEnvName]) {
     process.stderr.write(
-      'ANTHROPIC_API_KEY 미설정 — op run --env-file=.env.eval -- pnpm eval:e2e ... 로 주입하라.\n',
+      `${tokenEnvName} 미설정 — op run --env-file=.env.eval -- pnpm eval:e2e ... 로 주입하라.\n`,
     );
     process.exit(2);
   }
@@ -106,9 +121,17 @@ async function main(): Promise<void> {
   mkdirSync(resultsDir, { recursive: true });
   const runsPath = join(resultsDir, 'runs.jsonl');
 
+  const provider = args.baseUrl ? `gateway(${args.baseUrl})` : 'anthropic';
   process.stderr.write(
-    `eval:e2e — task=${task.id} model=${args.model} n=${args.n} (build-only, 콘솔 무접촉)\n`,
+    `eval:e2e — task=${task.id} model=${args.model} provider=${provider} ` +
+      `n=${args.n} (build-only, 콘솔 무접촉)\n`,
   );
+  if (args.baseUrl) {
+    process.stderr.write(
+      '  [주의] gateway 경로 — 슬래시 디스패치·캐시 토큰 계약 미검증(실험적). ' +
+        '캐시 기반 USD는 무의미할 수 있다.\n',
+    );
+  }
 
   const runs: RunRecord[] = [];
   for (let i = 0; i < args.n; i++) {
@@ -120,6 +143,8 @@ async function main(): Promise<void> {
       keep: args.keep,
       logInit: args.logInit && i === 0,
       maxTurns: args.maxTurns,
+      baseUrl: args.baseUrl || undefined,
+      authTokenEnv: args.authTokenEnv || undefined,
     });
     runs.push(rec);
     appendFileSync(runsPath, `${JSON.stringify(rec)}\n`);
