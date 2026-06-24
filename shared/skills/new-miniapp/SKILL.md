@@ -291,8 +291,10 @@ pnpm --dir <project_abs_path> dev
   cd ./<package_name> && pnpm install && pnpm dev
 ```
 
-> (장기적으로 `/ait dev` 명령 신설이 station 1→2 hand-off를 더 명시적으로
-> 담당할 수 있으나, 이번 PR 범위에는 포함하지 않는다 — follow-up 이슈로.)
+> (station 2(dev)는 station map상 의도적으로 `/ait` 명령이 아니라 `pnpm dev`
+> 원시 명령이다 — dev는 일회성 액션이 아니라 연속 프로세스라 슬래시 명령으로
+> 감싸지 않는다. station 1→2 hand-off는 이 안내 블록이 `pnpm dev`를 직접
+> 인쇄하는 것으로 충분하다.)
 
 ## 다른 템플릿이 추가될 때
 
