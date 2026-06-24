@@ -135,9 +135,15 @@ stdout 요약 예:
 
 - **build-only가 기본 — 콘솔 무접촉.** 드라이버는 콘솔 API를 아예 안 부른다. dog-food 앱
   `31146`은 구조적으로 못 건드린다.
-- **`register`/`deploy`/`auth-setup` 슬래시 명령 디스패치 금지.** 특히 `register`는 매 run
-  서버 발급 새 `miniAppId`를 자동 기록한다(= "lock 풀려고 새 앱 만들기" 반-패턴). 드라이버
-  프롬프트에 금지 명시 + `disallowedTools` 게이트로 2중 차단.
+- **`register`/`deploy`/`auth-setup` 디스패치 금지 — 결정적 게이트로 강제.** 특히 `register`는
+  매 run 서버 발급 새 `miniAppId`를 자동 기록한다(= "lock 풀려고 새 앱 만들기" 반-패턴).
+  이 skill 들은 결국 Bash 로 `aitcc …` / `ait deploy …` 를 호출하므로 프롬프트 텍스트만으로는
+  모델이 무시할 수 있다 → SDK `canUseTool` 콜백이 모든 `Bash` 명령 문자열을 검사해
+  콘솔/인증 변이(`aitcc` / `ait deploy·register·login` / `--api-key`)를 **결정적으로 deny**
+  하고 run 을 `forbidden-dispatch` 로 중단한다(`driver.ts` `isForbiddenBashCommand` — 단위
+  테스트 `driver.test.ts`). `permissionMode: bypassPermissions` 는 쓰지 않는다(쓰면 이 게이트가
+  우회된다). 프롬프트의 금지 명시는 soft 보조 안내일 뿐 강제 계층이 아니다. 심층 방어로
+  in-app debug MCP(`mcp__ait-devtools`)도 `disallowedTools` 에 둔다.
 - **시크릿 값(Deploy Key·TOTP·게이트웨이 토큰 등)은 stdout/stderr/`runs.jsonl`/로그 어디에도 출력 금지.**
   `--auth-token-env`는 토큰 *값*이 아니라 환경변수 *이름*만 받는다 — 드라이버가 값을 SDK env로만
   전달하고 RunRecord엔 base URL(호스트, 비밀 아님)만 남긴다.

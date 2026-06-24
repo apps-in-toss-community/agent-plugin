@@ -47,7 +47,8 @@
   "homepage": "https://aitc.dev/",
   "vitest": {
     "include": [
-      "shared/**/*.test.ts"
+      "shared/**/*.test.ts",
+      "eval/**/*.test.ts"
     ],
     "environment": "node"
   }

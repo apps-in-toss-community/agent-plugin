@@ -12,6 +12,7 @@ export type FailClass =
   | 'timeout' // maxTurns 초과
   | 'agent-gaveup' // 에이전트가 완주 전 정상 종료(success) but 산출물 미달
   | 'dispatch-missing' // /ait 명령이 세션에 로드 안 됨 (init assert 실패)
+  | 'forbidden-dispatch' // 콘솔/인증 변이 Bash 명령을 시도해 canUseTool 게이트가 차단
   | 'driver-error'; // SDK/심링크/예외
 
 /** committed task 정의 (tasks/*.task.json). */

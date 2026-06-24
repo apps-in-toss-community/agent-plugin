@@ -24,7 +24,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { query } from '@anthropic-ai/claude-agent-sdk';
+import { type CanUseTool, query } from '@anthropic-ai/claude-agent-sdk';
 import { classifyFailure, scoreBuildOnly } from './score.ts';
 import type { RunRecord, Task } from './types.ts';
 
@@ -37,8 +37,33 @@ const SKILLS_SRC = join(REPO_ROOT, 'shared', 'skills');
 const COMMANDS_SRC = join(REPO_ROOT, 'shared', 'commands');
 
 // 디스패치 금지 명령 — build-only 경로 밖. register는 새 앱 자동 생성(반-패턴),
-// deploy/auth는 콘솔/인증 변이. 드라이버 프롬프트에 명시 + tools 게이트.
+// deploy/auth는 콘솔/인증 변이. 드라이버 프롬프트에 명시(soft) + canUseTool 게이트(hard).
 const FORBIDDEN_DISPATCH = ['/ait register', '/ait deploy', '/ait auth-setup'] as const;
+
+// 콘솔/인증을 변이시키는 Bash 명령 패턴 — canUseTool 게이트가 결정적으로 차단한다.
+// register/deploy/auth-setup skill 은 결국 Bash 로 `aitcc …` / `ait deploy …` 를
+// 호출하므로(프롬프트 텍스트로만 막으면 모델이 무시할 수 있다), 명령 문자열을
+// 직접 검사해 거부한다. 31146 dog-food 앱·워크스페이스 3095 에 닿는 모든 경로를
+// build-only 측정에서 구조적으로 차단하는 것이 목적(§1.4 "register 자율 디스패치 금지").
+//
+// 매칭은 보수적으로 넓게: `aitcc` 전체(콘솔 자동화 CLI 전부), `ait deploy`/`ait register`/
+// `ait login`(번들러의 콘솔-접촉 서브명령), 그리고 Deploy Key 를 싣는 `--api-key`.
+// 번들 빌드 경로(`ait build`, `pnpm bundle:ait`, `pnpm install` 등)는 매칭하지 않는다.
+const FORBIDDEN_BASH_PATTERNS: readonly RegExp[] = [
+  /\baitcc\b/, // 콘솔 자동화 CLI 전체 (register/deploy/app/keys/me/workspace …)
+  /\bait\s+deploy\b/, // 번들러의 콘솔 업로드/검수 제출
+  /\bait\s+register\b/, // (혹시 모를) 등록 서브명령
+  /\bait\s+login\b/, // 콘솔 인증
+  /--api-key\b/, // Deploy Key 를 싣는 모든 호출
+] as const;
+
+/**
+ * Bash 명령 문자열이 콘솔/인증 변이 경로인지 판정한다 (순수 함수 — 단위 테스트 대상).
+ * true 면 canUseTool 게이트가 거부하고 run 을 forbidden-dispatch 로 종료한다.
+ */
+export function isForbiddenBashCommand(command: string): boolean {
+  return FORBIDDEN_BASH_PATTERNS.some((re) => re.test(command));
+}
 
 export interface DriverOptions {
   task: Task;
@@ -111,6 +136,30 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
   let isError = false;
   let initSlashCommands: string[] = [];
   let initSkills: string[] = [];
+  // canUseTool 게이트가 콘솔/인증 변이 Bash 명령을 거부했는지 — failClass 결정용.
+  let forbiddenDispatchAttempted = false;
+
+  // 결정적 권한 게이트. permissionMode 를 bypassPermissions 로 두면 이 콜백이
+  // 호출되지 않을 수 있으므로(모든 검사 우회), bypass 를 끄고 canUseTool 을
+  // 권위 있는 관문으로 삼는다 — 격리 temp cwd 안의 안전한 작업(파일 쓰기·번들
+  // 빌드 Bash)은 전부 allow 하되, 콘솔/인증 변이 Bash 만 결정적으로 deny 한다.
+  const canUseTool: CanUseTool = async (toolName, input) => {
+    if (toolName === 'Bash') {
+      const command = typeof input.command === 'string' ? input.command : '';
+      if (isForbiddenBashCommand(command)) {
+        forbiddenDispatchAttempted = true;
+        // interrupt: true → run 을 즉시 중단. SECRET-HANDLING: 거부 메시지에
+        // 명령 문자열(--api-key 값 등 시크릿 포함 가능)을 싣지 않는다.
+        return {
+          behavior: 'deny',
+          message:
+            'build-only 측정 경로에서 콘솔/인증 변이 명령(aitcc / ait deploy·register·login / --api-key)은 금지됩니다.',
+          interrupt: true,
+        };
+      }
+    }
+    return { behavior: 'allow', updatedInput: input };
+  };
 
   try {
     await mkdir(join(workDir, '.claude'), { recursive: true });
@@ -140,12 +189,17 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
         model,
         cwd: workDir,
         settingSources: ['project'],
-        permissionMode: 'bypassPermissions',
+        // permissionMode 를 bypassPermissions 로 두지 않는다 — 그러면 canUseTool
+        // 게이트가 우회돼 콘솔 변이 Bash 가 그대로 실행될 수 있다(이 콜백이 유일한
+        // 결정적 관문). canUseTool 이 격리 temp cwd 안의 안전 작업을 전부 allow 하므로
+        // bypass 없이도 권한 프롬프트로 멈추지 않는다.
+        canUseTool,
         maxTurns,
         // gateway 라우팅 변수가 들어간 환경. anthropic이면 process.env 그대로.
         env: childEnv,
-        // 콘솔 자동화 CLI(aitcc) 호출을 막는 2차 게이트. 번들러(ait build)는
-        // Bash로 돌지만 aitcc 콘솔 명령은 build-only 경로에 불필요.
+        // 심층 방어: in-app debug MCP 표면도 금지(build-only 경로에 불필요).
+        // 실제 콘솔 변이 차단은 위 canUseTool 의 Bash 검사가 담당한다 —
+        // register/deploy/auth-setup skill 은 MCP 가 아니라 Bash 로 aitcc/ait 를 호출하므로.
         disallowedTools: ['mcp__ait-devtools'],
       },
     });
@@ -190,8 +244,14 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
     const score = await scoreBuildOnly({ workDir, task, execFileAsync });
 
     const wallMs = Date.now() - startedAt;
-    const success = score.success && !isError;
-    const failClass = success ? null : classifyFailure({ initSeen, initOk, resultSubtype, score });
+    // 금지 명령을 시도한 run 은 게이트가 interrupt 했으므로 success 가 될 수 없다 —
+    // canUseTool 차단이 우선이라 명시적으로 실패 처리하고 forbidden-dispatch 로 분류.
+    const success = score.success && !isError && !forbiddenDispatchAttempted;
+    const failClass = success
+      ? null
+      : forbiddenDispatchAttempted
+        ? 'forbidden-dispatch'
+        : classifyFailure({ initSeen, initOk, resultSubtype, score });
 
     return {
       ts: startedAt,
