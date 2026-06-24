@@ -1,0 +1,22 @@
+{
+  "_note": "시계열 비교 기준선. 의미 있는 측정(충분한 N) 후 메인테이너가 갱신한다. fixedInputs = run-to-run 분산을 KPI로 측정하기 위해 고정한 입력들(plan §1.2). kpi 슬롯은 task×model 셀당 한 줄, 측정 전엔 null.",
+  "asOf": null,
+  "fixedInputs": {
+    "sdkVersion": null,
+    "templateSha": null,
+    "pricingAsOf": "2026-06-24",
+    "templateBaseline": {
+      "@apps-in-toss/web-framework": "^2.6.0",
+      "@ait-co/devtools": "^0.1.19"
+    }
+  },
+  "kpi": {
+    "_shape": "<taskId>.<model> = { n, completionRate, tokensPerSuccessMedian, tokenCv, usdPerSuccess }",
+    "timer.claude-haiku-4-5": null,
+    "timer.claude-sonnet-4-6": null,
+    "timer.claude-opus-4-8": null,
+    "coupon-shop.claude-haiku-4-5": null,
+    "coupon-shop.claude-sonnet-4-6": null,
+    "coupon-shop.claude-opus-4-8": null
+  }
+}
