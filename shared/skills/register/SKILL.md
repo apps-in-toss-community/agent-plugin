@@ -402,4 +402,5 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — register 앞 단계).
 - 짝 skill: `deploy` (등록된 앱에 번들 업로드 — register 뒤 단계).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인).
+- 커뮤니티 docs — 앱 등록 검수(`approvalType`)와 4046 lock, 번들 출시 검수와의 분리: https://docs.aitc.dev/guides/ship-mini-app
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli

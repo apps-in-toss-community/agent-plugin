@@ -423,13 +423,12 @@ const DOCS_DEEPLINK_EXEMPT = new Set([
   'new-miniapp',
   'changeset',
   'docs',
-  // 임시 — issue #200 Layer 3 (docs page authoring) 완료 시 제거
-  'deploy',
-  'deploy-key',
-  'register',
-  'setup-bundle',
+  // 임시 — issue #200 Layer 3 (docs page authoring) 완료 시 제거.
+  // ship(setup-bundle·register·deploy-key·deploy)·operate(status) 5종은
+  // docs guides/ship-mini-app·operate-mini-app 신설(docs #116)로 deep-link
+  // 타깃이 생겨 set 에서 제거됐다. 남은 3종은 dev-setup 주제 guide 미존재:
+  //   setup-phone-preview(환경 2 PWA), inject-devtools/inject-polyfill.
   'setup-phone-preview',
-  'status',
   'inject-devtools',
   'inject-polyfill',
 ]);
