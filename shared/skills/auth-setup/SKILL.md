@@ -380,6 +380,7 @@ native 검증은 번들·등록이 선행되어야 하므로, sandbox 확인이 
 ## 참고
 
 - 커뮤니티 docs — 토스 로그인 흐름: https://docs.aitc.dev/guides/auth-flow
+- 커뮤니티 docs — oidc-bridge 통합(consumer backend·operator mTLS·mock adapter): https://docs.aitc.dev/guides/oidc-bridge
 - oidc-bridge repo: https://github.com/apps-in-toss-community/oidc-bridge
 - 커뮤니티 공용 인스턴스: `https://oidc-bridge.aitc.dev`
 - sdk-example 레퍼런스 구현: `supabase/functions/toss-login/index.ts` + `src/snippets/auth/oidcExchange.ts`
