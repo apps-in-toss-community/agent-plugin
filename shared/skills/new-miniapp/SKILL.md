@@ -18,6 +18,10 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 
 - React 19 + Vite + TypeScript + `@apps-in-toss/web-framework` 조합으로
   바로 `pnpm dev`가 도는 빈 프로젝트가 만들어져 있다.
+- 이건 토스 앱 WebView에서 도는 **웹(React DOM) 미니앱**이지 React Native 앱이
+  아니다. 화면은 웹(CSS·DOM)으로 작성하고 RN 네이티브 컴포넌트(`<View>`·`<Text>`
+  등)나 `react-native` import를 쓰지 않는다. (설치 시 SDK가 RN을 peer로 선언해
+  뜨는 `unmet peer react-native` 경고는 그래서 무시해도 된다 — 아래 install 단계.)
 - `@ait-co/devtools`가 dev 시점에 SDK를 mock해주므로, 토스 앱 없이
   브라우저에서 개발할 수 있다.
 - 다음 단계(`pnpm dev` → 코드 수정 → `/ait setup-bundle` → `/ait design` → `/ait register` → `/ait deploy-key` → `/ait deploy`)가 명확히 안내된다.

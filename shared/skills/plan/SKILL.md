@@ -23,6 +23,10 @@ argument-hint: '[requirements]'
 2. **권한(permissions)** — 그 도메인들이 런타임에 사용자에게 요청하는 권한
 3. **약관(terms)** — 등록·배포 시 콘솔이 게이트하는 워크스페이스 약관
 
+전제: 미니앱은 토스 앱 WebView에서 도는 **웹(React DOM) 앱**이지 React Native
+앱이 아니다 — 계획·아키텍처를 웹 스택 기준으로 세우고 RN/네이티브 화면 경로를
+전제하지 않는다.
+
 이 skill은 harness의 **첫 station**이다(station 7 "plan"은 개발 순서상
 마지막에 추가됐지만, 흐름상으로는 scaffold 앞에 온다). 빈 디렉토리에서
 `/ait new`로 프로젝트를 만들기 **전에**, 무엇을 쓰게 될지 미리 지도를 그려서
