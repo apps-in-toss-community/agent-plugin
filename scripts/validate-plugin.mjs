@@ -1068,6 +1068,77 @@ function checkA7(root) {
 }
 
 // ---------------------------------------------------------------------------
+// A8 — seam-verb resolvability (hard-fail)
+// ---------------------------------------------------------------------------
+//
+// A2 의 seam 검사는 본문에 `/ait ` 토큰이 (1) ## 참고 이전에 있고 (2) fenced
+// 블록 안에 인쇄되는지만 본다 — 그 verb 가 실재 명령으로 resolve 되는지는
+// 검사하지 않는다. 그래서 skill 이 `/ait deploy-bundle` (실재는 setup-bundle)
+// 같은 stale·typo verb 를 fenced seam 으로 인쇄해도 A1/A2 전부 통과하고,
+// 비개발자가 그 seam 을 따라가면 존재하지 않는 명령에서 dead-end 한다.
+// A8 은 인쇄되는(= fenced) `/ait <verb>` 의 verb 가 합법 집합에 속하는지
+// 게이트한다 (#254 — A7 의 'mcpServers npx resolvability' 와 같은 클래스:
+// "인쇄되는 게 실재하는가").
+//
+// 합법 verb 집합 = EXPECTED_CMD_TO_SKILL 키에서 도출(`ait-<verb>.md` → verb).
+// harness-external `changeset` 은 `/ait` prefix 가 없으므로 집합에서 제외한다.
+// 산문(non-fenced) 언급은 검사하지 않는다 — seam 계약은 '인쇄되는' 토큰에
+// 한정되며(A2/seam-not-printed 와 동일 스코프), 설명문 속 우연한 `/ait` 는
+// false-positive 가 되기 때문이다.
+
+/** EXPECTED_CMD_TO_SKILL 에서 합법 `/ait <verb>` 집합을 도출한다. */
+function legalAitVerbs() {
+  /** @type {Set<string>} */
+  const verbs = new Set();
+  for (const cmdFile of Object.keys(EXPECTED_CMD_TO_SKILL)) {
+    // ait- prefix 가 없는 command(예: changeset.md, harness-external 도구)는
+    // /ait <verb> seam verb 가 아니다 — 정규식 비매치로 자연히 제외된다.
+    const m = /^ait-(.+)\.md$/.exec(cmdFile);
+    if (m) verbs.add(m[1]);
+  }
+  return verbs;
+}
+
+/** @param {string} root @returns {Violation[]} */
+function checkA8(root) {
+  const violations = [];
+  const skillsDir = path.join(root, 'shared', 'skills');
+  const legal = legalAitVerbs();
+
+  for (const skillName of listDirs(skillsDir)) {
+    const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) continue;
+
+    const relFile = path.relative(root, skillFile);
+    const src = readFile(skillFile);
+    const srcLines = src.split('\n');
+    const fencedLines = fencedCodeLineNumbers(srcLines);
+
+    // 이미 보고한 verb 는 skill 당 한 번만 (노이즈 억제).
+    const reported = new Set();
+    for (let i = 0; i < srcLines.length; i++) {
+      if (!fencedLines.has(i + 1)) continue; // 인쇄되는(fenced) 토큰만 검사
+      const line = srcLines[i];
+      for (const match of line.matchAll(/\/ait ([a-z][a-z0-9-]*)/g)) {
+        const verb = match[1];
+        if (legal.has(verb) || reported.has(verb)) continue;
+        reported.add(verb);
+        violations.push(
+          mkv(
+            relFile,
+            i + 1,
+            'A8/seam-verb-unresolved',
+            `인쇄된 seam '/ait ${verb}' 가 실재 명령으로 resolve 되지 않는다 — shared/commands/ait-${verb}.md 가 없다 (fix: verb 오타·stale rename 정정, 또는 명령 추가 + EXPECTED_CMD_TO_SKILL 갱신). 합법 verb: ${[...legal].sort().join(', ')}`,
+          ),
+        );
+      }
+    }
+  }
+
+  return violations;
+}
+
+// ---------------------------------------------------------------------------
 // A6 — 링크 liveness (opt-in, warn-only, 네트워크)
 // ---------------------------------------------------------------------------
 //
@@ -1225,6 +1296,7 @@ export function runChecks(repoRoot) {
     ...checkA4(root),
     ...checkA5(root),
     ...checkA7(root),
+    ...checkA8(root),
   ];
 
   const hasErrors = allViolations.some((viol) => viol.level === 'error');
@@ -1257,6 +1329,7 @@ function printViolations(violations) {
     A5: 'A5 — plugin.json ↔ package.json 버전 드리프트',
     A6: 'A6 — 링크 liveness (opt-in, warn)',
     A7: 'A7 — mcpServers npx args 해석 가능성',
+    A8: 'A8 — seam /ait verb 해석 가능성',
   };
 
   for (const [prefix, items] of groups) {

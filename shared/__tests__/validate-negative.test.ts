@@ -531,3 +531,68 @@ describe('A7 negative tests', () => {
     expect(rulesFired(violations)).not.toContain('A7/mcp-npx-bare-bin');
   });
 });
+
+// ---------------------------------------------------------------------------
+// A8 — seam /ait verb 해석 가능성
+// ---------------------------------------------------------------------------
+
+describe('A8 negative tests', () => {
+  it('A8/seam-verb-unresolved — fenced seam 이 실재하지 않는 /ait verb 를 인쇄하면 위반이 난다', async () => {
+    buildValidFixture(tmpDir);
+    // fenced 블록 안에 stale/typo verb (`deploy-bundle` 는 ait-deploy-bundle.md 부재).
+    const broken = `---
+name: ${SKILL_NAME}
+description: Fixture skill.
+argument-hint: ''
+---
+
+# ${SKILL_NAME} skill
+
+## 목적
+
+본문.
+
+[가이드](https://docs.aitc.dev/guides/fixture-guide)
+
+\`\`\`
+/ait deploy-bundle
+\`\`\`
+`;
+    writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
+    const { violations } = await runChecks(tmpDir);
+    expect(rulesFired(violations)).toContain('A8/seam-verb-unresolved');
+  });
+
+  it('A8/seam-verb-unresolved — 합법 verb (/ait new) 는 발화하지 않는다 (positive control)', async () => {
+    buildValidFixture(tmpDir);
+    // 기본 fixture SKILL.md 의 seam 은 `/ait new` (합법) → A8 silent.
+    const { violations } = await runChecks(tmpDir);
+    expect(rulesFired(violations)).not.toContain('A8/seam-verb-unresolved');
+  });
+
+  it('A8/seam-verb-unresolved — 산문(non-fenced) 속 stale verb 는 발화하지 않는다 (스코프 한정)', async () => {
+    buildValidFixture(tmpDir);
+    // fenced 블록엔 합법 verb, 산문엔 stale verb — A8 은 인쇄(fenced) 토큰만 본다.
+    const proseOnly = `---
+name: ${SKILL_NAME}
+description: Fixture skill.
+argument-hint: ''
+---
+
+# ${SKILL_NAME} skill
+
+## 목적
+
+이전엔 /ait deploy-bundle 를 안내했지만 지금은 아래 명령을 쓰세요 (산문 언급).
+
+[가이드](https://docs.aitc.dev/guides/fixture-guide)
+
+\`\`\`
+/ait new
+\`\`\`
+`;
+    writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), proseOnly);
+    const { violations } = await runChecks(tmpDir);
+    expect(rulesFired(violations)).not.toContain('A8/seam-verb-unresolved');
+  });
+});
