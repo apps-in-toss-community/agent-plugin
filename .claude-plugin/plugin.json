@@ -14,7 +14,7 @@
   "mcpServers": {
     "ait-devtools": {
       "command": "npx",
-      "args": ["-y", "@ait-co/devtools", "devtools-mcp"]
+      "args": ["-y", "-p", "@ait-co/devtools", "devtools-mcp"]
     }
   }
 }
