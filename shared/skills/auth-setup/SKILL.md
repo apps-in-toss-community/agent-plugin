@@ -227,7 +227,7 @@ Content-Type: application/json
 
 `referrer` 값:
 - `"DEFAULT"` — production / 실제 앱인토스 환경
-- `"SANDBOX"` — devtools sandbox (토스 앱 없이 테스트할 때)
+- `"SANDBOX"` — 앱인토스 샌드박스 환경 (브리지가 토스에 그대로 전달하는 필드 — devtools mock authorizationCode의 실패를 막지 않는다. §6 검증 안내 참고)
 
 ### 4.5 Edge Function 배포 (Supabase 경로)
 
@@ -329,10 +329,18 @@ const userCredential = await signInWithCredential(getAuth(), credential);
 
 ### 6. 검증 안내
 
-**개발 중 (devtools sandbox)**:
-1. `pnpm dev` — devtools mock이 `appLogin()`을 intercept해 sandbox authorizationCode 반환
-2. 백엔드 `/oidc/token` 호출 시 `referrer: "SANDBOX"` 사용
-3. 반환된 `id_token`을 디코딩(JWT)해 `sub` claim 확인
+**개발 중 (devtools sandbox) — 제한 사항 먼저 읽기**:
+
+devtools mock은 `appLogin()`을 intercept해 `mock-auth-<uuid>` 형태의 가짜 authorizationCode를 반환한다. 이 가짜 코드는 클라이언트 레이어만 대체하며, 토스 서버에서 발급된 실제 코드가 아니다.
+
+- **공용 브리지(`oidc-bridge.aitc.dev`)와 조합하면 동작하지 않는다.** 브리지는 가짜 코드를 토스 mTLS API로 그대로 전달하므로 업스트림에서 실패한다. `upstream_error`가 반환되면 설정 오류가 아니라 **이 구조적 한계 때문이다**.
+- `referrer: "SANDBOX"` 는 mock 전환 스위치가 아니다 — 브리지가 그대로 토스에 전달하는 필드이므로 가짜 코드의 실패를 막지 못한다.
+- **가짜 코드로 end-to-end `/oidc/token` → `id_token` 경로를 테스트하려면 self-host 브리지에서 `BRIDGE_TOSS_ADAPTER=mock` 환경변수를 설정**해야 한다(self-host 전용 옵션, 합성 id_token 반환). 공용 인스턴스는 이 어댑터를 지원하지 않는다.
+
+개발 중 현실적인 검증 범위:
+1. `pnpm dev` — mock이 `appLogin()` intercept → 가짜 authorizationCode 반환까지 확인
+2. 백엔드가 코드를 수신해 브리지 호출 직전까지 로그로 확인 (id_token 디코딩은 아래 네이티브 검증에서)
+3. self-host 브리지(`BRIDGE_TOSS_ADAPTER=mock`)가 있으면 합성 id_token까지 검증 가능
 
 **앱인토스 네이티브 검증**:
 1. `/ait deploy` 실행 (번들러 `ait` CLI로 업로드 — `/ait deploy` 참고)
