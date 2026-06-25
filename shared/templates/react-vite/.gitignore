@@ -16,3 +16,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# phone-preview local secrets (never commit)
+.ait_relay
+.ait_urls
