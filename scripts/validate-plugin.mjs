@@ -597,6 +597,28 @@ function checkA2(root) {
             `다음 station 세am 없음: skill 본문(## Out of scope / ## 참고 이전)에 '/ait ' 참조 필요 (umbrella §1.3 규칙 3)`,
           ),
         );
+      } else {
+        // §1.3 rule 3 강화: seam 은 "완료/요약 출력"(인쇄되는 fenced 블록) 안에
+        // 있어야 한다 — 산문 속 우연한 `/ait` 언급만으로는 부족하다. 전 skill
+        // 조사 결과 16/16 이 완료 블록을 fenced 로 인쇄하므로 이 불변은
+        // false-positive 없이 "실제 인쇄 seam vs 본문 언급"을 구별한다.
+        // (welcome 의 완료 블록이 ## 참고 뒤로 밀려 산문 언급만으로 통과하던
+        // 갭을 닫는다 — issue #241.)
+        const fencedLines = fencedCodeLineNumbers(bodyLines);
+        const seamEnd = seamBodyEndIdx === -1 ? bodyLines.length : seamBodyEndIdx;
+        const seamInFence = bodyLines.some(
+          (l, i) => i < seamEnd && fencedLines.has(i + 1) && l.includes('/ait '),
+        );
+        if (!seamInFence) {
+          violations.push(
+            mkv(
+              relFile,
+              1,
+              'A2/seam-not-printed',
+              `seam 이 산문에만 있음: 다음 station '/ait' 명령을 완료/요약 fenced 블록(## 참고 이전)에 인쇄해야 한다 (umbrella §1.3 규칙 3 — "본문 마지막 블록(완료/요약 출력)")`,
+            ),
+          );
+        }
       }
     }
   }
