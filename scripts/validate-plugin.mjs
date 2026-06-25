@@ -1008,6 +1008,66 @@ function checkA5(root) {
 }
 
 // ---------------------------------------------------------------------------
+// A7 — mcpServers npx args resolvability (hard-fail)
+// ---------------------------------------------------------------------------
+//
+// plugin.json 의 mcpServers.<name> 가 `npx` 로 패키지의 *특정 이름 bin* 을 실행할
+// 때, 패키지를 -p/--package 로 명시하지 않은 "bare" 형태(`npx [-y] <pkg> <bin>`)는
+// npm 이 어느 실행파일을 돌릴지 추론하지 못해 "could not determine executable to
+// run" 으로 실패할 수 있다 — 패키지가 bin 을 여러 개 게시하거나 기본 bin 이름이
+// 패키지명과 다를 때. 올바른 형태는 `npx [-y] -p <pkg> <bin>`. (#248: ait-devtools
+// 가 bin 2개를 게시해 bare 형태가 install 시 MCP 등록을 silently 깨뜨린 갭을 닫는다.
+// A1–A5 는 mcpServers 를 전혀 검사하지 않았다.)
+//
+// npx 형태만 검사한다 — 다른 command(node, 절대경로 등)는 범위 밖(false-positive 회피).
+
+/** 패키지를 명시하는 플래그 — 이게 있으면 bin 추론 모호성이 없다 */
+const NPX_PACKAGE_FLAGS = new Set(['-p', '--package']);
+
+/** @param {string} root @returns {Violation[]} */
+function checkA7(root) {
+  const violations = [];
+  const pluginPath = path.join(root, '.claude-plugin', 'plugin.json');
+  const relPlugin = path.relative(root, pluginPath);
+
+  if (!fs.existsSync(pluginPath)) return violations; // A5 가 부재를 별도로 다룬다
+
+  /** @type {{ mcpServers?: Record<string, { command?: string, args?: string[] }> }} */
+  let plugin;
+  try {
+    plugin = JSON.parse(readFile(pluginPath));
+  } catch {
+    return violations; // A5 가 파싱 실패를 별도로 다룬다
+  }
+
+  const servers = plugin.mcpServers ?? {};
+  for (const [name, server] of Object.entries(servers)) {
+    if (!server || server.command !== 'npx') continue;
+    const args = Array.isArray(server.args) ? server.args : [];
+
+    // -p/--package 가 이미 있으면 bin 추론 모호성이 없다 — 통과.
+    if (args.some((a) => NPX_PACKAGE_FLAGS.has(a))) continue;
+
+    // positional 토큰 = 플래그(-로 시작)가 아닌 인자.
+    // 첫 positional = 패키지 spec, 그 뒤 positional 이 하나라도 있으면 = bin 토큰.
+    // (bin 토큰이 있는데 -p 가 없으면 npm 이 bin 을 추론해야 해서 모호 → bare 형태.)
+    const positionals = args.filter((a) => !a.startsWith('-'));
+    if (positionals.length >= 2) {
+      violations.push(
+        mkv(
+          relPlugin,
+          1,
+          'A7/mcp-npx-bare-bin',
+          `mcpServers.${name}: npx args 가 패키지 다음에 bin 토큰('${positionals[1]}')을 두지만 -p/--package 가 없다 — 패키지가 bin 을 여러 개 게시하면 npm 이 실행파일을 추론하지 못해 'could not determine executable to run' 으로 실패한다 (fix: ["-y", "-p", "${positionals[0]}", "${positionals[1]}"] 처럼 -p 로 패키지 명시)`,
+        ),
+      );
+    }
+  }
+
+  return violations;
+}
+
+// ---------------------------------------------------------------------------
 // A6 — 링크 liveness (opt-in, warn-only, 네트워크)
 // ---------------------------------------------------------------------------
 //
@@ -1164,6 +1224,7 @@ export function runChecks(repoRoot) {
     ...checkA3(root),
     ...checkA4(root),
     ...checkA5(root),
+    ...checkA7(root),
   ];
 
   const hasErrors = allViolations.some((viol) => viol.level === 'error');
@@ -1195,6 +1256,7 @@ function printViolations(violations) {
     A4: 'A4 — CLI 토큰 크로스체크 (warn)',
     A5: 'A5 — plugin.json ↔ package.json 버전 드리프트',
     A6: 'A6 — 링크 liveness (opt-in, warn)',
+    A7: 'A7 — mcpServers npx args 해석 가능성',
   };
 
   for (const [prefix, items] of groups) {
