@@ -286,5 +286,6 @@ setup-bundle 완료
 - 짝 skill: `deploy` (`bundle:ait` 빌드 후 콘솔에 업로드 — `ait deploy --profile <name>`).
 - 짝 skill: `deploy-key` (Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장).
 - 짝 skill: `new-miniapp` (새 프로젝트 생성 — `granite.config.ts` 없는 상태에서 시작).
+- 커뮤니티 docs — ship 흐름에서 번들 빌드(`ait build`)가 놓이는 위치: https://docs.aitc.dev/guides/ship-mini-app
 - sdk-example 구현 사례: https://github.com/apps-in-toss-community/sdk-example
 - `@apps-in-toss/cli` (번들러 바이너리): https://www.npmjs.com/package/@apps-in-toss/cli

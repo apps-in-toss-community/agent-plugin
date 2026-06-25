@@ -221,6 +221,7 @@ Deploy Key 저장 완료 · 프로파일: <profile-name>
 
 ## 참고
 
+- 커뮤니티 docs — Deploy Key가 ship 흐름에서 `ait deploy --profile` 인증에 놓이는 위치: https://docs.aitc.dev/guides/ship-mini-app
 - console-cli keys 명령: https://github.com/apps-in-toss-community/console-cli
 - Deploy Key 운영 인스턴스 레퍼런스: https://github.com/apps-in-toss-community/console-cli/blob/main/docs/api/api-keys.md
 - 짝 skill: `deploy` — 이 skill로 저장한 프로파일을 `ait deploy --profile` 로 소비.

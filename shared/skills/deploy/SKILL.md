@@ -324,6 +324,7 @@ exit 2 실패한다. 따라서 약관을 채팅으로 먼저 제시하고 사용
 - 짝 skill: `deploy-key` (Deploy Key 발급 + 프로파일 저장 — 이 skill의 전제 조건).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — 이 skill의 전제 조건).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인 — 배포 전 점검).
+- 커뮤니티 docs — 번들 빌드·등록·배포 전 과정(두 상태머신·4046 lock·ait↔aitcc 분담): https://docs.aitc.dev/guides/ship-mini-app
 - console-cli 레퍼런스: https://github.com/apps-in-toss-community/console-cli
 - `@apps-in-toss/cli` (번들러): https://www.npmjs.com/package/@apps-in-toss/cli
 - 환경 3 dog-food(QR/deep-link relay) 배경: umbrella `CLAUDE.md` §3.2
