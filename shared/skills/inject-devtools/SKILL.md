@@ -306,6 +306,7 @@ module.exports = {
 
 ## 참고
 
+- 커뮤니티 docs — 브라우저 mock·polyfill·실기기 미리보기 셋업과 fidelity 사다리(환경 1·2): https://docs.aitc.dev/guides/dev-environment
 - 짝 skill: `new-miniapp` (새 프로젝트 생성), `inject-polyfill` (polyfill 마이그레이션), `debug` (이 skill이 깔아둔 panel·CDP relay를 소비하는 on-device 디버깅), `deploy`.
 - devtools API / 지원 번들러 상세: https://github.com/apps-in-toss-community/devtools
 - devtools live demo: https://devtools.aitc.dev/

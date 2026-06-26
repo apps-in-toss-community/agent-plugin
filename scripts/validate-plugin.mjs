@@ -409,29 +409,19 @@ const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp']);
 
 // A2 deep-link-required (positive) allowlist — §1.3.4("skill 말미 docs 링크는
 // docs.aitc.dev/<주제>로 deep-link 필수")를 코드로 강제하되, deep-link 의무가
-// 면제되는 skill 을 명시한다. 면제 사유 3종 + 임시 1종:
+// 면제되는 skill 을 명시한다. 면제 사유 3종 (영구):
 //   1. entry/scaffold (welcome·new-miniapp): docs 루트 링크가 적절 (§1.2 예외)
 //   2. harness-external (changeset): /ait prefix 예외, docs 주제 페이지 무관
 //   3. docs 로더 자체 (docs): self-link 가 무의미
-//   4. [임시] 대상 docs 페이지 미존재 (ship/operate/dev-setup 8종):
-//      deploy·deploy-key·register·setup-bundle·setup-phone-preview·status·
-//      inject-devtools·inject-polyfill. 지금 deep-link 를 박으면 404 — 무링크보다
-//      나쁘다. docs repo 에 해당 guide 가 authoring 되면(issue #200 Layer 3) 이
-//      8개를 이 set 에서 제거한다. 그때까지 "링크 없음"은 의도된 상태.
-const DOCS_DEEPLINK_EXEMPT = new Set([
-  'welcome',
-  'new-miniapp',
-  'changeset',
-  'docs',
-  // 임시 — issue #200 Layer 3 (docs page authoring) 완료 시 제거.
-  // ship(setup-bundle·register·deploy-key·deploy)·operate(status) 5종은
-  // docs guides/ship-mini-app·operate-mini-app 신설(docs #116)로 deep-link
-  // 타깃이 생겨 set 에서 제거됐다. 남은 3종은 dev-setup 주제 guide 미존재:
-  //   setup-phone-preview(환경 2 PWA), inject-devtools/inject-polyfill.
-  'setup-phone-preview',
-  'inject-devtools',
-  'inject-polyfill',
-]);
+//
+// issue #200 Layer 3 완료: "대상 docs 페이지 미존재" 임시 면제는 모두 해소됐다.
+// ship(setup-bundle·register·deploy-key·deploy)·operate(status) 5종은 docs
+// guides/ship-mini-app·operate-mini-app 신설(docs #116)로, dev-setup 3종
+// (inject-devtools·inject-polyfill·setup-phone-preview)은 guides/dev-environment
+// 신설(docs #130)로 각각 deep-link 타깃이 생겨 set 에서 제거됐다. 이제 모든
+// 비면제 skill 은 실재하는 docs deep-link 를 가져야 한다(VALIDATE_LINKS=1 A6 로
+// liveness 까지 강제 가능).
+const DOCS_DEEPLINK_EXEMPT = new Set(['welcome', 'new-miniapp', 'changeset', 'docs']);
 
 // docs deep-link 형태: docs.aitc.dev/guides/<slug> 또는 docs.aitc.dev/api/<group>[/<method>]
 const DOCS_DEEPLINK_RE = /docs\.aitc\.dev\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_-]*/;

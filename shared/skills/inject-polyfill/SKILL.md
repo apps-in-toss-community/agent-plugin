@@ -310,6 +310,7 @@ Tier-1 매핑:
 
 ## 참고
 
+- 커뮤니티 docs — 표준 Web API → SDK 라우팅 shim과 dev 환경 셋업(브라우저 mock·실기기 미리보기): https://docs.aitc.dev/guides/dev-environment
 - 짝 skill: `inject-devtools` (devtools unplugin 추가 — 함께 쓰면 브라우저에서도 표준 API 경로로 동작 확인), `setup-phone-preview` (실기기 WebKit 미리보기 병행 시), `new-miniapp` (polyfill 포함 템플릿 `react-vite-polyfill` 추가 예정), `deploy` (설정 완료 후 콘솔 배포).
 - `@ait-co/polyfill` 패키지: <https://github.com/apps-in-toss-community/polyfill>
 - 통합 가이드: [`polyfill/INTEGRATION.md`](https://github.com/apps-in-toss-community/polyfill/blob/main/INTEGRATION.md)
