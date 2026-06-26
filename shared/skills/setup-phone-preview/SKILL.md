@@ -366,6 +366,7 @@ setup-phone-preview 완료
 
 ## 참고
 
+- 커뮤니티 docs — 실기기 PWA 미리보기(환경 2)와 dev 환경 fidelity 사다리: https://docs.aitc.dev/guides/dev-environment
 - 짝 skill: `inject-devtools` (`@ait-co/devtools` 신규 설치 + vite.config 기본 설정 — `setup-phone-preview`보다 먼저 실행), `inject-polyfill` (polyfill 병행 사용 시), `debug` (이 skill의 tunnel 위에서 도는 relay-sandbox on-device 디버깅), `deploy` (tunnel 검증 후 앱인토스 배포).
 - devtools tunnel 구현 (PR #131): https://github.com/apps-in-toss-community/devtools/pull/131
 - sdk-example wiring 사례 (PR #59): https://github.com/apps-in-toss-community/sdk-example/pull/59
