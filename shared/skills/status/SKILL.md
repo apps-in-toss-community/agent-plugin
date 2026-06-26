@@ -159,23 +159,44 @@ you@example.com / workspace <번호> <이름> · 앱 N개 ·
 
 ## CLI 미설치 fallback
 
-`aitcc`가 없으면:
+`aitcc`가 PATH에 없으면 zero-install로 바로 실행할 수 있다.
+이 skill의 모든 명령은 read-only라 zero-install로도 그대로 동작한다:
+
+```bash
+# PATH에 aitcc가 있으면 그대로 사용. 없으면 설치 없이 실행:
+pnpm dlx @ait-co/console-cli@latest <args>   # pnpm 환경 (권장)
+npx -y @ait-co/console-cli@latest <args>      # npm/npx 환경
+```
+
+패키지 이름은 `@ait-co/console-cli`이고 단일 bin이 `aitcc`라 위 형태가 그대로
+`aitcc`를 실행한다. credential/session(`~/.config/aitcc/`)은 실행 방식과 무관하게
+재사용되므로 zero-install 호출도 기존 로그인 세션을 그대로 쓴다.
+
+예시: `aitcc whoami --json` 대신
+
+```bash
+pnpm dlx @ait-co/console-cli@latest whoami --json
+# 또는
+npx -y @ait-co/console-cli@latest whoami --json
+```
+
+자주 사용한다면 전역 설치가 편하다:
+
+```bash
+npm i -g @ait-co/console-cli       # 또는 pnpm/bun
+```
+
+**`aitcc login`은 전역 설치 후 실행해야 한다** — 시스템 Chrome 창을 열어야 하므로
+zero-install 실행 방식으로는 대화형 로그인을 완료할 수 없다. 설치 후 한 번만 로그인하면 이후
+세션은 zero-install 호출에서도 재사용된다:
 
 ```
-console 상태를 확인하려면 `@ait-co/console-cli`가 필요합니다 (현재 PATH에 없음).
-
-설치:
-  npm i -g @ait-co/console-cli       # 또는 pnpm/bun
-
-설치 후 `aitcc login`으로 로그인하세요:
-  aitcc login은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에
-  계정으로 로그인하세요. Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나
-  `AITCC_BROWSER`로 경로를 지정하세요.
-
-설치 후 다시 `/ait status`를 호출해주세요.
+aitcc login은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에
+계정으로 로그인하세요. Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나
+`AITCC_BROWSER`로 경로를 지정하세요.
+```
 
 참고: https://github.com/apps-in-toss-community/console-cli
-```
 
 `aitcc`는 있는데 미인증인 경우는 그냥 `aitcc whoami` 결과를 그대로 보여주고
 `aitcc login` 안내만 덧붙인다 — 별도 큰 fallback 블록 안 만든다.

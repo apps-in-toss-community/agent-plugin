@@ -35,18 +35,30 @@ argument-hint: '[profile-name]'
 command -v aitcc
 ```
 
-없으면 중단하고 설치를 안내한다:
+없으면 zero-install로 바로 진행할 수 있다. 이후 모든 `aitcc …` 명령을 아래 형태로 치환해 실행한다:
 
+```bash
+# PATH에 aitcc가 있으면 그대로 사용. 없으면 설치 없이 실행:
+pnpm dlx @ait-co/console-cli@latest <args>   # pnpm 환경 (권장)
+npx -y @ait-co/console-cli@latest <args>      # npm/npx 환경
 ```
-console-cli(aitcc)가 PATH에 없습니다. 먼저 설치해주세요:
 
-  npm i -g @ait-co/console-cli
+credential/session(`~/.config/aitcc/`)은 실행 방식과 무관하게 재사용되므로
+zero-install 호출도 기존 로그인 세션을 그대로 쓴다.
+`--save-profile` 로 발급된 키는 실행 방식과 무관하게 `~/.ait/credentials`에 기록된다 —
+apiKey 값은 어느 경로에서도 채팅·로그에 출력하지 않는다.
 
-설치 후 `aitcc login`으로 로그인하고 /ait deploy-key 를 다시 실행해주세요.
+단, **`aitcc login`(대화형 브라우저 OAuth)은 이 skill이 자동 호출하지 않는다**. 로그인이
+필요하면 전역 설치 후 직접 실행해야 한다:
+
+```bash
+npm i -g @ait-co/console-cli   # 전역 설치 (로그인용)
+aitcc login                    # 시스템 Chrome 창에서 로그인
+```
+
 참고: https://github.com/apps-in-toss-community/console-cli
-```
 
-`aitcc`가 있으면 세션을 확인한다:
+`aitcc`가 있으면(또는 위 zero-install 경로를 쓰면) 세션을 확인한다:
 
 ```bash
 aitcc whoami --json
