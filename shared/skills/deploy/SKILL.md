@@ -204,6 +204,21 @@ stdout / stderr를 그대로 보여주고 진단 힌트를 추가한다.
 
 #### 약관 미체결 복구 시퀀스 (에러 코드 → TYPE 매핑)
 
+> **console CLI 실행 방법** — 아래 복구 명령(`aitcc workspace terms …` / `aitcc me terms …`)은
+> `aitcc` CLI가 필요하다. PATH에 있으면 그대로 사용. 없으면 zero-install로 실행한다:
+>
+> ```bash
+> # PATH에 aitcc가 있으면 그대로 사용. 없으면 설치 없이 실행:
+> pnpm dlx @ait-co/console-cli@latest workspace terms …   # pnpm 환경 (권장)
+> pnpm dlx @ait-co/console-cli@latest me terms …
+> npx -y @ait-co/console-cli@latest workspace terms …      # npm/npx 환경
+> npx -y @ait-co/console-cli@latest me terms …
+> ```
+>
+> credential/session(`~/.config/aitcc/`)은 실행 방식과 무관하게 재사용되므로
+> zero-install 호출도 기존 로그인 세션을 그대로 쓴다.
+> 아래 코드블록의 `aitcc`를 그 자리에서 위 형태로 치환하면 된다.
+
 에러 코드별 해당 약관 TYPE:
 
 | 에러 코드 | TYPE | 설명 |

@@ -48,7 +48,15 @@ aitcc app events ls --json        # 현재 디렉토리의 aitcc.yaml 기준
 aitcc app events ls <appId>       # appId 직접 지정
 ```
 
-`aitcc`가 PATH에 없으면 설치 안내 (`npm i -g @ait-co/console-cli`).
+`aitcc`가 PATH에 있으면 그대로 사용. 없으면 zero-install로 실행한다:
+
+```bash
+# PATH에 aitcc가 있으면 그대로 사용. 없으면 설치 없이 실행:
+pnpm dlx @ait-co/console-cli@latest app events ls --json   # pnpm 환경 (권장)
+npx -y @ait-co/console-cli@latest app events ls --json      # npm/npx 환경
+```
+
+credential/session은 실행 방식과 무관하게 재사용된다.
 
 #### 대안 2: 앱 메트릭 — `aitcc app metrics`
 
