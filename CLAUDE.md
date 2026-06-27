@@ -43,7 +43,7 @@
 | `auth-setup` | oidc-bridge 연결 옵션 설정 | `Edit` |
 | `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 — 환경 2(AITC Sandbox App (PWA)) 진입, 실기기 WebKit dev 미리보기 | `Edit`, `Bash` |
 | `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `Read`/`WebFetch` |
-| `debug` | 환경 4겹 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2: PWA Sandbox(`setup-phone-preview`). 환경 3·4: `ait-devtools` MCP의 `build_attach_url` QR로 on-device CDP relay attach | `Read`, `ait-devtools` MCP |
+| `debug` | 환경 3겹 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2: PWA Sandbox(`setup-phone-preview`). 환경 3: `ait-devtools` MCP의 `build_attach_url` QR로 on-device CDP relay attach | `Read`, `ait-devtools` MCP |
 | `welcome` | harness 진입 안내 — station 0 install 완료 후 station 1(scaffold)로 hand-off | (없음) |
 | `plan` | 기획 station 7 — 미니앱 기획 지원 | `Read`/`WebFetch` |
 | `design` | 디자인 station 8 — Figma MCP 연동 UI 설계 지원 | Figma MCP |
@@ -142,7 +142,7 @@ Phase 2-4 어댑터는 harness roadmap M3 달성 후 착수.
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/{plugin.json,marketplace.json}` 존재 — `marketplace.json`이 `/plugin marketplace add apps-in-toss-community/agent-plugin` 설치 경로(harness station 0)를 지탱한다. `plugin.json`의 `mcpServers."ait-devtools"`가 `devtools-mcp`를 상시 기동해 station 2·3을 단일 MCP surface로 묶는다.
 
 - ✅ **작동**: `docs`, `status`, `new-miniapp`, `inject-devtools`, `inject-polyfill`, `auth-setup`, `logs`, `setup-phone-preview`, `deploy-key`, `deploy`, `setup-bundle`, `register`, `debug`
-- ✅ **등록**: `ait-devtools` MCP(`npx -y @ait-co/devtools devtools-mcp`) — `/ait debug`가 환경 3·4 attach 경로(`build_attach_url` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
+- ✅ **등록**: `ait-devtools` MCP(`npx -y @ait-co/devtools devtools-mcp`) — `/ait debug`가 환경 3 attach 경로(`build_attach_url` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
 - 🔜 **남은 검증**: plugin 설치 → `/mcp`에 `ait-devtools` 노출 + 실기기 QR attach 1회 acceptance (GitHub Project harness roadmap 추적)
 - 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
 
