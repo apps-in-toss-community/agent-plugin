@@ -376,7 +376,7 @@ URL을 복사·재입력하게 하지 않는다.**
    | `measure_safe_area` | safe-area inset 측정 (노치·홈바 여백) |
    | `call_sdk` | SDK 메서드 직접 호출 — **환경 2(relay-sandbox)에서 불가** (mock SDK) |
    | `evaluate` | WebView JS 표현식 평가 — **환경 2(relay-sandbox)에서 실 SDK 접근 불가** (mock SDK) |
-   | `run_tests` | 프로젝트의 `*.phone.test.ts` 파일을 이미 attach된 실기기 WebView에서 실행해 pass/fail/skip 결과 반환 — **환경 2(relay-sandbox)에서 SDK는 mock이므로 실 SDK 동작 검증 불가** (DOM·console·타이밍 fidelity 검증은 가능) |
+   | `run_tests` | 프로젝트의 `*.ait.test.ts` 파일을 이미 attach된 실기기 WebView에서 실행해 pass/fail/skip 결과 반환 — **환경 2(relay-sandbox)에서 SDK는 mock이므로 실 SDK 동작 검증 불가** (DOM·console·타이밍 fidelity 검증은 가능) |
    | `AIT.getSdkCallHistory` | SDK 호출 이력 조회 |
    | `AIT.getMockState` | devtools mock 상태 스냅샷 조회 |
    | `AIT.getOperationalEnvironment` | 운영 환경 정보 + SDK 버전 조회 |
@@ -397,11 +397,11 @@ URL을 복사·재입력하게 하지 않는다.**
 
 ### 5-E. 실기기 테스트 실행 — `run_tests`
 
-attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)라면, 프로젝트에 `*.phone.test.ts` 파일이 있을 경우 **같은 relay 연결을 그대로 재사용**해 실기기 WebView에서 테스트를 실행할 수 있다.
+attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)라면, 프로젝트에 `*.ait.test.ts` 파일이 있을 경우 **같은 relay 연결을 그대로 재사용**해 실기기 WebView에서 테스트를 실행할 수 있다.
 
 ```
 run_tests({
-  files: ["**/*.phone.test.ts"],
+  files: ["**/*.ait.test.ts"],
   projectRoot: "<프로젝트 루트 경로>"
 })
 ```
@@ -479,7 +479,7 @@ run_tests({
   `/ait deploy`로 candidate를 만든 뒤 다시 `/ait debug`.
 - **`start_attach` 스캔 대기 중** → 폰 카메라로 QR 스캔.
   attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 13종 도구로 디버깅 시작.
-- **attach 후 미니앱에 `*.phone.test.ts` 테스트가 있으면** → `run_tests({ files: ["**/*.phone.test.ts"], projectRoot: "<프로젝트 루트>" })`로 실기기에서 실행 (5-E). env별 결과를 대조하면 SDK 버전·플랫폼 거동 차이를 잡는다.
+- **attach 후 미니앱에 `*.ait.test.ts` 테스트가 있으면** → `run_tests({ files: ["**/*.ait.test.ts"], projectRoot: "<프로젝트 루트>" })`로 실기기에서 실행 (5-E). env별 결과를 대조하면 SDK 버전·플랫폼 거동 차이를 잡는다.
 - **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
   Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
   다시 확인. 여전히 없으면 `get_debug_status`로 현재 환경/모드·relay 연결 상태 점검.
