@@ -49,6 +49,8 @@ adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_backgro
   (`start_debug`·`start_attach`·`list_pages`·`get_debug_status`)만 보이고, 폰이
   relay에 붙으면 나머지 도구가 같은 세션에서 동적 등록된다.
 
+세 환경 모두 attach 후 `run_tests`로 미니앱 test case 파일(glob)을 그 환경에서 실행할 수 있다 — env1은 mock+local CDP, env2는 실기기 WebKit, env3는 실 토스 WebView에서 같은 테스트를 돌려 환경별 거동 차이를 본다.
+
 생성·수정하는 모든 메시지에서 "공식(official)", "토스가 제공하는",
 "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
@@ -383,7 +385,7 @@ URL을 복사·재입력하게 하지 않는다.**
    진단한다.
 
 **attach 전에 보이는 도구는 bootstrap 4종(`start_debug`·`start_attach`·
-`list_pages`·`get_debug_status`)뿐이다** — 그게 정상이다. 나머지 12종이 안 보이면 아직 폰이 안
+`list_pages`·`get_debug_status`)뿐이다** — 그게 정상이다. 나머지 13종이 안 보이면 아직 폰이 안
 붙은 것이니 5-C 스캔 단계로 돌아간다.
 
 > SECRET-HANDLING: relay attach에 시크릿/인증 코드가 쓰이더라도 그 값을
@@ -432,7 +434,7 @@ run_tests({
 
 - ❌ attach 전에 attach 의존 도구가 안 보이는 걸 "버그"로 오인. bootstrap 4종
   (`start_debug`·`start_attach`·`list_pages`·`get_debug_status`)만 보이는 게 정상이고, 폰이
-  붙으면 나머지 12종이 동적 등록된다(5-D).
+  붙으면 나머지 13종이 동적 등록된다(5-D).
 - ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다(5-C).
 - ❌ 환경 2(`relay-sandbox`)에서 `call_sdk`/`evaluate`로 실 SDK 호출 시도. SDK가 mock이라
   불가하다. 실 SDK fidelity가 필요하면 환경 3(intoss-private dogfood)으로 올라간다.
@@ -476,8 +478,8 @@ run_tests({
 - **candidate scheme URL이 아직 없음** → `/ait setup-bundle` → `/ait register` →
   `/ait deploy`로 candidate를 만든 뒤 다시 `/ait debug`.
 - **`start_attach` 스캔 대기 중** → 폰 카메라로 QR 스캔.
-  attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 12종 도구로 디버깅 시작.
-- **attach 후 미니앱에 `*.phone.test.ts` 테스트가 있으면** → `run_tests({ files: ["**/*.phone.test.ts"], projectRoot: "<프로젝트 루트>" })`로 실기기에서 실행 (5-E).
+  attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 13종 도구로 디버깅 시작.
+- **attach 후 미니앱에 `*.phone.test.ts` 테스트가 있으면** → `run_tests({ files: ["**/*.phone.test.ts"], projectRoot: "<프로젝트 루트>" })`로 실기기에서 실행 (5-E). env별 결과를 대조하면 SDK 버전·플랫폼 거동 차이를 잡는다.
 - **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
   Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
   다시 확인. 여전히 없으면 `get_debug_status`로 현재 환경/모드·relay 연결 상태 점검.
