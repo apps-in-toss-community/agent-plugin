@@ -3,8 +3,9 @@ name: plan
 description: |
   Turn a natural-language mini-app idea into a plan — needed SDK domains,
   the runtime permissions they prompt for, and console terms (약관) that
-  gate registration. Analysis only, no scaffold/API calls; hands off to
-  `/ait new`. Conceptually precedes scaffold. Triggered by
+  gate registration. Use when the user asks "미니앱 만들 건데 필요한 SDK
+  도메인/권한/약관 먼저 정리해줘" — requirements analysis, not a docs
+  lookup. Analysis only; hands off to `/ait new`. Triggered by
   `/ait plan [requirements]`.
 argument-hint: '[requirements]'
 ---
