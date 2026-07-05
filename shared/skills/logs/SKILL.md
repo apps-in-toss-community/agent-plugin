@@ -2,9 +2,10 @@
 name: logs
 description: |
   Show runtime log options for the current mini-app. The Apps in Toss
-  console does not expose a runtime log endpoint, so this skill explains
-  the confirmed gap and guides the user to practical alternatives.
-  Triggered by `/ait logs`.
+  console exposes no runtime log endpoint (confirmed gap, not a plugin
+  bug) — this skill explains that and guides to practical alternatives.
+  Triggered by `/ait logs`, no args. Distinct from `status` (registration
+  state, not runtime logs).
 argument-hint: ''
 ---
 

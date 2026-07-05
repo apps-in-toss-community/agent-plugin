@@ -2,14 +2,10 @@
 name: register
 description: |
   Register the current mini-app with the Apps in Toss console — the step
-  between bundling and deploying. Scaffolds the `aitcc.yaml` manifest
-  non-interactively (the work `aitcc app init` does, but `app init` is
-  TTY-only so an agent can't run it), discovers `workspaceId` /
-  `categoryIds` via `aitcc whoami --json` and `aitcc app categories
-  --selectable --json`, then runs `aitcc app register --config
-  ./aitcc.yaml --json` (offer `--dry-run` first; `--accept-terms` only
-  with explicit user consent). Never overwrites an existing manifest.
-  Triggered by `/ait register`.
+  between bundling and deploying. Scaffolds `aitcc.yaml` non-interactively
+  (agents can't run TTY-only `aitcc app init`), discovers workspace/category
+  IDs, then runs `aitcc app register`. Never overwrites an existing
+  manifest. Triggered by `/ait register`, no args.
 argument-hint: ''
 ---
 

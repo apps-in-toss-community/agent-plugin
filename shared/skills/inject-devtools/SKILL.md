@@ -1,10 +1,11 @@
 ---
 name: inject-devtools
 description: |
-  Add `@ait-co/devtools` unplugin to an existing Apps in Toss mini-app project.
-  Detects the build tool (Vite / Next.js / Rspack / Webpack), installs the dev
-  dep with the right package manager, and patches the config file idempotently.
-  Triggered by `/ait inject-devtools`.
+  Add `@ait-co/devtools` unplugin to an existing (brownfield) mini-app
+  project — detects the build tool (Vite/Next.js/Rspack/Webpack), installs
+  the dev dep, and patches the config idempotently. Triggered by
+  `/ait inject-devtools`, no args. Distinct from `new-miniapp` (greenfield
+  scaffold) and `inject-polyfill` (standard Web API shim, not mock SDK).
 argument-hint: ''
 ---
 

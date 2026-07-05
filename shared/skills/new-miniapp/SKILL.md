@@ -2,10 +2,10 @@
 name: new-miniapp
 description: |
   Scaffold a new Apps in Toss mini-app from a community template (React 19
-  + Vite + TypeScript + `@ait-co/devtools` by default). Copies the template
-  directory next to the user's cwd, substitutes `{{tokens}}`, and runs the
-  initial `pnpm install` so `pnpm dev` works immediately. Triggered by
-  `/ait new <app-name> [--template <name>] [--no-install]`.
+  + Vite + TypeScript + `@ait-co/devtools` by default) — copies the
+  template, substitutes tokens, runs `pnpm install` so `pnpm dev` works
+  immediately. Greenfield only (see `inject-devtools` for existing
+  projects). Triggered by `/ait new <app-name> [--template <name>] [--no-install]`.
 argument-hint: '<app-name> [--template <name>] [--no-install]'
 ---
 

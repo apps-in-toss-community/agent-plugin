@@ -1,12 +1,10 @@
 ---
 name: deploy-key
 description: |
-  Issue a Deploy Key and save it to `~/.ait/credentials` so
-  `ait deploy --profile <name>` works immediately. The key is written
-  directly to `~/.ait/credentials`; the skill never re-echoes it.
-  Checks for a usable existing profile first; if one is valid and expires
-  in 7+ days, skips issuance and reports the name.
-  Triggered by `/ait deploy-key`.
+  Issue a Deploy Key and save it to `~/.ait/credentials` as a named profile
+  so `ait deploy --profile <name>` works immediately; never re-echoes the
+  key. Skips issuance if a valid profile (7+ days to expiry) already exists.
+  Triggered by `/ait deploy-key [profile-name]`. Precedes `/ait deploy`.
 argument-hint: '[profile-name]'
 ---
 

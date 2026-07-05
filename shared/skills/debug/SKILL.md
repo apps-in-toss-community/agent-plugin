@@ -1,22 +1,12 @@
 ---
 name: debug
 description: |
-  Help debug an Apps in Toss mini-app across three environments. Environment 1
-  (local browser): the `@ait-co/devtools` floating panel (mock state, 12 tabs),
-  the `window.__ait` runtime state object, and the browser's own DevTools
-  (console / network). Environment 2 (AITC Sandbox App (PWA)): real-device WebKit
-  engine via an installable PWA (`devtools.aitc.dev/launcher/`) — this skill's
-  MCP attach path via `start_attach({mode:'relay-sandbox'})` — one call that
-  switches to relay-sandbox mode and issues a QR attach URL; the SDK is mock
-  so CDP observation only (no real SDK calls); PWA tunnel infrastructure must
-  be set up first via `/ait setup-phone-preview` (`tunnel:{cdp:true}`), then
-  this skill launches the dev server automatically. The `ait-devtools` MCP
-  server is registered by this plugin and always running. Environment 3
-  (on-device intoss-private candidate): call `start_attach({mode:'relay-staging',
-  scheme_url})` — one call that switches the environment and issues a QR attach
-  URL; once the phone scans it and the relay attaches, attach-dependent tools
-  register dynamically in the same session. `/ait debug` branches by what it
-  observes and prints the right path. Triggered by `/ait debug`.
+  Debug an Apps in Toss mini-app across three environments — local browser
+  (devtools panel, `window.__ait`, browser DevTools), AITC Sandbox PWA
+  (real-device WebKit via `ait-devtools` MCP relay-sandbox attach), and
+  on-device intoss-private candidate (relay-staging QR attach). Branches by
+  what it observes. Triggered by `/ait debug` (no args). Distinct from
+  `status`/`logs` (console-side, not live device state).
 argument-hint: ''
 adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_background, /mcp auto-start, notifications/tools/list_changed handling are Claude Code-specific. Replace §5 with an adapter-specific overlay when targeting other agents.'
 ---
