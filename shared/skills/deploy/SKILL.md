@@ -1,24 +1,26 @@
 ---
 name: deploy
 description: |
-  Deploy the current mini-app bundle to Apps in Toss. Builds `.ait` if
-  missing, runs `ait deploy --profile <name>` (Deploy Key from
-  `/ait deploy-key`, or `--api-key` in CI), and surfaces the resulting
-  `intoss-private://` scheme URL. Triggered by `/ait deploy`, no args.
-  Requires prior `/ait register`; does not itself register or build bundles.
+  Ship the current mini-app bundle to Apps in Toss ("미니앱 배포해줘"): builds the
+  `.ait` if missing, then `ait deploy --profile <name>` (env `--api-key` in CI),
+  surfacing the `intoss-private://` URL. Also the Deploy Key facet `/ait deploy-key`
+  ("Deploy Key 발급해줘") — issues + saves the profile, never re-echoing the key.
 argument-hint: ''
 ---
 
 # deploy skill
+
+이 skill은 두 facet을 담는다 — `/ait deploy`(번들 업로드)와 `/ait deploy-key`(Deploy Key 발급·프로파일 저장). deploy-key는 deploy의 인증 전제 조건이라 하나로 묶였다(issue #273). 사용자가 `/ait deploy-key`로 진입했으면 아래 "Deploy Key facet" 섹션으로 곧장 분기한다.
 
 ## 목적
 
 `/ait deploy` 한 번으로 미니앱 번들을 앱인토스 콘솔에 업로드하고,
 결과로 나오는 `intoss-private://` scheme URL을 사용자에게 전달한다.
 
-이 skill의 범위는 **빌드 확인 → 업로드 → 결과 해석**으로 한정한다.
+deploy facet의 범위는 **빌드 확인 → 업로드 → 결과 해석**이다.
 앱 등록(`aitcc app register`)은 사전에 완료되어 있어야 하며 — 이 skill이
-수행하지 않는다. Deploy Key 발급과 프로파일 저장은 `/ait deploy-key`가 담당한다.
+수행하지 않는다. Deploy Key 발급·프로파일 저장은 이 skill의 **Deploy Key facet**
+(`/ait deploy-key`)이 담당한다 — 아래 별도 섹션 참조.
 
 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
@@ -315,10 +317,33 @@ exit 2 실패한다. 따라서 약관을 채팅으로 먼저 제시하고 사용
   # approved/OPENED면 scheme URL이 그대로 토스 앱에서 로드됨
 ```
 
+## Deploy Key facet — `/ait deploy-key` (Deploy Key 발급 + 프로파일 저장)
+
+사용자가 `/ait deploy-key`로 진입했으면 이 facet을 실행한다(deploy facet의 인증 전제).
+`ait deploy --profile <name>` 배포에 필요한 Deploy Key를 한 번 발급해
+`~/.ait/credentials`에 프로파일로 저장한다. 기존 프로파일이 유효하면(만료 7일+) 재발급
+없이 그 이름만 안내하고 종료한다.
+
+**SECRET-HANDLING (필수 — 절대 완화 금지)**: `aitcc keys create --json`의 `apiKey`는
+**1회 전달 채널**(GitHub PAT 패턴 — 한 번만 노출)이다. 발급된 키 값을 채팅·로그·명령문에
+**다시 출력하지 않는다**. `--save-profile`이 aitcc를 통해 `~/.ait/credentials`(mode 0600)에
+직접 기록하므로 에이전트가 raw 값을 다룰 필요가 없다 — 상태는 `ok`·`savedProfile`·
+`saveProfileWarning` 필드로만 확인하고 `apiKey`는 surface하지 않는다. 발급 즉시 안전한
+저장소로 옮긴다. `--save-profile` 저장 실패 시엔 `gh secret set --body-file -` no-echo
+레시피로 GitHub secret(`AITCC_API_KEY`)에 stdin 파이프로 넘긴다(argv에 평문 안 남김).
+
+절차(세션·zero-install·프로파일 이름 결정·`aitcc keys create --save-profile` 발급·
+`saveProfileWarning` 복구·`ok:false` reason 매핑·발급 확인·완료 seam)는 —
+
+**상세가 필요하면 Read `<이 skill의 base directory>/references/deploy-key.md`.**
+
+`/ait deploy-key <profile-name>` 인자가 있으면 그 이름을, 없으면
+`aitc-<repo-name>-local`(ASCII ≤16자)을 기본 프로파일 이름으로 쓴다. 저장 완료 후
+`/ait deploy --profile <profile-name>`로 이어진다.
+
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 앱 등록 — `/ait register` skill의 역할 (사전 작업).
-- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` skill의 역할.
 - ❌ 콘솔 로그인(`aitcc login`) — 이 skill은 `ait deploy --profile`(프로파일 인증) 또는 `--api-key`(env 인증)를 쓰므로 `aitcc` 세션이 필요 없다.
 - ❌ PREPARE 상태 실기기 dog-food — `/ait debug` 환경 3 경로(QR/deep-link relay 주입)가 담당.
 - ❌ `bundle:ait` 환경 설정 — `/ait setup-bundle` skill.
@@ -335,7 +360,7 @@ exit 2 실패한다. 따라서 약관을 채팅으로 먼저 제시하고 사용
 ## 참고
 
 - 짝 skill: `register` (앱인토스 콘솔 앱 등록 — 이 skill의 전제 조건, `aitcc.yaml` 없으면 선행).
-- 짝 skill: `deploy-key` (Deploy Key 발급 + 프로파일 저장 — 이 skill의 전제 조건).
+- Deploy Key facet 상세: `<이 skill의 base directory>/references/deploy-key.md` (발급·저장·복구 절차 전문).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — 이 skill의 전제 조건).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인 — 배포 전 점검).
 - 커뮤니티 docs — 번들 빌드·등록·배포 전 과정(두 상태머신·4046 lock·ait↔aitcc 분담): https://docs.aitc.dev/guides/ship-mini-app

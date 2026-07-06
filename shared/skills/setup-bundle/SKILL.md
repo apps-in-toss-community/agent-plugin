@@ -259,7 +259,7 @@ setup-bundle 완료
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 콘솔 앱 등록 — `/ait register` skill의 역할 (비대화형 앱 등록).
-- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` skill의 역할.
+- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` (`deploy` skill의 Deploy Key facet).
 - ❌ 콘솔 인증(`aitcc login`) — 별도 작업.
 - ❌ 배포 업로드 — `/ait deploy` (`deploy` skill).
 - ❌ 기존 `granite.config.ts` 수정 — 수동 편집 내용을 보호하기 위해 파일이 있으면 중단.

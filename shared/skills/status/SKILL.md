@@ -1,15 +1,16 @@
 ---
 name: status
 description: |
-  Show Apps in Toss console state for the current workspace and mini-app(s)
-  via `aitcc` — authenticated user/workspace, mini-apps in workspace, and
-  (if `aitcc.yaml` present) this app's review state. Read-only. Triggered
-  by `/ait status`, no args. Distinct from `logs` (runtime logs, not
-  registration/review state).
+  Read-only Apps in Toss console queries via `aitcc`. Two facets: `/ait status`
+  reports auth/workspace + current app review & runtime state ("콘솔 상태 보여줘",
+  "내 미니앱 심사 상태"); `/ait logs` explains the confirmed runtime-log gap and
+  guides alternatives ("런타임 로그 보고 싶어", "배포한 앱 로그"). Modifies nothing.
 argument-hint: ''
 ---
 
 # status skill
+
+이 skill은 두 facet을 담는다 — `/ait status`(콘솔 상태 조회)와 `/ait logs`(런타임 로그 옵션 안내). 둘 다 앱인토스 콘솔을 **읽기만** 하는 read-only 조회 계열이라 하나로 묶였다(issue #273). 사용자가 `/ait logs`로 진입했으면 아래 "logs facet" 섹션으로 곧장 분기한다.
 
 ## 목적
 
@@ -157,6 +158,34 @@ you@example.com / workspace <번호> <이름> · 앱 N개 ·
 
 이 skill은 분기 명령을 **자동 실행하지 않는다** — 가리키기만 한다.
 
+## logs facet — `/ait logs` (런타임 로그 옵션 안내)
+
+사용자가 `/ait logs`로 진입했으면 이 facet을 실행한다. status facet(위)과 달리 콘솔 조회
+명령을 부르지 않는다.
+
+**확인된 콘솔 갭 (정직하게 전달)**: 앱인토스 콘솔은 현재 **런타임 로그 API를 공개하지
+않는다**(2026-05-02 조사 확정). 그래서 `aitcc logs` 명령은 이 이유로 구현이 보류돼 있다 —
+이건 콘솔 설계 현황이지 플러그인 버그가 아니다. `aitcc logs`를 호출하려 하지 말 것(명령이
+없어 오류만 난다).
+
+대신 사용자에게 먼저 상황을 명시한다:
+
+```
+Apps in Toss 콘솔은 현재 런타임 로그 API를 공개하지 않습니다.
+`aitcc logs` 명령은 이 이유로 구현이 보류되어 있습니다.
+
+아래 대안 중 가장 적합한 방법을 선택해주세요.
+```
+
+그다음 **실행 가능한 대안 네 가지**를 안내한다: (1) `aitcc app events` 커스텀 이벤트
+카탈로그, (2) `aitcc app metrics` 전환 지표, (3) `/ait debug` DevTools 콘솔(환경 1 브라우저 /
+환경 3 on-device relay), (4) 외부 텔레메트리(Sentry 등). 각 대안의 구체 명령·zero-install
+형태·Sentry 단계별 안내·logs facet 분기 seam·하지 말아야 할 것은 —
+
+**상세가 필요하면 Read `<이 skill의 base directory>/references/log-alternatives.md`.**
+
+cwd에 `aitcc.yaml`이 있으면 대안 3(DevTools 콘솔)을 먼저 제시한다.
+
 ## CLI 미설치 fallback
 
 `aitcc`가 PATH에 없으면 zero-install로 바로 실행할 수 있다.
@@ -215,8 +244,10 @@ aitcc login은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토�
 ## 참고
 
 - 커뮤니티 docs — `app status`(클라이언트 derive) vs `app service-status`(서버 권위)·PREPARE vs OPENED·상태별 next-step: https://docs.aitc.dev/guides/operate-mini-app
+- 커뮤니티 docs — 이벤트 로깅 (logs facet 대안 1): https://docs.aitc.dev/guides/event-logging
 - console-cli 명령 레퍼런스: https://github.com/apps-in-toss-community/console-cli
 - 짝 skill: `deploy` (이 skill이 안전하다고 알려준 뒤 deploy로 넘어가는 흐름)
-- 짝 skill: `logs` (station 6 operate의 다른 절반 — 런타임 이벤트·지표·on-device 관측. `/ait logs`)
+- 짝 skill: `debug` (logs facet 환경 1: 브라우저 상태·콘솔 오류 캡처 / 환경 3: on-device CDP relay로 배포된 앱의 실 토스 WebView 런타임 관측)
+- logs facet 상세: `<이 skill의 base directory>/references/log-alternatives.md`
 - 초점은 현재 디렉토리의 미니앱(`aitcc.yaml` 기준) 하나다 — workspace 전체
   앱 목록은 맥락 제공용으로만 보여주고, 요약은 현재 프로젝트에 집중한다.
