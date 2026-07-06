@@ -51,7 +51,7 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
 ## 입력
 
 매니페스트 필수/선택 필드 전체 표, `titleEn` Title-Case 제약, 이미지 자산 규격표는
-**Read shared/skills/register/references/manifest-fields.md**. 핵심만 요약하면:
+**Read <이 skill의 base directory>/references/manifest-fields.md**. 핵심만 요약하면:
 `workspaceId`·`titleKo`·`titleEn`·`appName`(kebab-case)·`csEmail`·`subtitle`·`description`·
 `categoryIds`·`logo`·`horizontalThumbnail`·`verticalScreenshots`(≥3)가 필수이고,
 `homePageUri`·`logoDarkMode`·`keywords`·`horizontalScreenshots`는 선택(주석 처리해서 emit).
@@ -179,7 +179,7 @@ aitcc app categories --selectable --json
 ```
 
 응답은 두 단계 중첩 구조다(`categories[]`는 그룹 래퍼, `categoryList[]`가 실제 leaf 후보) —
-정확한 JSON 형태와 leaf 판별 규칙은 **Read shared/skills/register/references/manifest-fields.md**.
+정확한 JSON 형태와 leaf 판별 규칙은 **Read <이 skill의 base directory>/references/manifest-fields.md**.
 leaf를 수집한 뒤 "그룹명 › leaf명 = id" 형태로 사용자에게 제시하고
 ≥ 1개를 고르게 한다(예: `생활 › 교육 = 82`, `게임 › 액션 = 3836`).
 `categoryIds`에는 **leaf의 `id`**를 넣는다(그룹 id 아님).
@@ -223,7 +223,7 @@ mkdir -p assets
 `renderInitYaml()` 레이아웃을 그대로 따른다 — 헤더 주석 + 필수 블록 +
 주석 처리된 선택 블록. `titleKo`/`titleEn`/`subtitle`은 콜론 안전을 위해
 큰따옴표 스칼라로 쓴다. `miniAppId`는 주석으로만 둔다(등록이 자동 기록).
-정확한 템플릿은 **Read shared/skills/register/references/manifest-fields.md**.
+정확한 템플릿은 **Read <이 skill의 base directory>/references/manifest-fields.md**.
 
 ### 6. 등록 실행
 
@@ -286,7 +286,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 **실패** — 각 `reason`을 한국어 진단 + 수정 힌트로 매핑한다(특별히 명시한
 경우 외 exit 2). 전체 discriminator → 진단/힌트 매핑표는
-**Read shared/skills/register/references/error-mapping.md**. 특히
+**Read <이 skill의 base directory>/references/error-mapping.md**. 특히
 **`api-error`의 `errorCode: 4046`(REVIEW lock)은 운영팀 처리 대기가 정답 — 새 앱
 생성으로 우회하지 않는다**(anti-pattern, §하지 말아야 할 것 참조).
 
@@ -309,7 +309,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 ## 참고
 
-- 상세가 필요하면 Read shared/skills/register/references/manifest-fields.md (매니페스트 필드 전체 표·카테고리 응답 구조·`aitcc.yaml` 템플릿), references/error-mapping.md (등록 실패 discriminator → 진단/힌트 전체 매핑).
+- 상세가 필요하면 Read <이 skill의 base directory>/references/manifest-fields.md (매니페스트 필드 전체 표·카테고리 응답 구조·`aitcc.yaml` 템플릿), references/error-mapping.md (등록 실패 discriminator → 진단/힌트 전체 매핑).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — register 앞 단계).
 - 짝 skill: `deploy` (등록된 앱에 번들 업로드 — register 뒤 단계).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인).

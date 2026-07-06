@@ -118,7 +118,7 @@ package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실�
 
    stdout의 `Local: http://localhost:<port>/` 줄을 파싱해 실제 포트를 확인한다(빌드 도구마다 출력 형식이 조금씩 다르다). 파싱 전 예상 포트는 위 1단계에서 결정한 값(Vite 5173 / Next.js 3000 / Rspack·Webpack 8080, 또는 `--port` 명시값)이다.
 
-브라우저에서 연 뒤 화면 하단의 **AIT** 버튼을 누르면 패널이 열린다. 증상별로 어느 탭을 볼지는 `references/panel-tabs.md`에 정리돼 있다 — **상세가 필요하면 Read shared/skills/debug/references/panel-tabs.md**.
+브라우저에서 연 뒤 화면 하단의 **AIT** 버튼을 누르면 패널이 열린다. 증상별로 어느 탭을 볼지는 `references/panel-tabs.md`에 정리돼 있다 — **상세가 필요하면 Read <이 skill의 base directory>/references/panel-tabs.md**.
 
 ### 2-B. 브라우저 기본 DevTools
 
@@ -185,7 +185,7 @@ CDP(Chrome DevTools Protocol) relay로 attach해야 관측된다.
 없으면 먼저 station 5(`/ait setup-bundle` → `/ait register` → `/ait deploy`)로
 candidate를 만들도록 안내한다.
 
-`start_debug`/`start_attach`의 mode 값·내부 동작(dual-connection 라우터, lazy-boot relay, 수동 `/mcp` 재구성 fallback)은 정상 경로에서는 몰라도 되는 세부다 — **상세가 필요하면 Read shared/skills/debug/references/mode-switching.md**. attach까지 한 번에 처리하려면 바로 아래 5-B·5-C 순서를 따른다(`start_attach`가 환경 전환+QR 발급을 1호출로).
+`start_debug`/`start_attach`의 mode 값·내부 동작(dual-connection 라우터, lazy-boot relay, 수동 `/mcp` 재구성 fallback)은 정상 경로에서는 몰라도 되는 세부다 — **상세가 필요하면 Read <이 skill의 base directory>/references/mode-switching.md**. attach까지 한 번에 처리하려면 바로 아래 5-B·5-C 순서를 따른다(`start_attach`가 환경 전환+QR 발급을 1호출로).
 
 ### 5-B. candidate 번들 준비 (환경 3만)
 
@@ -208,7 +208,7 @@ URL을 복사·재입력하게 하지 않는다.**
 환경에 따라 분기한다. 두 경로 모두 **QR 스캔이 단일 진입**이다 —
 `devicectl`/`adb` 같은 device-control 발사는 쓰지 않는다(실유저 플로우 아님).
 사전 조건 확인·백그라운드 기동·폴링 등 단계별 상세는
-**Read shared/skills/debug/references/attach-flow.md**.
+**Read <이 skill의 base directory>/references/attach-flow.md**.
 
 **환경 2 (relay-sandbox) 경로 요약**: `/ait setup-phone-preview` 배선 확인 →
 `pnpm dev:phone:cdp` 백그라운드 기동(idempotent) → `<projectRoot>/.ait_urls` 생성 대기 →
@@ -231,7 +231,7 @@ TOTP 코드가 만료되면 `start_attach`가 자동으로 재발행해 QR/대�
 
 2. attach 성공 순간 서버가 `notifications/tools/list_changed`를 emit → Claude Code가
    tool 목록을 자동 갱신한다. attach 의존 도구 13종이 같은 세션에서 즉시 callable해진다 —
-   전체 목록·용도·SECRET-HANDLING 세부는 **Read shared/skills/debug/references/attach-tools.md**.
+   전체 목록·용도·SECRET-HANDLING 세부는 **Read <이 skill의 base directory>/references/attach-tools.md**.
 
 **attach 전에 보이는 도구는 bootstrap 4종(`start_debug`·`start_attach`·
 `list_pages`·`get_debug_status`)뿐이다** — 그게 정상이다. 나머지가 안 보이면 아직 폰이 안
@@ -239,7 +239,7 @@ TOTP 코드가 만료되면 `start_attach`가 자동으로 재발행해 QR/대�
 
 ### 5-E. 실기기 테스트 실행 — `run_tests`
 
-attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)라면, 프로젝트에 `*.ait.test.ts` 파일이 있을 경우 **같은 relay 연결을 그대로 재사용**해 실기기 WebView에서 테스트를 실행할 수 있다. 호출 형태·옵션·환경별 검증 범위는 **Read shared/skills/debug/references/attach-tools.md**.
+attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)라면, 프로젝트에 `*.ait.test.ts` 파일이 있을 경우 **같은 relay 연결을 그대로 재사용**해 실기기 WebView에서 테스트를 실행할 수 있다. 호출 형태·옵션·환경별 검증 범위는 **Read <이 skill의 base directory>/references/attach-tools.md**.
 
 ## Out of scope (이 skill이 하지 않는 것)
 
@@ -309,7 +309,7 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 
 ## 참고
 
-- 상세가 필요하면 Read shared/skills/debug/references/panel-tabs.md (환경 1 패널 탭별 관찰 지점), references/mode-switching.md (`start_debug`/`start_attach` mode 내부 동작·fallback), references/attach-tools.md (attach 후 13종 도구 + `run_tests` 상세 + SECRET-HANDLING).
+- 상세가 필요하면 Read <이 skill의 base directory>/references/panel-tabs.md (환경 1 패널 탭별 관찰 지점), references/mode-switching.md (`start_debug`/`start_attach` mode 내부 동작·fallback), references/attach-tools.md (attach 후 13종 도구 + `run_tests` 상세 + SECRET-HANDLING).
 - 짝 skill: `inject-devtools` (panel 설정), `setup-phone-preview` (환경 2(AITC Sandbox App (PWA)) 인프라 배선 — `tunnel:{cdp:true}` + cloudflared 터널 기동. `/ait debug` relay-sandbox의 선행 단계).
 - 환경 3겹 × fidelity 설계 정본: umbrella `meta/four-environments-fidelity.md` (§1 환경 모델, §5 동적 도구 등록, §7 CDP 단일 transport).
 - 환경 3 진입 시나리오 + QR relay 흐름: https://github.com/apps-in-toss-community/devtools/blob/main/docs/scenarios/env-3.md

@@ -146,7 +146,7 @@ const { authorizationCode } = await appLogin();
 mini-app은 authorizationCode를 **자신의 백엔드**로 전달하고, 백엔드가 bridge를 호출한다.
 bridge 요청/응답 JSON 계약, Supabase Edge Function 코드 예, Edge Function 배포(`supabase functions deploy`
 + `supabase secrets set`), 클라이언트 `signInWithIdToken`/Firebase `signInWithCredential` 코드 전체는
-**Read shared/skills/auth-setup/references/backend-integration.md**.
+**Read <이 skill의 base directory>/references/backend-integration.md**.
 
 핵심만 요약하면: 백엔드가 `POST /t/<tenantId>/oidc/token`(공용) 또는 `POST /oidc/token`(self-host)으로
 `{grant_type, code, client_id, referrer, client_secret?}`를 보내고, bridge가 돌려준 `id_token`만
@@ -216,7 +216,7 @@ native 검증은 번들·등록이 선행되어야 하므로, sandbox 확인이 
 
 ## 참고
 
-- 상세가 필요하면 Read shared/skills/auth-setup/references/backend-integration.md (bridge 요청/응답 계약, Supabase Edge Function 코드, 배포 명령, 클라이언트 signInWithIdToken/Firebase 코드 전체).
+- 상세가 필요하면 Read <이 skill의 base directory>/references/backend-integration.md (bridge 요청/응답 계약, Supabase Edge Function 코드, 배포 명령, 클라이언트 signInWithIdToken/Firebase 코드 전체).
 - 커뮤니티 docs — 토스 로그인 흐름: https://docs.aitc.dev/guides/auth-flow
 - 커뮤니티 docs — oidc-bridge 통합(consumer backend·operator mTLS·mock adapter): https://docs.aitc.dev/guides/oidc-bridge
 - oidc-bridge repo: https://github.com/apps-in-toss-community/oidc-bridge
