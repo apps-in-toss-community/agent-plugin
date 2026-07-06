@@ -50,55 +50,18 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
 
 ## 입력
 
-### 매니페스트 필수 필드 (console-cli가 검증)
-
-| 필드 | 설명 | 제약 |
-|---|---|---|
-| `workspaceId` | 워크스페이스 ID (정수) | `aitcc whoami --json`으로 발견 |
-| `titleKo` | 한국어 앱 제목 | 허용 문자: 한글·영문자·숫자·공백 + `: · ?`만. 공백 제외 ≤ 10 코드포인트 |
-| `titleEn` | 영어 앱 제목 | `[A-Za-z0-9 :·?]`만. 공백 제외 ≤ 15 코드포인트. 각 단어는 Title-Case |
-| `appName` | 콘솔 앱 식별자 | `^[a-z][a-z0-9-]*$` (소문자 시작, kebab-case) |
-| `csEmail` | 고객지원 이메일 | 유효한 이메일 |
-| `subtitle` | 한 줄 부제 | ≤ 20자 |
-| `description` | 앱 설명 (블록 스칼라) | ≤ 500 코드포인트 |
-| `categoryIds` | 카테고리 ID 배열 | 정수 ≥ 1개. `aitcc app categories --selectable --json`으로 발견 |
-| `logo` | `./assets/logo.png` | 600×600 PNG |
-| `horizontalThumbnail` | `./assets/thumbnail.png` | 1932×828 PNG |
-| `verticalScreenshots` | 경로 ≥ 3개 | 각 636×1048 PNG |
-
-**`titleEn` 주의**: 각 단어는 Title-Case여야 한다(첫 글자 대문자, 나머지 소문자).
-`SDK`·`AITC` 같은 전부 대문자 토큰은 서버가 거부한다 — 사용자에게 미리 알린다.
-(예: `AITC SDK Example` ✗ → `Aitc Sdk Example` ✓)
-
-### 매니페스트 선택 필드 (주석 처리해서 emit)
-
-`aitcc app init`처럼 주석 처리된 라인으로 남겨둔다.
-
-| 필드 | 설명 | 제약 |
-|---|---|---|
-| `homePageUri` | 홈페이지 URL | http/https |
-| `logoDarkMode` | `./assets/logo-dark.png` | 600×600 PNG |
-| `keywords` | 키워드 배열 | ≤ 10개 |
-| `horizontalScreenshots` | 가로 스크린샷 경로 | 각 1504×741 PNG |
-
-### 이미지 자산 (사용자가 `./assets/`에 직접 배치)
-
-이 skill은 이미지를 생성·리사이즈하지 않는다. 규격은 등록 시점에
-로컬 + 서버 양쪽에서 강제된다.
+매니페스트 필수/선택 필드 전체 표, `titleEn` Title-Case 제약, 이미지 자산 규격표는
+**Read <이 skill의 base directory>/references/manifest-fields.md**. 핵심만 요약하면:
+`workspaceId`·`titleKo`·`titleEn`·`appName`(kebab-case)·`csEmail`·`subtitle`·`description`·
+`categoryIds`·`logo`·`horizontalThumbnail`·`verticalScreenshots`(≥3)가 필수이고,
+`homePageUri`·`logoDarkMode`·`keywords`·`horizontalScreenshots`는 선택(주석 처리해서 emit).
 
 아이콘·스크린샷 준비는 harness의 디자인 station(`/ait design`, station 8)이
 맡는다 — 이 산출은 `/ait design`으로 실행한다. design을 거치지 않고 자산을
 직접 준비할 수도 있으며, 그때는 register가 규격을 명시적으로 안내하고
 사용자가 `./assets/`에 채우는 hand-off로 처리한다(절벽이 아니라 seam).
 `/ait design`은 register 규격에 맞는 자산을 만들어 그 앞에 자연스럽게 연결된다.
-
-| 파일 | 규격 | 개수 |
-|---|---|---|
-| `assets/logo.png` | 600×600 | 1 (필수) |
-| `assets/thumbnail.png` | 1932×828 | 1 (필수) |
-| `assets/screenshot-*.png` | 636×1048 | ≥ 3 (필수, 세로) |
-| `assets/logo-dark.png` | 600×600 | 선택 |
-| `assets/screenshot-h-*.png` | 1504×741 | 선택 (가로) |
+이 skill은 이미지를 생성·리사이즈하지 않는다 — 규격은 등록 시점에 로컬 + 서버 양쪽에서 강제된다.
 
 ## 실행 순서
 
@@ -215,25 +178,8 @@ aitcc whoami --json
 aitcc app categories --selectable --json
 ```
 
-응답 구조는 두 단계 중첩이다 — `categories[]`는 그룹 래퍼이지 leaf가 아니다:
-
-```
-{
-  ok: true,
-  categories: [
-    {
-      categoryGroup: { id, name, isSelectable },   // 그룹(선택 불가)
-      categoryList: [                               // 실제 leaf 후보
-        { id, name, isSelectable, subCategoryList: [...] }
-      ]
-    }
-  ]
-}
-```
-
-**leaf 판별**: `isSelectable === true` AND `subCategoryList`가 비어 있거나 없음.
-`subCategoryList`에 항목이 있으면 그 안으로 재귀한다.
-
+응답은 두 단계 중첩 구조다(`categories[]`는 그룹 래퍼, `categoryList[]`가 실제 leaf 후보) —
+정확한 JSON 형태와 leaf 판별 규칙은 **Read <이 skill의 base directory>/references/manifest-fields.md**.
 leaf를 수집한 뒤 "그룹명 › leaf명 = id" 형태로 사용자에게 제시하고
 ≥ 1개를 고르게 한다(예: `생활 › 교육 = 82`, `게임 › 액션 = 3836`).
 `categoryIds`에는 **leaf의 `id`**를 넣는다(그룹 id 아님).
@@ -277,38 +223,7 @@ mkdir -p assets
 `renderInitYaml()` 레이아웃을 그대로 따른다 — 헤더 주석 + 필수 블록 +
 주석 처리된 선택 블록. `titleKo`/`titleEn`/`subtitle`은 콜론 안전을 위해
 큰따옴표 스칼라로 쓴다. `miniAppId`는 주석으로만 둔다(등록이 자동 기록).
-
-```yaml
-# Apps in Toss 미니앱 등록 매니페스트 (aitcc app register --config ./aitcc.yaml)
-# 커뮤니티 오픈소스 console-cli(aitcc)가 읽는 파일입니다.
-# miniAppId: <등록 후 register가 자동으로 기록합니다 — 직접 채우지 마세요>
-
-workspaceId: <number>
-
-titleKo: "<한국어 제목>"
-titleEn: "<English Title>"
-appName: <kebab-case>
-csEmail: <support@example.com>
-subtitle: "<한 줄 부제>"
-description: |-
-  <앱 설명. 여러 줄 가능. 최대 500자.>
-
-categoryIds: [<id>, ...]
-
-logo: ./assets/logo.png
-horizontalThumbnail: ./assets/thumbnail.png
-verticalScreenshots:
-  - ./assets/screenshot-1.png
-  - ./assets/screenshot-2.png
-  - ./assets/screenshot-3.png
-
-# --- 선택 필드 (필요하면 주석 해제) ---
-# homePageUri: "https://example.com"
-# logoDarkMode: ./assets/logo-dark.png
-# keywords: [foo, bar]
-# horizontalScreenshots:
-#   - ./assets/screenshot-h-1.png
-```
+정확한 템플릿은 **Read <이 skill의 base directory>/references/manifest-fields.md**.
 
 ### 6. 등록 실행
 
@@ -370,23 +285,10 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 `consoleUrl`은 콘솔 deep-link다(서버가 miniAppId를 생략하면 null).
 
 **실패** — 각 `reason`을 한국어 진단 + 수정 힌트로 매핑한다(특별히 명시한
-경우 외 exit 2):
-
-| discriminator (exit) | 진단 + 힌트 |
-|---|---|
-| `no-workspace-selected` (2) | workspaceId가 정해지지 않음. `aitcc.yaml`에 설정하거나 `--workspace`로 전달. |
-| `invalid-config` (2, `message`) | 매니페스트 형식/검증 오류. `message`를 그대로 보여줌. |
-| `missing-required-field` (2, `field`,`message`) | 빠진 필드(`field`)를 지목. |
-| `image-dimension-mismatch` (2, `path`,`expected`,`actual`,`message`) | 어느 이미지(`path`)가 규격(`expected`)과 다른지(`actual`) 안내. 자산을 다시 만들려면 `/ait design`. |
-| `image-unreadable` (2, `path`,`message`) | `path`의 이미지가 없거나 손상됨. `./assets/`에 규격대로 배치하거나 `/ait design`으로 생성. |
-| `terms-not-accepted` (2, `message`) | 사용자 동의를 다시 받아 `--accept-terms`로 재실행. |
-| `ok:true · authenticated:false` (10) | 세션 없음(reason 필드 없음 — `ok:true`로 다른 실패와 구별됨). `aitcc login` 직접 실행 후 재시도. |
-| `network-error` (11, `message`) | 네트워크 오류. `message`를 보여주고 재시도. |
-| `api-error` (17, `status?`,`errorCode?`,`message`) | 서버 `errorCode`를 surface. **`4046` = REVIEW lock** → 운영팀 처리 대기. **새 앱 생성으로 우회하지 않는다**(anti-pattern). **`5010` = 계정 단위 AI_RISK_USE 약관 미동의** → `aitcc me terms agree --scope AI_RISK_USE --yes` 로 동의 후 재시도(`--yes`는 비대화형 환경에서 필수 — 없으면 hang). 동의는 법적 행위이므로 `--yes`를 붙이기 전 약관 내용을 사용자에게 보이고 명시적 확인을 받는다(`--accept-terms`의 동의 책임 경계와 동일). |
-
-`api-error`는 항상 `errorCode`를 그대로 보여준다. `4046`이 오면 앱이
-리뷰 잠금 상태이므로 업데이트가 막힌 것 — 운영팀 처리를 기다리고, 우회용으로
-새 앱을 만들지 않는다.
+경우 외 exit 2). 전체 discriminator → 진단/힌트 매핑표는
+**Read <이 skill의 base directory>/references/error-mapping.md**. 특히
+**`api-error`의 `errorCode: 4046`(REVIEW lock)은 운영팀 처리 대기가 정답 — 새 앱
+생성으로 우회하지 않는다**(anti-pattern, §하지 말아야 할 것 참조).
 
 ## Out of scope (이 skill이 하지 않는 것)
 
@@ -407,6 +309,7 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 ## 참고
 
+- 상세가 필요하면 Read <이 skill의 base directory>/references/manifest-fields.md (매니페스트 필드 전체 표·카테고리 응답 구조·`aitcc.yaml` 템플릿), references/error-mapping.md (등록 실패 discriminator → 진단/힌트 전체 매핑).
 - 짝 skill: `setup-bundle` (번들 빌드 환경 설정 — register 앞 단계).
 - 짝 skill: `deploy` (등록된 앱에 번들 업로드 — register 뒤 단계).
 - 짝 skill: `status` (콘솔 인증 + 앱 상태 확인).
