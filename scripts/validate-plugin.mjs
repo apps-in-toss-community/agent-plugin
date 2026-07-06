@@ -257,8 +257,17 @@ function checkA1(root) {
     const referencedSkill = match[1];
 
     // argument-hint 동기화 검증
+    //   병합 skill(issue #273)에는 여러 command 가 서로 다른 facet 인자로 위임한다.
+    //   한 skill 은 argument-hint 를 하나만 가지므로 secondary-facet stub 의 hint 와는
+    //   본질적으로 어긋난다 — 그 stub 들은 sync 검사에서 면제한다(각 병합 skill 은
+    //   자기 argument-hint 로 두 facet 을 커버하거나 분기한다). primary stub
+    //   (skill 과 같은 verb: ait-deploy→deploy, ait-status→status)만 sync 를 강제한다.
     const skillInfo = skillMeta.get(referencedSkill);
-    if (skillInfo?.hasArgumentHint && 'argument-hint' in fm) {
+    if (
+      skillInfo?.hasArgumentHint &&
+      'argument-hint' in fm &&
+      !MERGED_SECONDARY_FACET_CMDS.has(cmdFile)
+    ) {
       if (fm['argument-hint'] !== skillInfo.argumentHint) {
         violations.push(
           mkv(
@@ -303,26 +312,11 @@ function checkA1(root) {
     }
   }
 
-  // 각 skill이 두 개 이상의 command에서 참조되는지 (중복)
-  /** @type {Map<string, number>} */
-  const skillCommandCount = new Map();
-  for (const [, meta] of commandMeta) {
-    const cnt = (skillCommandCount.get(meta.skillName) ?? 0) + 1;
-    skillCommandCount.set(meta.skillName, cnt);
-  }
-  for (const [skillName, cnt] of skillCommandCount) {
-    if (cnt > 1) {
-      const relFile = path.join('shared', 'skills', skillName, 'SKILL.md');
-      violations.push(
-        mkv(
-          relFile,
-          1,
-          'A1/skill-multi-cmd',
-          `skill '${skillName}' 이 ${cnt}개 명령에서 참조됨 (1:1 위반)`,
-        ),
-      );
-    }
-  }
+  // 병합 skill: 여러 command stub이 한 skill로 위임하는 것은 의도된 many-to-one 이다
+  // (skill 통합 17→14, issue #273 — command 표면은 17개 유지, 겹치는 skill만 병합).
+  // 어떤 command 가 어떤 skill 로 위임하는지는 아래 EXPECTED_CMD_TO_SKILL 스냅샷이
+  // 권위 있게 못박으므로, "skill 이 2개 이상 command 에서 참조됨"은 그 자체로는
+  // 위반이 아니다 — 스냅샷에 없는 예기치 못한 매핑만 A1/routing-mismatch 로 잡는다.
 
   // 라우팅 스냅샷 검증: commandMeta 가 EXPECTED_CMD_TO_SKILL 과 일치하는지
   for (const [cmdFile, expectedSkill] of Object.entries(EXPECTED_CMD_TO_SKILL)) {
@@ -431,17 +425,33 @@ const DOCS_DEEPLINK_RE = /docs\.aitc\.dev\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_
 // shared/commands/ 전수를 열거한다. 변경 시 이 상수도 함께 갱신.
 // ---------------------------------------------------------------------------
 
+// 17개 command stub → 14개 skill 매핑 (issue #273, skill 통합 17→14).
+// 병합 3건은 여러 command 가 한 skill 로 위임한다(command 표면은 무변경):
+//   ait-logs            → status  (status+logs 병합: 같은 read-only 콘솔 조회 계열)
+//   ait-deploy-key      → deploy  (deploy-key 를 deploy 로 흡수: deploy 의 인증 전제)
+//   ait-inject-devtools → inject  (inject-devtools+inject-polyfill 병합: 둘 다 기존
+//   ait-inject-polyfill → inject   프로젝트 빌드 셋업 패치 — 병합 skill 이름은 중립적 `inject`)
+// 병합 skill 의 secondary-facet command stub (primary 는 skill 과 같은 verb).
+// 이 stub 들은 argument-hint sync 검사에서 면제된다 — 병합 skill 은 hint 를
+// 하나만 가지므로 secondary facet 의 hint 와는 본질적으로 어긋나기 때문.
+const MERGED_SECONDARY_FACET_CMDS = new Set([
+  'ait-logs.md', // → status
+  'ait-deploy-key.md', // → deploy
+  'ait-inject-devtools.md', // → inject
+  'ait-inject-polyfill.md', // → inject
+]);
+
 /** @type {Record<string, string>} */
 const EXPECTED_CMD_TO_SKILL = {
   'ait-auth-setup.md': 'auth-setup',
   'ait-debug.md': 'debug',
-  'ait-deploy-key.md': 'deploy-key',
+  'ait-deploy-key.md': 'deploy',
   'ait-deploy.md': 'deploy',
   'ait-design.md': 'design',
   'ait-docs.md': 'docs',
-  'ait-inject-devtools.md': 'inject-devtools',
-  'ait-inject-polyfill.md': 'inject-polyfill',
-  'ait-logs.md': 'logs',
+  'ait-inject-devtools.md': 'inject',
+  'ait-inject-polyfill.md': 'inject',
+  'ait-logs.md': 'status',
   'ait-new.md': 'new-miniapp',
   'ait-plan.md': 'plan',
   'ait-register.md': 'register',

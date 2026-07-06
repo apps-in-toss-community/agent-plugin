@@ -39,18 +39,17 @@ providers:
       # 확인됨: working_dir 키 이름. skill 이 0개로 잡히면 이 키를 확인하라
       # (provider 버전에 따라 cwd / workingDir 일 수 있음).
       working_dir: ./fixture
-      # 16개 skill을 명시적으로 노출 (setting_sources 발견과 병행 — 안전).
+      # 14개 skill을 명시적으로 노출 (setting_sources 발견과 병행 — 안전).
+      # skill 통합 17→14 (issue #273): logs→status, deploy-key→deploy,
+      # inject-devtools+inject-polyfill→inject. command 표면은 17개 그대로.
       skills:
         - auth-setup
         - changeset
         - debug
         - deploy
-        - deploy-key
         - design
         - docs
-        - inject-devtools
-        - inject-polyfill
-        - logs
+        - inject
         - new-miniapp
         - plan
         - register
@@ -106,21 +105,21 @@ tests:
       - type: skill-used
         value: design
 
-  # --- station 2: dev — devtools 주입 (brownfield) ---
-  - description: 'POS inject-devtools — 기존 프로젝트에 devtools 주입'
+  # --- station 2: dev — devtools 주입 (brownfield, inject skill의 devtools facet) ---
+  - description: 'POS inject (devtools facet) — 기존 프로젝트에 devtools 주입'
     vars:
       utterance: '이미 있는 Vite 프로젝트에 앱인토스 devtools 패널을 붙이고 싶어'
     assert:
       - type: skill-used
-        value: inject-devtools
+        value: inject
 
-  # --- station 2: dev — polyfill 마이그레이션 ---
-  - description: 'POS inject-polyfill — polyfill 모드 전환'
+  # --- station 2: dev — polyfill 마이그레이션 (inject skill의 polyfill facet) ---
+  - description: 'POS inject (polyfill facet) — polyfill 모드 전환'
     vars:
       utterance: '표준 Web API로 코드를 쓸 수 있게 앱인토스 polyfill 모드로 마이그레이션해줘'
     assert:
       - type: skill-used
-        value: inject-polyfill
+        value: inject
 
   # --- station 2: dev — 실기기 미리보기 ---
   - description: 'POS setup-phone-preview — 실폰 미리보기 터널'
@@ -162,13 +161,13 @@ tests:
       - type: skill-used
         value: register
 
-  # --- station 5: deploy-key ---
-  - description: 'POS deploy-key — Deploy Key 발급'
+  # --- station 5: deploy-key (deploy skill의 Deploy Key facet) ---
+  - description: 'POS deploy (Deploy Key facet) — Deploy Key 발급'
     vars:
       utterance: '앱인토스 Deploy Key 발급해서 프로파일로 저장해줘'
     assert:
       - type: skill-used
-        value: deploy-key
+        value: deploy
 
   # --- station 5: deploy ---
   - description: 'POS deploy — 번들 배포'
@@ -186,13 +185,13 @@ tests:
       - type: skill-used
         value: status
 
-  # --- station 6: logs ---
-  - description: 'POS logs — 런타임 로그 조회'
+  # --- station 6: logs (status skill의 logs facet) ---
+  - description: 'POS status (logs facet) — 런타임 로그 조회'
     vars:
       utterance: '배포한 미니앱의 런타임 로그를 보고 싶어'
     assert:
       - type: skill-used
-        value: logs
+        value: status
 
   # --- cross-cutting: docs ---
   - description: 'POS docs — 커뮤니티 docs 토픽 로드'
@@ -224,9 +223,7 @@ tests:
       - type: not-skill-used
         value: new-miniapp
       - type: not-skill-used
-        value: inject-devtools
-      - type: not-skill-used
-        value: inject-polyfill
+        value: inject
       - type: not-skill-used
         value: design
 
@@ -268,11 +265,9 @@ tests:
       - type: not-skill-used
         value: auth-setup
 
-  - description: 'NEG 일반 상태 조회 — status/logs 로 새지 않아야'
+  - description: 'NEG 일반 상태 조회 — status(+logs facet) 로 새지 않아야'
     vars:
       utterance: 'git 상태 한 번 보여줘. 뭐가 staged 됐는지.'
     assert:
       - type: not-skill-used
         value: status
-      - type: not-skill-used
-        value: logs

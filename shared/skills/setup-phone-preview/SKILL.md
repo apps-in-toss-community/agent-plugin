@@ -341,7 +341,7 @@ setup-phone-preview 완료
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ `@ait-co/devtools` 신규 설치 — `/ait inject-devtools` skill.
+- ❌ `@ait-co/devtools` 신규 설치 — `/ait inject-devtools` (`inject` skill의 devtools facet).
 - ❌ Next.js / Rspack / Webpack 프로젝트 — Vite 전용. 다른 빌드 도구는 cloudflared CLI 직접 사용.
 - ❌ 실제 tunnel URL 확인·연결 테스트 — `pnpm dev:phone` 직접 실행 후 확인.
 - ❌ launcher PWA 홈화면 추가 자동화 — OS gesture 필요, 수동.

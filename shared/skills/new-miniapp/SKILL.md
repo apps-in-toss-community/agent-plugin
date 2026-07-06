@@ -317,7 +317,7 @@ pnpm --dir <project_abs_path> dev
 - ❌ `aitcc.yaml` 생성 / 콘솔에 앱 등록 — `/ait register` skill의 역할.
 - ❌ 배포 — `/ait deploy` (`deploy` skill).
 - ❌ 기존 프로젝트에 devtools 주입 — `/ait inject-devtools`
-  (`inject-devtools` skill).
+  (`inject` skill의 devtools facet).
 - ❌ Workspace 등록 / 멤버 초대 / billing — console-cli + 콘솔 UI.
 - ❌ Lockfile commit — 템플릿에는 lockfile을 포함하지 않는다 (사용처마다
   매니저/버전이 달라 처음 install로 생성).
