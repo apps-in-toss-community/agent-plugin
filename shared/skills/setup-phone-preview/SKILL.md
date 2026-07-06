@@ -1,12 +1,11 @@
 ---
 name: setup-phone-preview
 description: |
-  Wire up the devtools quick-tunnel + launcher PWA flow into the current project
-  so you can preview the dev app on a real phone. Patches vite.config.ts
-  (adds tunnel option), pnpm-workspace.yaml (adds cloudflared to
-  onlyBuiltDependencies), package.json (adds dev:phone script), and runs pnpm
-  install so the cloudflared binary is cached before the first run. All changes
-  are idempotent — safe to run more than once. Triggered by `/ait setup-phone-preview`.
+  Wire up the devtools quick-tunnel + launcher PWA flow so you can preview
+  the dev app on a real phone (environment 2, WebKit engine, no review
+  needed) — patches vite.config.ts, pnpm-workspace.yaml, adds a `dev:phone`
+  script, pre-caches cloudflared. Idempotent. Triggered by
+  `/ait setup-phone-preview`, no args. Prerequisite for `debug`'s environment 2.
 argument-hint: ''
 ---
 

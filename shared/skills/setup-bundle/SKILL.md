@@ -1,12 +1,11 @@
 ---
 name: setup-bundle
 description: |
-  Wire up the native Apps in Toss bundle build (`.ait`) into an existing
-  mini-app project. Installs `@apps-in-toss/cli` as a dev dep, generates
-  `granite.config.ts`, adds the `bundle:ait` script to package.json, and
-  appends `.gitignore` entries — all idempotently. If `granite.config.ts`
-  already exists, reports and stops rather than overwriting hand-edited
-  config. Triggered by `/ait setup-bundle`.
+  Wire up the native `.ait` bundle build into an existing mini-app project —
+  installs `@apps-in-toss/cli`, generates `granite.config.ts`, adds the
+  `bundle:ait` script, appends `.gitignore` entries, idempotently. Stops
+  without overwriting if `granite.config.ts` already exists. Triggered by
+  `/ait setup-bundle`, no args. Precedes `/ait register`.
 argument-hint: ''
 ---
 

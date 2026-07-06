@@ -1,10 +1,10 @@
 ---
 name: changeset
 description: |
-  Create a changeset entry (.changeset/*.md) for version bump in npm packages.
-  Default bump is ALWAYS patch. Never auto-select minor or major — those
-  require explicit user instruction. Use this when the user asks to "make a
-  changeset", "add a changeset", "버전 올려줘", or invokes /changeset.
+  Create a `.changeset/*.md` entry for an npm version bump. Default bump is
+  ALWAYS patch; minor/major only with explicit user instruction. Use when
+  the user says "changeset 만들어줘", "add a changeset", "버전 올려줘", or
+  invokes `/changeset`. Harness-external maintainer tool, no `/ait` prefix.
 argument-hint: '[patch|minor|major]'
 ---
 

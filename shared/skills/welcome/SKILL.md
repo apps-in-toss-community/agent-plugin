@@ -1,12 +1,10 @@
 ---
 name: welcome
 description: |
-  Print the harness entry-point map after the plugin is installed — names the
-  zero→ship station flow and points the user at `/ait new` as the first step.
-  This is the station-0→1 hand-off: `/plugin install` puts the `/ait` commands
-  in place but prints no next step, so a freshly-installed user has no in-agent
-  signpost. Triggered by `/ait welcome`. Read-only — prints guidance, changes
-  nothing.
+  Print the harness entry-point map right after plugin install — names the
+  zero→ship station flow and points to `/ait new` as the first step, since
+  `/plugin install` itself prints no next step. Station-0→1 hand-off.
+  Read-only. Triggered by `/ait welcome`, no args.
 argument-hint: ''
 ---
 

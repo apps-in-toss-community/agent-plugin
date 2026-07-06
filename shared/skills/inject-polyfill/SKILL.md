@@ -1,10 +1,11 @@
 ---
 name: inject-polyfill
 description: |
-  Migrate an existing Apps in Toss mini-app project to `@ait-co/polyfill` mode —
-  install the package, wire up the auto-import in the entry point, and guide the
-  developer on writing standard Web API calls that route through the SDK at runtime.
-  Triggered by `/ait inject-polyfill`.
+  Migrate an existing mini-app project to `@ait-co/polyfill` mode — install
+  the package, wire up entry-point auto-import, so standard Web API calls
+  (`navigator.clipboard` etc.) route to the SDK at runtime. Triggered by
+  `/ait inject-polyfill [--entry <path>]`. Distinct from `inject-devtools`
+  (mock SDK for dev, not a runtime shim).
 argument-hint: '[--entry <path>]'
 ---
 

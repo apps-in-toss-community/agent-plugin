@@ -1,12 +1,11 @@
 ---
 name: auth-setup
 description: |
-  Wire up oidc-bridge authentication into the current project — guides the
-  user through calling `appLogin()`, exchanging the authorization code via
-  a consumer backend that calls oidc-bridge (public instance:
-  `/t/<tenantId>/oidc/token`; self-host: `/oidc/token`), and signing in
-  with the resulting `id_token` (Supabase or Firebase). Triggered by
-  `/ait auth-setup`.
+  Wire up oidc-bridge login into the current project — `appLogin()` →
+  consumer backend token exchange → sign-in with `id_token` (Supabase or
+  Firebase). Use when the user asks "앱인토스/토스 로그인 연동해줘",
+  "oidc-bridge로 Supabase/Firebase 인증 배선해줘". Triggered by
+  `/ait auth-setup [--firebase] [--bridge-url <url>]`.
 argument-hint: '[--firebase] [--bridge-url <url>]'
 ---
 

@@ -2,10 +2,10 @@
 name: status
 description: |
   Show Apps in Toss console state for the current workspace and mini-app(s)
-  via the community `aitcc` CLI. User invokes `/ait status`. Reports
-  authenticated user/workspace, mini-apps in the workspace, and (when an
-  `aitcc.yaml` is present in cwd) the review state of the current app.
-  Triggered by `/ait status`. Read-only — does not modify any console state.
+  via `aitcc` — authenticated user/workspace, mini-apps in workspace, and
+  (if `aitcc.yaml` present) this app's review state. Read-only. Triggered
+  by `/ait status`, no args. Distinct from `logs` (runtime logs, not
+  registration/review state).
 argument-hint: ''
 ---
 

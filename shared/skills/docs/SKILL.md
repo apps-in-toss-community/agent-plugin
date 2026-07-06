@@ -1,14 +1,11 @@
 ---
 name: docs
 description: |
-  Fetch a curated Apps in Toss SDK docs page by topic. User invokes
-  `/ait docs <topic>` (e.g. `/ait docs clipboard`, `/ait docs auth/login`).
-  The skill resolves the topic to a path in the community `docs` repo
-  (https://github.com/apps-in-toss-community/docs — Docusaurus 3 site) and
-  loads the content into the session via `Read` (if the repo is cloned
-  locally) or `WebFetch` (otherwise). Use this when the user asks
-  "앱인토스 docs에서 X 찾아줘", "how do I use X API?", or invokes
-  `/ait docs`. 토픽이 생략되면 사용자에게 되묻는다.
+  Fetch a curated Apps in Toss SDK docs page by topic from the community
+  `docs` repo, via `Read` (if cloned locally) or `WebFetch`. Use when the
+  user asks "앱인토스 docs에서 X 찾아줘", "how do I use X API?", or invokes
+  `/ait docs <topic>` (e.g. `clipboard`, `auth/login`). Asks back if topic
+  omitted.
 argument-hint: '[topic]'
 ---
 

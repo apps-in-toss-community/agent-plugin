@@ -1,12 +1,11 @@
 ---
 name: deploy
 description: |
-  Deploy the current mini-app bundle to Apps in Toss. Builds the `.ait`
-  bundle if missing (`pnpm bundle:ait`), verifies console auth, then runs
-  `ait deploy --profile <name>` (Deploy Key stored via `/ait deploy-key`).
-  Falls back to `--api-key "$AITCC_API_KEY"` in CI/env-only environments.
-  Interprets the result and surfaces the `intoss-private://` scheme URL.
-  Triggered by `/ait deploy`.
+  Deploy the current mini-app bundle to Apps in Toss. Builds `.ait` if
+  missing, runs `ait deploy --profile <name>` (Deploy Key from
+  `/ait deploy-key`, or `--api-key` in CI), and surfaces the resulting
+  `intoss-private://` scheme URL. Triggered by `/ait deploy`, no args.
+  Requires prior `/ait register`; does not itself register or build bundles.
 argument-hint: ''
 ---
 

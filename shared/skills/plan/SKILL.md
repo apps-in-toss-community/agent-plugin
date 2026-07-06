@@ -1,14 +1,12 @@
 ---
 name: plan
 description: |
-  Turn a natural-language description of a mini-app into a concrete plan:
-  the `@apps-in-toss/web-framework` SDK domains it needs, the runtime
-  permissions those domains prompt for, and the console terms (약관) that
-  registration/deploy will gate on. This is the first station in the
-  harness (station 7 — conceptually precedes scaffold). It is analysis
-  only: it reasons about requirements, consults docs when unsure, and
-  prints a structured plan whose hand-off is `/ait new`. It does not
-  scaffold, call any API, or register anything. Triggered by `/ait plan`.
+  Turn a natural-language mini-app idea into a plan — needed SDK domains,
+  the runtime permissions they prompt for, and console terms (약관) that
+  gate registration. Use when the user asks "미니앱 만들 건데 필요한 SDK
+  도메인/권한/약관 먼저 정리해줘" — requirements analysis, not a docs
+  lookup. Analysis only; hands off to `/ait new`. Triggered by
+  `/ait plan [requirements]`.
 argument-hint: '[requirements]'
 ---
 

@@ -1,16 +1,11 @@
 ---
 name: design
 description: |
-  Bridge a Figma design into an Apps in Toss mini-app — the asset producer
-  that feeds `/ait register`. Reads the design via a Figma MCP server if one is
-  configured (Dev Mode MCP / framelink-style), and degrades gracefully to a
-  manual design-spec walkthrough when no Figma MCP is present. Maps the design
-  to Apps in Toss UX constraints (safe-area insets, swipe-back gesture,
-  PageHeader conventions, internal design-token consistency), then produces the registration image
-  assets at the exact specs `register` consumes (logo 600×600, thumbnail
-  1932×828, vertical screenshots 636×1048 ≥3, plus optional dark logo and
-  horizontal screenshots) and verifies each file's dimensions. Never adds an MCP
-  server to this plugin and never registers or deploys. Triggered by `/ait design`.
+  Bridge a Figma design into a mini-app — reads it via a Figma MCP if
+  configured (else manual walkthrough), checks Apps in Toss UX constraints
+  (safe-area, swipe-back, PageHeader), and produces registration image
+  assets at `/ait register`'s exact specs (logo, thumbnail, screenshots).
+  Never registers/deploys. Triggered by `/ait design [figma-url]`.
 argument-hint: '[figma-url]'
 ---
 
