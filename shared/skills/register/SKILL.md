@@ -5,7 +5,7 @@ description: |
   between bundling and deploying. Scaffolds `aitcc.yaml` non-interactively
   (agents can't run TTY-only `aitcc app init`), discovers workspace/category
   IDs, then runs `aitcc app register`. Never overwrites an existing
-  manifest. Triggered by `/ait register`, no args.
+  manifest. Triggered by `/ait:register`, no args.
 argument-hint: ''
 ---
 
@@ -13,8 +13,8 @@ argument-hint: ''
 
 ## 목적
 
-`/ait register` 한 번으로 현재 미니앱을 앱인토스 콘솔에 등록한다.
-이 skill은 harness에서 번들 빌드(`/ait setup-bundle`)와 배포(`/ait deploy`)
+`/ait:register` 한 번으로 현재 미니앱을 앱인토스 콘솔에 등록한다.
+이 skill은 harness에서 번들 빌드(`/ait:setup-bundle`)와 배포(`/ait:deploy`)
 사이의 빈 칸을 메운다.
 
 핵심은 **`aitcc.yaml` 매니페스트를 비대화형으로 생성**하는 것이다.
@@ -27,7 +27,7 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
 이 skill이 완료되면:
 - 프로젝트 루트에 `aitcc.yaml`이 생성된다(이미 있으면 보존).
 - 등록이 제출되고, 서버가 돌려준 `miniAppId`가 `aitcc.yaml`에 자동 기록된다 —
-  이후 `/ait deploy`·`/ait status`가 같은 앱을 가리킨다.
+  이후 `/ait:deploy`·`/ait:status`가 같은 앱을 가리킨다.
 
 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
@@ -43,7 +43,7 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
   (아래 "입력" 참조). 이 skill은 이미지를 생성하지 않는다.
 
 > **세션 ≠ Deploy Key.** 등록은 콘솔 **세션**(`aitcc login`으로 로그인)을
-> 사용하고, 배포(`/ait deploy`)는 **Deploy Key**(로컬 권장 경로 `--profile <name>`,
+> 사용하고, 배포(`/ait:deploy`)는 **Deploy Key**(로컬 권장 경로 `--profile <name>`,
 > CI fallback `--api-key`)를 사용한다.
 > 둘은 서로 다른 자격증명이다 — 혼동하지 않는다. 이 skill은 Deploy Key를
 > 발급하지도 사용하지도 않는다.
@@ -56,11 +56,11 @@ non-TTY로 동작한다 — 막혀 있던 건 매니페스트 *생성*뿐이다.
 `categoryIds`·`logo`·`horizontalThumbnail`·`verticalScreenshots`(≥3)가 필수이고,
 `homePageUri`·`logoDarkMode`·`keywords`·`horizontalScreenshots`는 선택(주석 처리해서 emit).
 
-아이콘·스크린샷 준비는 harness의 디자인 station(`/ait design`, station 8)이
-맡는다 — 이 산출은 `/ait design`으로 실행한다. design을 거치지 않고 자산을
+아이콘·스크린샷 준비는 harness의 디자인 station(`/ait:design`, station 8)이
+맡는다 — 이 산출은 `/ait:design`으로 실행한다. design을 거치지 않고 자산을
 직접 준비할 수도 있으며, 그때는 register가 규격을 명시적으로 안내하고
 사용자가 `./assets/`에 채우는 hand-off로 처리한다(절벽이 아니라 seam).
-`/ait design`은 register 규격에 맞는 자산을 만들어 그 앞에 자연스럽게 연결된다.
+`/ait:design`은 register 규격에 맞는 자산을 만들어 그 앞에 자연스럽게 연결된다.
 이 skill은 이미지를 생성·리사이즈하지 않는다 — 규격은 등록 시점에 로컬 + 서버 양쪽에서 강제된다.
 
 ## 실행 순서
@@ -106,7 +106,7 @@ ls package.json
 
 ```
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
-예: cd <project-root> && /ait register
+예: cd <project-root> && /ait:register
 ```
 
 ### 2. 매니페스트 충돌 확인 (idempotency 선행 검사)
@@ -147,7 +147,7 @@ aitcc whoami --json
   `aitcc login`은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에 계정으로 로그인하세요.
   Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나 `AITCC_BROWSER`로 경로를 지정하세요.
 
-  로그인 후 /ait register 를 다시 실행하세요.
+  로그인 후 /ait:register 를 다시 실행하세요.
   ```
 
   대화형 로그인은 skill이 직접 호출하지 않는다.
@@ -162,7 +162,7 @@ aitcc whoami --json
     먼저 앱인토스 콘솔(apps-in-toss.toss.im)에서 워크스페이스를 생성해주세요.
     (워크스페이스 생성은 aitcc CLI로 할 수 없습니다 — 콘솔 웹 UI에서만 가능합니다.)
 
-    워크스페이스 생성 후 /ait register 를 다시 실행하세요.
+    워크스페이스 생성 후 /ait:register 를 다시 실행하세요.
     ```
 
   - **1개**면 그 `workspaceId`를 사용.
@@ -209,7 +209,7 @@ mkdir -p assets
 (이 skill은 이미지를 만들지 않는다 — 사용자가 배치):
 
 ```
-./assets/ 에 다음 PNG를 준비해주세요 (/ait design 으로 자산을 생성하거나
+./assets/ 에 다음 PNG를 준비해주세요 (/ait:design 으로 자산을 생성하거나
 직접 배치할 수 있습니다):
   - logo.png             600×600        (필수)
   - thumbnail.png        1932×828       (필수)
@@ -276,10 +276,10 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
   콘솔:        <consoleUrl>     (서버가 miniAppId를 생략하면 null)
 
 서버가 돌려준 miniAppId가 aitcc.yaml에 자동 기록되었습니다.
-이제 /ait deploy 와 /ait status 가 이 앱을 가리킵니다.
+이제 /ait:deploy 와 /ait:status 가 이 앱을 가리킵니다.
 
 다음 단계:
-  /ait deploy            # 번들을 이 앱에 업로드
+  /ait:deploy            # 번들을 이 앱에 업로드
 ```
 
 `consoleUrl`은 콘솔 deep-link다(서버가 miniAppId를 생략하면 null).
@@ -292,8 +292,8 @@ aitcc app register --config ./aitcc.yaml --accept-terms --json
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 이미지 생성·리사이즈 — 자산 생성은 `/ait design`(station 8)이 담당. 직접 준비할 경우 사용자가 `./assets/`에 규격대로 배치(수동 hand-off).
-- ❌ 번들 빌드(`/ait setup-bundle`)와 배포(`/ait deploy`) — register는 둘 **사이**의 단계. 두 짝 skill을 cross-ref.
+- ❌ 이미지 생성·리사이즈 — 자산 생성은 `/ait:design`(station 8)이 담당. 직접 준비할 경우 사용자가 `./assets/`에 규격대로 배치(수동 hand-off).
+- ❌ 번들 빌드(`/ait:setup-bundle`)와 배포(`/ait:deploy`) — register는 둘 **사이**의 단계. 두 짝 skill을 cross-ref.
 - ❌ Deploy Key 발급(`aitcc keys create`) — 등록은 세션, 배포는 Deploy Key.
 - ❌ 대화형 로그인(`aitcc login`) — skill 안에서 절대 호출하지 않는다.
 - ❌ `categoryIds` 하드코딩 — 매번 `aitcc app categories --selectable --json`로 발견.

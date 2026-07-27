@@ -1,6 +1,6 @@
 # Deploy Key facet — 발급 + 프로파일 저장 상세
 
-`/ait deploy-key`(deploy facet)로 진입했으면 이 절차를 따른다. `ait deploy --profile <name>`
+`/ait:deploy-key`(deploy facet)로 진입했으면 이 절차를 따른다. `ait deploy --profile <name>`
 배포에 필요한 Deploy Key를 한 번 발급해 `~/.ait/credentials`에 프로파일로 저장한다.
 
 - 기존 프로파일이 유효하면(만료 7일+ 이상) 재발급 없이 그 이름을 안내하고 종료.
@@ -59,7 +59,7 @@ aitcc whoami --json
 `aitcc login`은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에 계정으로 로그인하세요.
 Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나 `AITCC_BROWSER`로 경로를 지정하세요.
 
-로그인 후 /ait deploy-key 를 다시 실행해주세요.
+로그인 후 /ait:deploy-key 를 다시 실행해주세요.
 ```
 
 ## 2. 기존 Deploy Key 목록 조회
@@ -88,7 +88,7 @@ ait deploy --profile <profile-name> --scheme-only -m "<memo>"
 
 ## 3. 프로파일 이름 결정
 
-`/ait deploy-key <profile-name>`으로 호출했으면 그 값을 쓴다. 인자가 없으면 cwd 기반
+`/ait:deploy-key <profile-name>`으로 호출했으면 그 값을 쓴다. 인자가 없으면 cwd 기반
 기본값을 제안한다:
 
 ```bash
@@ -196,13 +196,13 @@ python3 -c "import json,os,sys; p=os.path.expanduser('~/.ait/credentials'); d=js
 Deploy Key 저장 완료 · 프로파일: <profile-name>
 
 배포 명령:
-  /ait deploy --profile <profile-name>
+  /ait:deploy --profile <profile-name>
 
 또는 직접:
   pnpm exec ait deploy --profile <profile-name> --scheme-only -m "<memo>"
 
-번들 빌드 환경이 아직 없으면 /ait setup-bundle 을 먼저 실행하세요.
-앱인토스 콘솔 등록이 안 됐으면 /ait register 를 먼저 실행하세요.
+번들 빌드 환경이 아직 없으면 /ait:setup-bundle 을 먼저 실행하세요.
+앱인토스 콘솔 등록이 안 됐으면 /ait:register 를 먼저 실행하세요.
 ```
 
 ## 배경

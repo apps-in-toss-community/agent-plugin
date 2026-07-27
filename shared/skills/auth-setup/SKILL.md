@@ -5,7 +5,7 @@ description: |
   consumer backend token exchange → sign-in with `id_token` (Supabase or
   Firebase). Use when the user asks "앱인토스/토스 로그인 연동해줘",
   "oidc-bridge로 Supabase/Firebase 인증 배선해줘". Triggered by
-  `/ait auth-setup [--firebase] [--bridge-url <url>]`.
+  `/ait:auth-setup [--firebase] [--bridge-url <url>]`.
 argument-hint: '[--firebase] [--bridge-url <url>]'
 ---
 
@@ -13,7 +13,7 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 
 ## 목적
 
-`/ait auth-setup` 한 번으로 사용자 프로젝트에 **토스 로그인 → consumer backend → oidc-bridge token 교환 → id_token으로 로그인** 흐름을 설정한다. token 엔드포인트 경로는 배포 형태에 따라 다르다 — 공용 인스턴스(`oidc-bridge.aitc.dev`)는 tenant-scoped dispatcher(`/t/<tenantId>/oidc/token`), self-host는 루트 마운트(`/oidc/token`).
+`/ait:auth-setup` 한 번으로 사용자 프로젝트에 **토스 로그인 → consumer backend → oidc-bridge token 교환 → id_token으로 로그인** 흐름을 설정한다. token 엔드포인트 경로는 배포 형태에 따라 다르다 — 공용 인스턴스(`oidc-bridge.aitc.dev`)는 tenant-scoped dispatcher(`/t/<tenantId>/oidc/token`), self-host는 루트 마운트(`/oidc/token`).
 
 이 흐름은 커뮤니티 오픈소스다. "공식 토스 로그인 SDK", "토스가 제공하는" 같은 표현은 사용하지 않는다. `@apps-in-toss/web-framework`는 원본 SDK 이름이라 그대로 사용한다.
 
@@ -22,7 +22,7 @@ argument-hint: '[--firebase] [--bridge-url <url>]'
 **이 명령이 필요한가?** 사용자를 식별하거나 사용자별 데이터를 저장해야 하면 이 명령을 쓴다. 로그인이 전혀 필요 없는 앱이라면 건너뛰어도 된다:
 
 ```
-/ait setup-bundle    # 로그인 없이 번들 배포로 바로 건너뛰기
+/ait:setup-bundle    # 로그인 없이 번들 배포로 바로 건너뛰기
 ```
 
 ## 아키텍처 요약 (M5 flow)
@@ -76,7 +76,7 @@ grep -r '@apps-in-toss/web-framework' package.json 2>/dev/null | head -1
 설치:
   pnpm add @apps-in-toss/web-framework
 
-설치 후 다시 /ait auth-setup을 호출해주세요.
+설치 후 다시 /ait:auth-setup을 호출해주세요.
 ```
 
 있으면 다음 단계로.
@@ -139,7 +139,7 @@ const { authorizationCode } = await appLogin();
 // 클라이언트에서 bridge를 직접 호출하지 말 것.
 ```
 
-개발 중 토스 앱 없이 브라우저에서 테스트하려면 `@ait-co/devtools` unplugin을 함께 사용한다 (`/ait inject-devtools` 참고).
+개발 중 토스 앱 없이 브라우저에서 테스트하려면 `@ait-co/devtools` unplugin을 함께 사용한다 (`/ait:inject-devtools` 참고).
 
 ### 4. consumer backend 구현 — bridge `POST /oidc/token` 교환
 
@@ -172,7 +172,7 @@ devtools mock은 `appLogin()`을 intercept해 `mock-auth-<uuid>` 형태의 가�
 3. self-host 브리지(`BRIDGE_TOSS_ADAPTER=mock`)가 있으면 합성 id_token까지 검증 가능
 
 **앱인토스 네이티브 검증**:
-1. `/ait deploy` 실행 (번들러 `ait` CLI로 업로드 — `/ait deploy` 참고)
+1. `/ait:deploy` 실행 (번들러 `ait` CLI로 업로드 — `/ait:deploy` 참고)
 2. 토스 앱에서 미니앱 열기 → `appLogin()` 실행 → 백엔드가 `referrer: "DEFAULT"`로 교환
 3. `id_token`의 `sub` claim이 실제 토스 계정 ID인지 확인
 
@@ -195,14 +195,14 @@ auth-setup 완료
 
 다음 단계:
   pnpm dev            # devtools sandbox에서 appLogin() mock으로 흐름 확인
-  /ait setup-bundle   # .ait 번들 빌드 환경 추가 (granite.config.ts — deploy 전제)
-  /ait register       # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 — deploy 전제)
-  /ait deploy         # 번들 업로드 → native end-to-end 검증
-  /ait status         # 배포 후 콘솔 상태 확인
+  /ait:setup-bundle   # .ait 번들 빌드 환경 추가 (granite.config.ts — deploy 전제)
+  /ait:register       # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 — deploy 전제)
+  /ait:deploy         # 번들 업로드 → native end-to-end 검증
+  /ait:status         # 배포 후 콘솔 상태 확인
 ```
 
-native 검증은 번들·등록이 선행되어야 하므로, sandbox 확인이 끝나면 `/ait setup-bundle`
-→ `/ait register` → `/ait deploy` 순으로 station 5를 진행한다(`/ait deploy`는
+native 검증은 번들·등록이 선행되어야 하므로, sandbox 확인이 끝나면 `/ait:setup-bundle`
+→ `/ait:register` → `/ait:deploy` 순으로 station 5를 진행한다(`/ait:deploy`는
 `granite.config.ts`와 `aitcc.yaml`이 없으면 hard-stop한다).
 
 ## 하지 말아야 할 것

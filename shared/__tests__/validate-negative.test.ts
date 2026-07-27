@@ -81,7 +81,7 @@ argument-hint: ''
 ## 실행
 
 \`\`\`
-/ait new
+/ait:new
 \`\`\`
 
 ## 참고
@@ -287,7 +287,7 @@ argument-hint: ''
 [가이드](https://docs.aitc.dev/guides/fixture-guide)
 
 \`\`\`
-/ait new
+/ait:new
 \`\`\`
 `;
     writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
@@ -314,7 +314,7 @@ argument-hint: ''
 [가이드](https://docs.aitc.dev/guides/fixture-guide)
 
 \`\`\`
-/ait new
+/ait:new
 \`\`\`
 `;
     writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
@@ -339,7 +339,7 @@ argument-hint: ''
 [전체 문서](https://docs.aitc.dev)
 
 \`\`\`
-/ait new
+/ait:new
 \`\`\`
 `;
     writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
@@ -363,7 +363,7 @@ argument-hint: ''
 본문. 링크 없음.
 
 \`\`\`
-/ait new
+/ait:new
 \`\`\`
 `;
     writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
@@ -410,7 +410,7 @@ argument-hint: ''
 
 ## 목적
 
-본문. 다음으로 /ait new 를 실행하세요 (산문에만 있음).
+본문. 다음으로 /ait:new 를 실행하세요 (산문에만 있음).
 
 [가이드](https://docs.aitc.dev/guides/fixture-guide)
 `;
@@ -533,7 +533,7 @@ describe('A7 negative tests', () => {
 });
 
 // ---------------------------------------------------------------------------
-// A8 — seam /ait verb 해석 가능성
+// A8 — seam /ait:verb 형태·해석 가능성
 // ---------------------------------------------------------------------------
 
 describe('A8 negative tests', () => {
@@ -555,7 +555,7 @@ argument-hint: ''
 [가이드](https://docs.aitc.dev/guides/fixture-guide)
 
 \`\`\`
-/ait deploy-bundle
+/ait:deploy-bundle
 \`\`\`
 `;
     writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
@@ -563,9 +563,9 @@ argument-hint: ''
     expect(rulesFired(violations)).toContain('A8/seam-verb-unresolved');
   });
 
-  it('A8/seam-verb-unresolved — 합법 verb (/ait new) 는 발화하지 않는다 (positive control)', async () => {
+  it('A8/seam-verb-unresolved — 합법 verb (/ait:new) 는 발화하지 않는다 (positive control)', async () => {
     buildValidFixture(tmpDir);
-    // 기본 fixture SKILL.md 의 seam 은 `/ait new` (합법) → A8 silent.
+    // 기본 fixture SKILL.md 의 seam 은 `/ait:new` (합법) → A8 silent.
     const { violations } = await runChecks(tmpDir);
     expect(rulesFired(violations)).not.toContain('A8/seam-verb-unresolved');
   });
@@ -583,7 +583,34 @@ argument-hint: ''
 
 ## 목적
 
-이전엔 /ait deploy-bundle 를 안내했지만 지금은 아래 명령을 쓰세요 (산문 언급).
+이전엔 /ait:deploy-bundle 를 안내했지만 지금은 아래 명령을 쓰세요 (산문 언급).
+
+[가이드](https://docs.aitc.dev/guides/fixture-guide)
+
+\`\`\`
+/ait:new
+\`\`\`
+`;
+    writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), proseOnly);
+    const { violations } = await runChecks(tmpDir);
+    expect(rulesFired(violations)).not.toContain('A8/seam-verb-unresolved');
+  });
+
+  it('A8/seam-verb-space-form — 공백 형태 `/ait <verb>` 를 인쇄하면 위반이 난다 (#286)', async () => {
+    buildValidFixture(tmpDir);
+    // verb 자체는 합법(`new`)이지만 **형태**가 존재하지 않는 명령이다 —
+    // `/ait` 라는 명령이 없어 `Unknown command: /ait` 로 끝난다.
+    const spaceForm = `---
+name: ${SKILL_NAME}
+description: Fixture skill.
+argument-hint: ''
+---
+
+# ${SKILL_NAME} skill
+
+## 목적
+
+본문.
 
 [가이드](https://docs.aitc.dev/guides/fixture-guide)
 
@@ -591,8 +618,79 @@ argument-hint: ''
 /ait new
 \`\`\`
 `;
-    writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), proseOnly);
+    writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), spaceForm);
+    const fired = rulesFired((await runChecks(tmpDir)).violations);
+    expect(fired).toContain('A8/seam-verb-space-form');
+    // 합법 verb 이므로 resolve 규칙은 조용해야 한다 — 두 규칙은 직교한다.
+    expect(fired).not.toContain('A8/seam-verb-unresolved');
+  });
+
+  it('A8/seam-verb-space-form — 콜론 형태는 발화하지 않는다 (positive control)', async () => {
+    buildValidFixture(tmpDir);
+    // 기본 fixture 의 seam 은 `/ait:new` (콜론 형태) → silent.
     const { violations } = await runChecks(tmpDir);
-    expect(rulesFired(violations)).not.toContain('A8/seam-verb-unresolved');
+    expect(rulesFired(violations)).not.toContain('A8/seam-verb-space-form');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A1/cmd-name-shadows-skill — 명령 이름이 같은 이름 skill 을 가리는 경우 (#286)
+// ---------------------------------------------------------------------------
+
+describe('A1/cmd-name-shadows-skill negative tests', () => {
+  it('명령 basename 이 다른 skill 이름과 겹치면 위반이 난다', async () => {
+    buildValidFixture(tmpDir);
+    // `other-skill` 이라는 skill 을 하나 더 두고, 그 이름의 command 가 엉뚱하게
+    // fix-skill 로 위임한다 — 설치 형상에서 둘 다 `ait:other-skill` 로 올라간다.
+    writeFile(
+      path.join(tmpDir, 'shared', 'skills', 'other-skill', 'SKILL.md'),
+      `---
+name: other-skill
+description: Another fixture skill.
+argument-hint: ''
+---
+
+# other-skill
+
+## 목적
+
+본문.
+
+[가이드](https://docs.aitc.dev/guides/fixture-guide)
+
+\`\`\`
+/ait:new
+\`\`\`
+`,
+    );
+    writeFile(
+      path.join(tmpDir, 'shared', 'commands', 'other-skill.md'),
+      `---
+description: 'Shadowing command.'
+argument-hint: ''
+---
+
+Load the \`${SKILL_NAME}\` skill.
+`,
+    );
+    const { violations } = await runChecks(tmpDir);
+    expect(rulesFired(violations)).toContain('A1/cmd-name-shadows-skill');
+  });
+
+  it('같은 이름 skill 로 위임하면 발화하지 않는다 (changeset 패턴, positive control)', async () => {
+    buildValidFixture(tmpDir);
+    // 이름이 겹쳐도 자기 자신에게 위임하면 어느 쪽이 이기든 결과가 같다.
+    writeFile(
+      path.join(tmpDir, 'shared', 'commands', `${SKILL_NAME}.md`),
+      `---
+description: 'Self-delegating command.'
+argument-hint: ''
+---
+
+Load the \`${SKILL_NAME}\` skill.
+`,
+    );
+    const { violations } = await runChecks(tmpDir);
+    expect(rulesFired(violations)).not.toContain('A1/cmd-name-shadows-skill');
   });
 });

@@ -1,6 +1,6 @@
 # attach 후 동적 등록 도구 13종 + 엣지케이스
 
-`/ait debug` §5-D(attach 확인 및 도구 자동 등록)의 상세다.
+`/ait:debug` §5-D(attach 확인 및 도구 자동 등록)의 상세다.
 
 ## 도구 목록
 

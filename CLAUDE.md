@@ -40,30 +40,41 @@
 
 ## 제공물
 
-### Skills (`/ait ...` 명령이 트리거)
+### Skills (`/ait:...` 명령이 트리거)
 
-**14개 skill · 18개 command stub** — 겹치는 skill은 병합하되(issue #273 skill 통합 17→14) 사용자 표면(`/ait <verb>` 명령)은 station 수만큼 유지한다(A1: agent-plugin#280 `/ait inject-debug-console` facet 신설로 17→18). 병합 4건은 여러 command stub이 한 skill의 서로 다른 **facet**으로 위임한다: `/ait logs`→`status`, `/ait deploy-key`→`deploy`, `/ait inject-devtools`·`/ait inject-polyfill`·`/ait inject-debug-console`→`inject`.
+**14개 skill · 18개 command stub** — 겹치는 skill은 병합하되(issue #273 skill 통합 17→14) 사용자 표면(`/ait:<verb>` 명령)은 station 수만큼 유지한다(A1: agent-plugin#280 `/ait:inject-debug-console` facet 신설로 17→18). 병합 4건은 여러 command stub이 한 skill의 서로 다른 **facet**으로 위임한다: `/ait:logs`→`status`, `/ait:deploy-key`→`deploy`, `/ait:inject-devtools`·`/ait:inject-polyfill`·`/ait:inject-debug-console`→`inject`.
 
 | Skill | 책임 | command (facet) | 의존 |
 |---|---|---|---|
-| `new-miniapp` | 템플릿 선택·파일 생성·dev-dep 주입 | `/ait new` | `Write`/`Edit`, `templates/` |
-| `inject` | 기존 프로젝트 빌드 셋업 패치 — **devtools facet**: `@ait-co/devtools` unplugin 주입 · **polyfill facet**: `@ait-co/polyfill` 모드 마이그레이션 · **debug-console facet**: `@ait-co/debug-console`(on-device attach + eruda) `dependencies` 설치 + `/auto` 와이어업 | `/ait inject-devtools`, `/ait inject-polyfill`, `/ait inject-debug-console` | `Edit`, `Bash` |
-| `deploy` | 번들 확인 → `ait build` (번들러) → `ait deploy --profile <name>` (번들 업로드) → 결과 해석 + scheme URL. **Deploy Key facet**: `aitcc keys create --save-profile`로 Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장 (`ait deploy --profile` 인증 전제) | `/ait deploy`, `/ait deploy-key` | `Bash`, `@apps-in-toss/web-framework`, console-cli |
-| `setup-bundle` | 기존 프로젝트에 `.ait` 번들 빌드 환경 추가 (`granite.config.ts` + `bundle:ait` 스크립트) | `/ait setup-bundle` | `Write`/`Edit`, `@apps-in-toss/cli` |
-| `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `/ait register` | `Write`/`Bash`, console-cli |
-| `status` | 콘솔 상태 조회 (auth·workspace·review·serviceStatus). **logs facet**: 콘솔 런타임 로그 endpoint 부재(확정된 갭) 안내 + 대안 4종 | `/ait status`, `/ait logs` | `Bash`, console-cli |
-| `auth-setup` | oidc-bridge 연결 옵션 설정 | `/ait auth-setup` | `Edit` |
-| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 — 환경 2(AITC Sandbox App (PWA)) 진입, 실기기 WebKit dev 미리보기 | `/ait setup-phone-preview` | `Edit`, `Bash` |
-| `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `/ait docs` | `Read`/`WebFetch` |
-| `debug` | 환경 3겹 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2: PWA Sandbox(`setup-phone-preview`). 환경 3: `ait-devtools` MCP(`@ait-co/debugger`)의 `start_attach` QR로 on-device CDP relay attach | `/ait debug` | `Read`, `ait-devtools` MCP |
-| `welcome` | harness 진입 안내 — station 0 install 완료 후 station 1(scaffold)로 hand-off | `/ait welcome` | (없음) |
-| `plan` | 기획 station 7 — 미니앱 기획 지원 | `/ait plan` | `Read`/`WebFetch` |
-| `design` | 디자인 station 8 — Figma MCP 연동 UI 설계 지원 | `/ait design` | Figma MCP |
-| `changeset` | npm 릴리즈 워크플로 (Type A/B repo 메인테이너 도구, harness 외부) | `/changeset` | `Bash`, Changesets |
+| `new-miniapp` | 템플릿 선택·파일 생성·dev-dep 주입 | `/ait:new` | `Write`/`Edit`, `templates/` |
+| `inject` | 기존 프로젝트 빌드 셋업 패치 — **devtools facet**: `@ait-co/devtools` unplugin 주입 · **polyfill facet**: `@ait-co/polyfill` 모드 마이그레이션 · **debug-console facet**: `@ait-co/debug-console`(on-device attach + eruda) `dependencies` 설치 + `/auto` 와이어업 | `/ait:inject-devtools`, `/ait:inject-polyfill`, `/ait:inject-debug-console` | `Edit`, `Bash` |
+| `deploy` | 번들 확인 → `ait build` (번들러) → `ait deploy --profile <name>` (번들 업로드) → 결과 해석 + scheme URL. **Deploy Key facet**: `aitcc keys create --save-profile`로 Deploy Key 발급 + `~/.ait/credentials` 프로파일 저장 (`ait deploy --profile` 인증 전제) | `/ait:deploy`, `/ait:deploy-key` | `Bash`, `@apps-in-toss/web-framework`, console-cli |
+| `setup-bundle` | 기존 프로젝트에 `.ait` 번들 빌드 환경 추가 (`granite.config.ts` + `bundle:ait` 스크립트) | `/ait:setup-bundle` | `Write`/`Edit`, `@apps-in-toss/cli` |
+| `register` | `aitcc.yaml` 매니페스트 비대화형 생성 → `aitcc app register` (번들과 배포 사이) | `/ait:register` | `Write`/`Bash`, console-cli |
+| `status` | 콘솔 상태 조회 (auth·workspace·review·serviceStatus). **logs facet**: 콘솔 런타임 로그 endpoint 부재(확정된 갭) 안내 + 대안 4종 | `/ait:status`, `/ait:logs` | `Bash`, console-cli |
+| `auth-setup` | oidc-bridge 연결 옵션 설정 | `/ait:auth-setup` | `Edit` |
+| `setup-phone-preview` | vite.config tunnel 옵션 + dev:phone script + cloudflared 사전 캐시 — 환경 2(AITC Sandbox App (PWA)) 진입, 실기기 WebKit dev 미리보기 | `/ait:setup-phone-preview` | `Edit`, `Bash` |
+| `docs <topic>` | docs repo에서 주제 경로 리턴, `Read`로 로드 | `/ait:docs` | `Read`/`WebFetch` |
+| `debug` | 환경 3겹 분기 디버깅 안내. 환경 1: 브라우저(devtools panel · `window.__ait` · 브라우저 DevTools). 환경 2: PWA Sandbox(`setup-phone-preview`). 환경 3: `ait-devtools` MCP(`@ait-co/debugger`)의 `start_attach` QR로 on-device CDP relay attach | `/ait:debug` | `Read`, `ait-devtools` MCP |
+| `welcome` | harness 진입 안내 — station 0 install 완료 후 station 1(scaffold)로 hand-off | `/ait:welcome` | (없음) |
+| `plan` | 기획 station 7 — 미니앱 기획 지원 | `/ait:plan` | `Read`/`WebFetch` |
+| `design` | 디자인 station 8 — Figma MCP 연동 UI 설계 지원 | `/ait:design` | Figma MCP |
+| `changeset` | npm 릴리즈 워크플로 (Type A/B repo 메인테이너 도구, harness 외부) | `/ait:changeset` | `Bash`, Changesets |
+
+### 명령 표면 — `/ait:<verb>` (issue #286)
+
+설치 형상(`/plugin install`)에서 **플러그인 이름이 네임스페이스**가 된다. 그래서 사용자가 실제로 치는 형태는 `/ait:<verb>`이고, 공백 형태 `/ait <verb>`는 어떤 형상에서도 존재한 적이 없다(`Unknown command: /ait`). 문서·skill seam은 전부 콜론 형태로 인쇄한다 — 검증기 A8이 공백 형태를 하드 실패로 잡는다.
+
+같은 목록에 두 종류가 함께 오른다:
+
+- **skill** `shared/skills/<name>/` → `ait:<name>`. 대응 stub 없이도 그 자체로 호출된다(`/ait:plan`, `/ait:docs` …).
+- **command stub** `shared/commands/<file>.md` → `ait:<basename>`.
+
+그래서 stub 파일명은 **자기가 위임하는 skill과 이름이 겹치면 안 된다**(겹치면 한 칸을 두고 다툰다). facet stub 6개는 대응 skill과 이름이 다르므로 bare verb를 쓰고(`new.md`, `logs.md`, `deploy-key.md`, `inject-*.md`), skill과 같은 verb를 갖는 stub 12개는 `ait-` prefix를 유지해 skill 쪽 `ait:<verb>` 칸을 비워 둔다(`ait-plan.md` → `ait:ait-plan`, 문서화하지 않는 별칭). 예외는 `changeset.md` 하나 — 같은 이름 skill로 위임하므로 어느 쪽이 이겨도 결과가 같다. 이 계약은 `A1/cmd-name-shadows-skill`이 강제한다.
 
 ### Slash commands & Templates
 
-`commands/ait-*.md`는 얇은 진입점, 실제 절차는 skill이 담는다. `templates/`는 `react-vite/`, `react-vite-polyfill/`, `react-vite-supabase/` (oidc-bridge + Supabase Auth) — `new-miniapp`이 단순 파일 복사 + 변수 치환으로 사용.
+`commands/*.md`는 얇은 진입점, 실제 절차는 skill이 담는다. `templates/`는 `react-vite/`, `react-vite-polyfill/`, `react-vite-supabase/` (oidc-bridge + Supabase Auth) — `new-miniapp`이 단순 파일 복사 + 변수 치환으로 사용.
 
 ## 디렉토리 구조
 
@@ -139,7 +150,7 @@ Phase 2-4 어댑터는 harness roadmap M3 달성 후 착수.
 `eval/`은 플러그인이 **에이전트 안에서 실제로 동작하는가**를 두 각도로 검증한다. 둘은 형제이고 서로 안 건드린다.
 
 - **슈트 A — `eval/promptfoo/` + `eval/routing/`** (라우팅 정합성): 맞는 발화에서 맞는 skill이 뜨고(positive) off-topic에선 안 뜨는가(negative control)를 **single-turn**으로 결정적 판정(호출된 skill만 보고 산문은 채점 안 함). 러너가 둘인 건 **얹는 형상이 달라서**다 — `promptfoo/`는 skill을 project skill(`.claude/skills/`)로 얹고(`pnpm eval:promptfoo`, API 키 필요), `routing/`은 `claude -p --plugin-dir`로 **실제 설치 형상**(skill이 `ait:` 네임스페이스 + command stub 17개가 같은 목록에 함께 오름)을 재며 API 키가 필요 없다. 이 차이는 측정값을 바꾼다(#275: 두 케이스가 project 형상 5/5, 설치 형상 0/5·2/5). **케이스 정본은 `promptfooconfig.yaml`, 회귀 판정은 `bash eval/routing/run.sh 3`.**
-- **슈트 B — `eval/e2e/`** (완주·비용·분산): "작은 아이디어 → 작동하는 미니앱"(`/ait new`→번들 빌드)을 **멀티턴**으로 자율 완주시켜 **완주율·성공당 토큰·run-to-run 분산**을 모델·공급자별로 측정. **공급자 축 포함** — Anthropic tier(opus/sonnet/haiku)와 Qwen 등 비-Anthropic(`--base-url`로 Anthropic-호환 게이트웨이 라우팅) 둘 다. Claude Agent SDK 직접 드라이버(신규 의존성 0 — promptfoo가 이미 끌어오는 동일 패키지). `pnpm eval:e2e --task <id> --model <id> --n <int> [--base-url <url> --auth-token-env <NAME>]`. 상세는 `eval/e2e/README.md`.
+- **슈트 B — `eval/e2e/`** (완주·비용·분산): "작은 아이디어 → 작동하는 미니앱"(`/ait:new`→번들 빌드)을 **멀티턴**으로 자율 완주시켜 **완주율·성공당 토큰·run-to-run 분산**을 모델·공급자별로 측정. **공급자 축 포함** — Anthropic tier(opus/sonnet/haiku)와 Qwen 등 비-Anthropic(`--base-url`로 Anthropic-호환 게이트웨이 라우팅) 둘 다. Claude Agent SDK 직접 드라이버(신규 의존성 0 — promptfoo가 이미 끌어오는 동일 패키지). `pnpm eval:e2e --task <id> --model <id> --n <int> [--base-url <url> --auth-token-env <NAME>]`. 상세는 `eval/e2e/README.md`.
 
   가변성 두 결을 분리: (1) 같은 모델 반복 흔들림(run-to-run, 토큰 CV — 한 공급자 안에서) vs (2) 모델·공급자 간 차이(셀 비교). (1)을 깨끗이 재려고 한 run 안에서 공급자를 안 섞는다. 게이트웨이 경로는 미문서·실험적 — 슬래시 디스패치·tool-use·캐시 토큰 계약이 모델 구현에 의존(캐시 토큰 ≈0 → 캐시 기반 USD 무의미, 토큰 KPI는 유효). 게이트웨이 토큰은 `--auth-token-env`로 *이름*만 받아 값은 출력 안 함.
 
@@ -154,7 +165,7 @@ Phase 2-4 어댑터는 harness roadmap M3 달성 후 착수.
 Scaffold 완료. `shared/{skills,commands,templates}/` + `.claude-plugin/{plugin.json,marketplace.json}` 존재 — `marketplace.json`이 `/plugin marketplace add apps-in-toss-community/agent-plugin` 설치 경로(harness station 0)를 지탱한다. `plugin.json`의 `mcpServers."ait-devtools"`가 `debugger`를 상시 기동해 station 2·3을 단일 MCP surface로 묶는다(Phase 3 분리 후 데몬 패키지는 `@ait-co/debugger` — server key `ait-devtools`는 개명하지 않는다).
 
 - ✅ **작동** (14 skill / 18 command): `docs`, `status`(+logs facet), `new-miniapp`, `inject`(devtools·polyfill·debug-console facet), `auth-setup`, `setup-phone-preview`, `deploy`(+Deploy Key facet), `setup-bundle`, `register`, `debug`, `welcome`, `plan`, `design`, `changeset`
-- ✅ **등록**: `ait-devtools` MCP(`npx -y -p @ait-co/debugger debugger`) — `/ait debug`가 환경 3 attach 경로(`start_attach` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
+- ✅ **등록**: `ait-devtools` MCP(`npx -y -p @ait-co/debugger debugger`) — `/ait:debug`가 환경 3 attach 경로(`start_attach` QR) 발급. attach 전 bootstrap 도구만, 폰 attach 후 `list_changed`로 동적 등록(devtools #208).
 - 🔜 **남은 검증**: plugin 설치 → `/mcp`에 `ait-devtools` 노출 + 실기기 QR attach 1회 acceptance (GitHub Project harness roadmap 추적)
 - 📁 **Templates**: `react-vite/` 사용 가능. `react-vite-polyfill/`, `react-vite-supabase/`는 의존 repo 준비 후 추가
 

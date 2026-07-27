@@ -1,6 +1,6 @@
 # `start_debug(mode)` / `start_attach(mode)` — 런타임 환경 전환 상세
 
-`/ait debug` §5의 attach 흐름이 내부적으로 어떻게 동작하는지, 그리고 흔치 않은 fallback 경로의 상세다. 정상 경로만 필요하면 SKILL.md §5의 요약으로 충분하다 — 아래는 mode 내부 동작을 더 알아야 하거나 fallback이 필요할 때만 읽는다.
+`/ait:debug` §5의 attach 흐름이 내부적으로 어떻게 동작하는지, 그리고 흔치 않은 fallback 경로의 상세다. 정상 경로만 필요하면 SKILL.md §5의 요약으로 충분하다 — 아래는 mode 내부 동작을 더 알아야 하거나 fallback이 필요할 때만 읽는다.
 
 ## mode 값
 
@@ -33,12 +33,12 @@ dual-connection 라우터로 동작하므로, `start_debug({mode:'relay-sandbox'
 호출 시 이 외부 relay 패밀리를 **런타임에 lazy-boot**해 붙는다. 별도
 `--target=mobile` 데몬을 띄우거나 MCP 서버를 재시작할 필요가 없다.
 
-유일한 전제는 외부 relay 주소다: `/ait setup-phone-preview`로 배선하고
+유일한 전제는 외부 relay 주소다: `/ait:setup-phone-preview`로 배선하고
 `pnpm dev:phone:cdp`를 기동하면 `<projectRoot>/.ait_urls`(또는 `AIT_RELAY_BASE_URL`
 env var)가 채워지고, 데몬이 이를 읽어 relay endpoint를 구성한다. 이 주소가 없으면
 `start_attach`는 **relay 주소 미설정 에러**(env var 이름을 짚고 "dev 서버를
 `tunnel:{cdp:true}`로 기동하라"는 안내)를 돌려준다 — "데몬을 재시작하라"가 아니라
-"환경 2를 먼저 배선하라"는 뜻이다. 따라서 진입 순서는 `/ait setup-phone-preview`
+"환경 2를 먼저 배선하라"는 뜻이다. 따라서 진입 순서는 `/ait:setup-phone-preview`
 → `pnpm dev:phone:cdp` → `start_attach({mode:'relay-sandbox'})`이다(SKILL.md 5-C relay-sandbox 분기).
 
 ## fallback — 수동 `/mcp` 재구성 (거의 불필요)
@@ -52,7 +52,7 @@ env var)가 채워지고, 데몬이 이를 읽어 relay endpoint를 구성한다
 3. Claude Code를 재시작하거나 해당 MCP 서버를 재초기화해 dual-connection 데몬을
    다시 부팅한다.
 
-이 fallback도 relay 배선(`/ait setup-phone-preview` + `pnpm dev:phone:cdp`)이
+이 fallback도 relay 배선(`/ait:setup-phone-preview` + `pnpm dev:phone:cdp`)이
 선행돼야 `start_debug`가 외부 relay를 발견한다.
 
 ## `MCP_ENV` (deprecated back-compat)

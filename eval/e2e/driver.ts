@@ -36,16 +36,23 @@ const REPO_ROOT = join(HERE, '..', '..');
 const SKILLS_SRC = join(REPO_ROOT, 'shared', 'skills');
 const COMMANDS_SRC = join(REPO_ROOT, 'shared', 'commands');
 
-// 프롬프트가 시킬 슬래시 명령. **command 파일의 basename이 곧 키**다 — `/ait new`
-// 같은 다단어 형태는 존재하지 않는 명령이고 `Unknown command: /ait` 로 떨어진다
-// (2026-07-27 실측, issue #226·#286). 측정이 "명령이 없어서" 실패하는 일이 없도록
-// 실제 키를 쓴다.
-const DISPATCH_COMMAND = 'ait-new';
-const SETUP_BUNDLE_COMMAND = 'ait-setup-bundle';
+// 프롬프트가 시킬 슬래시 명령. **basename 이 곧 키**이고, 그 앞에 형상별 접두가
+// 붙는다 — 설치 형상은 `ait:<basename>`(사용자가 치는 `/ait:new`), 이 드라이버가
+// 쓰는 project 형상은 접두 없이 `<basename>`. 공백 형태 `/ait new` 는 어느
+// 형상에도 없다 (`Unknown command: /ait` — 2026-07-27 실측, issue #226·#286).
+// `exposesKey` 가 두 형상을 모두 받아주므로 여기엔 맨 basename 을 둔다.
+//
+// 문서 표면과 같은 지점을 재려고 **문서가 안내하는 verb** 를 그대로 쓴다:
+// `/ait:new` → `shared/commands/new.md`, `/ait:setup-bundle` → `setup-bundle` skill
+// (`ait-setup-bundle.md` stub 은 `ait:ait-setup-bundle` 이라 문서 경로가 아니다).
+const DISPATCH_COMMAND = 'new';
+const SETUP_BUNDLE_COMMAND = 'setup-bundle';
 
 // 디스패치 금지 명령 — build-only 경로 밖. register는 새 앱 자동 생성(반-패턴),
 // deploy/auth는 콘솔/인증 변이. 드라이버 프롬프트에 명시(soft) + canUseTool 게이트(hard).
-const FORBIDDEN_DISPATCH = ['/ait-register', '/ait-deploy', '/ait-auth-setup'] as const;
+// 형상 접두 없이 verb 로 적는다 — 프롬프트는 사람이 읽는 soft 안내고, 결정적
+// 차단은 아래 FORBIDDEN_BASH_PATTERNS + canUseTool 이 한다.
+const FORBIDDEN_DISPATCH = ['register', 'deploy', 'auth-setup'] as const;
 
 // 콘솔/인증을 변이시키는 Bash 명령 패턴 — canUseTool 게이트가 결정적으로 차단한다.
 // register/deploy/auth-setup skill 은 결국 Bash 로 `aitcc …` / `ait deploy …` 를
@@ -195,7 +202,7 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
       `아이디어: ${task.prompt}`,
       ``,
       `중요 제약:`,
-      `- 콘솔 등록/배포/로그인은 절대 하지 않는다. ${FORBIDDEN_DISPATCH.join(', ')} 를 실행하지 마라.`,
+      `- 콘솔 등록/배포/로그인은 절대 하지 않는다. ${FORBIDDEN_DISPATCH.map((v) => `\`${v}\``).join(', ')} skill 을 어떤 형태로도 실행하지 마라.`,
       `- 번들(.ait)이 생성되면 완료다. 거기서 멈춘다.`,
       `- 막혀도 멈추지 말고 다음 단계를 시도한다.`,
     ].join('\n');
@@ -226,12 +233,14 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
         initSeen = true;
         initSlashCommands = message.slash_commands ?? [];
         initSkills = message.skills ?? [];
-        // 키 표현은 확정됐다 (2026-07-27 실측, issue #226): slash-command 키는
-        // **command 파일의 basename**이다 — `ait-new`, `ait-plan`, `changeset`.
+        // 키 표현은 확정됐다 (2026-07-27 실측, issue #226·#286): slash-command
+        // 키는 **command 파일의 basename**이다 — `new`, `ait-plan`, `changeset`.
         // `"ait new"`(다단어)도 `"ait"`(단일 prefix)도 아니다. 플러그인으로 얹히면
-        // 앞에 `<plugin>:`이 붙어 `ait:ait-new`가 된다. 이 드라이버는 project
+        // 앞에 `<plugin>:`이 붙어 `ait:new`가 된다. 이 드라이버는 project
         // `.claude/commands` 형상이라 접두어 없는 쪽이지만, 같은 코드가 설치
         // 형상에서도 통하도록 `:` suffix 매칭을 함께 허용한다.
+        // skill 도 같은 목록에 오르므로(`ait:plan` 등) stub 없는 verb 도 이 검사를
+        // 통과한다 — SETUP_BUNDLE_COMMAND 가 그 경우다.
         initOk =
           exposesKey(initSlashCommands, DISPATCH_COMMAND) && exposesKey(initSkills, 'new-miniapp');
         if (opts.logInit) {

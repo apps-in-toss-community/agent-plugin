@@ -8,13 +8,13 @@ AI 코딩 에이전트 안에서 앱인토스 미니앱을 생성·개발·테�
 
 `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, 커뮤니티 docs를 엮어 하나의 통합된 경험을 제공합니다. 현재 제공하는 slash command:
 
-- `/ait new` — 새 미니앱 스캐폴딩
-- `/ait docs <topic>` — 큐레이트된 SDK 문서를 세션에 로드
-- `/ait inject-devtools` / `/ait inject-polyfill` / `/ait inject-debug-console` — 기존 프로젝트에 설정 주입
-- `/ait status` / `/ait logs` — console-cli 기반 상태 조회
-- `/ait auth-setup` — oidc-bridge 연결 구성
-- `/ait debug` — 브라우저 디버깅 안내 (devtools 패널 · `window.__ait` · 브라우저 DevTools). 폰 안 번들의 on-device CDP 디버깅은 진행 중
-- `/ait deploy` — 미니앱 배포
+- `/ait:new` — 새 미니앱 스캐폴딩
+- `/ait:docs <topic>` — 큐레이트된 SDK 문서를 세션에 로드
+- `/ait:inject-devtools` / `/ait:inject-polyfill` / `/ait:inject-debug-console` — 기존 프로젝트에 설정 주입
+- `/ait:status` / `/ait:logs` — console-cli 기반 상태 조회
+- `/ait:auth-setup` — oidc-bridge 연결 구성
+- `/ait:debug` — 브라우저 디버깅 안내 (devtools 패널 · `window.__ait` · 브라우저 DevTools). 폰 안 번들의 on-device CDP 디버깅은 진행 중
+- `/ait:deploy` — 미니앱 배포
 
 전체 skill 목록과 의존 repo는 [`CLAUDE.md`](./CLAUDE.md)의 "Skills" 표 참고.
 
@@ -43,7 +43,7 @@ Claude Code에서 marketplace를 추가하고 플러그인을 설치합니다:
 /plugin install ait@aitc
 ```
 
-설치 후 `/ait` 명령(`/ait new`, `/ait deploy` 등)을 사용할 수 있습니다.
+설치 후 `/ait:` 명령(`/ait:new`, `/ait:deploy` 등)을 사용할 수 있습니다. 플러그인 이름이 네임스페이스라 콜론 형태가 실제 명령이고, 공백 형태(`/ait new`)는 존재하지 않습니다.
 
 Codex / Gemini CLI / Cursor / Windsurf는 Phase 2+ 예정입니다. [`CLAUDE.md`](./CLAUDE.md)의 "배포 phases" 참고.
 

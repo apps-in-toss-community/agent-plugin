@@ -1,20 +1,20 @@
 ---
 name: status
 description: |
-  Read-only Apps in Toss console queries via `aitcc`. Two facets: `/ait status`
+  Read-only Apps in Toss console queries via `aitcc`. Two facets: `/ait:status`
   reports auth/workspace + current app review & runtime state ("콘솔 상태 보여줘",
-  "내 미니앱 심사 상태"); `/ait logs` explains the confirmed runtime-log gap and
+  "내 미니앱 심사 상태"); `/ait:logs` explains the confirmed runtime-log gap and
   guides alternatives ("런타임 로그 보고 싶어", "배포한 앱 로그"). Modifies nothing.
 argument-hint: ''
 ---
 
 # status skill
 
-이 skill은 두 facet을 담는다 — `/ait status`(콘솔 상태 조회)와 `/ait logs`(런타임 로그 옵션 안내). 둘 다 앱인토스 콘솔을 **읽기만** 하는 read-only 조회 계열이라 하나로 묶였다(issue #273). 사용자가 `/ait logs`로 진입했으면 아래 "logs facet" 섹션으로 곧장 분기한다.
+이 skill은 두 facet을 담는다 — `/ait:status`(콘솔 상태 조회)와 `/ait:logs`(런타임 로그 옵션 안내). 둘 다 앱인토스 콘솔을 **읽기만** 하는 read-only 조회 계열이라 하나로 묶였다(issue #273). 사용자가 `/ait:logs`로 진입했으면 아래 "logs facet" 섹션으로 곧장 분기한다.
 
 ## 목적
 
-`/ait status` 한 번으로 사용자가 묻기 전에 답해야 하는 것:
+`/ait:status` 한 번으로 사용자가 묻기 전에 답해야 하는 것:
 
 - 누가 로그인되어 있는가? (계정 + workspace)
 - 이 workspace에 등록된 미니앱이 있는가?
@@ -75,7 +75,7 @@ workspace가 선택되지 않은 상태다. 다음 순서로 복구한다:
 
 1. `aitcc workspace ls --json`으로 사용 가능한 workspace 목록을 조회한다.
    - 목록이 비어 있으면(워크스페이스 0개): 앱인토스 콘솔에서 워크스페이스를
-     생성해야 한다. `/ait register` skill로 hand-off.
+     생성해야 한다. `/ait:register` skill로 hand-off.
    - 항목이 1개뿐이면: `aitcc workspace use <workspaceId>`를 자동 실행 후
      Step 3을 재시도한다.
    - 항목이 여러 개면: `workspaceId`와 `workspaceName`을 목록으로 보여주고
@@ -101,7 +101,7 @@ aitcc app bundles ls --json
 - **runtime state** (`serviceStatus`, shutdown 일정) — `app service-status`
 
 `aitcc.yaml`이 없으면 이 step은 skip하고, "이 디렉토리는 등록된 미니앱이
-아닙니다 — `/ait register`로 시작하세요"로 끝낸다.
+아닙니다 — `/ait:register`로 시작하세요"로 끝낸다.
 
 `aitcc.yaml` 위치 탐색은 CLI에 위임한다 (cwd 기준). parent 디렉토리를
 거슬러 올라갈지 여부도 CLI가 결정 — skill에서 별도 로직 없음.
@@ -122,7 +122,7 @@ aitcc app bundles ls --json
 review 상태 조회 API가 일시적으로 응답하지 않습니다 — runtime 상태는 아래와 같습니다.
   serviceStatus: <service-status 결과>
   업로드된 번들: <bundles ls 결과>
-잠시 후 `/ait status`를 다시 실행하거나, 아래 다음 단계를 참고하세요.
+잠시 후 `/ait:status`를 다시 실행하거나, 아래 다음 단계를 참고하세요.
 ```
 
 - 다음 단계 분기는 runtime 상태 기준으로 제시한다 (Step 5 "api-error" 행 참조).
@@ -146,21 +146,21 @@ you@example.com / workspace <번호> <이름> · 앱 N개 ·
 |---|---|
 | 미인증 (authenticated:false — reason 없으면 최초 미로그인, reason:"session-expired"면 만료) | `aitcc login`은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토스 콘솔(apps-in-toss.toss.im)에 계정으로 로그인하세요. Chrome을 못 찾으면 exit 14로 실패하니 Chrome/Chromium을 설치하거나 `AITCC_BROWSER`로 경로를 지정하세요. |
 | `4010` (한국 외 IP) — whoami는 OK인데 명령이 막힘 | 세션 쿠키는 한국 IP 전용입니다. 재로그인 불필요 — 한국 네트워크(KR 거주 IP)에서 명령을 실행하세요. 클라우드 CI runner(US/EU)·VPN이 원인입니다. |
-| cwd에 `aitcc.yaml` 없음 (미등록) | `/ait register`로 콘솔 등록 |
+| cwd에 `aitcc.yaml` 없음 (미등록) | `/ait:register`로 콘솔 등록 |
 | 등록됨 · review state `not-submitted` (검수 미제출) | 앱은 등록됐으나 검수를 한 번도 제출하지 않은 상태. 번들을 빌드(`ait build`)하고 검수 제출: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(단일 명령 — 업로드+검수요청 동시, 비가역, --release-notes 필수; `<번들파일>`은 `ait build`(번들러) 산출물 `.ait` 경로). |
-| 등록됨 · `serviceStatus: PREPARE` (런타임 미출시) | 배포된 번들은 있으나 아직 서비스가 시작되지 않은 상태. 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(단일 명령 — 업로드+검수요청 동시, 비가역, --release-notes 필수; `<번들파일>`은 `ait build`(번들러) 산출물 `.ait` 경로). |
-| 등록됨 · `under-review` | 운영팀 처리 대기. 그 사이 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load) |
+| 등록됨 · `serviceStatus: PREPARE` (런타임 미출시) | 배포된 번들은 있으나 아직 서비스가 시작되지 않은 상태. 실기기 dog-food는 `/ait:debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(단일 명령 — 업로드+검수요청 동시, 비가역, --release-notes 필수; `<번들파일>`은 `ait build`(번들러) 산출물 `.ait` 경로). |
+| 등록됨 · `under-review` | 운영팀 처리 대기. 그 사이 실기기 dog-food는 `/ait:debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load) |
 | 등록됨 · `rejected` | `aitcc app status --json`의 `rejectedMessage` 필드에서 반려 사유를 확인하고 수정 → `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`(`ait build` 산출물 `.ait` 파일 경로 지정)로 재업로드 |
 | 등록됨 · `approved` / `approved-with-edits` | **승인된 이 번들을 실제 출시(publish)**: `aitcc app deploy --release --confirm <번들파일>` (APPROVED 전제의 별도 2nd run — `--confirm`은 비가역 publish 가드. 출시는 사용자가 의식적으로 실행하는 동작이다). 출시되면 `serviceStatus`가 `OPENED`로 전환된다. **다른/새 번들을 배포**하려면: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>` (새 번들은 검수부터 다시 — `--request-review`는 출시가 아니라 검수 재제출이다). (`approved-with-edits`는 조건부 승인 — 요청된 수정 후 재배포.) |
-| 등록됨 · `serviceStatus: OPENED` (실서비스 운영 중) | 앱이 실서비스 중입니다. 런타임 이벤트·전환 지표·on-device 관측은 `/ait logs`(station 6 operate의 짝). 새 번들을 배포하려면 `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`. |
-| `app status` api-error (review 상태 조회 불가) · `serviceStatus: PREPARE` | review 상태는 일시 불명. 실기기 dog-food는 `/ait debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면 `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`로 진행 가능. |
-| `app status` api-error (review 상태 조회 불가) · 번들 없음 또는 serviceStatus 미확인 | review 상태 일시 불명. 번들을 먼저 빌드하고 (`ait build`) 검수 제출: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`. API 장애가 지속되면 잠시 후 `/ait status`를 다시 실행하세요. |
+| 등록됨 · `serviceStatus: OPENED` (실서비스 운영 중) | 앱이 실서비스 중입니다. 런타임 이벤트·전환 지표·on-device 관측은 `/ait:logs`(station 6 operate의 짝). 새 번들을 배포하려면 `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`. |
+| `app status` api-error (review 상태 조회 불가) · `serviceStatus: PREPARE` | review 상태는 일시 불명. 실기기 dog-food는 `/ait:debug`(환경 3 — QR/deep-link relay 주입으로 PREPARE에서도 cold-load). 검수 제출 준비가 됐으면 `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`로 진행 가능. |
+| `app status` api-error (review 상태 조회 불가) · 번들 없음 또는 serviceStatus 미확인 | review 상태 일시 불명. 번들을 먼저 빌드하고 (`ait build`) 검수 제출: `aitcc app deploy --request-review --release-notes "<릴리즈 노트>" <번들파일>`. API 장애가 지속되면 잠시 후 `/ait:status`를 다시 실행하세요. |
 
 이 skill은 분기 명령을 **자동 실행하지 않는다** — 가리키기만 한다.
 
-## logs facet — `/ait logs` (런타임 로그 옵션 안내)
+## logs facet — `/ait:logs` (런타임 로그 옵션 안내)
 
-사용자가 `/ait logs`로 진입했으면 이 facet을 실행한다. status facet(위)과 달리 콘솔 조회
+사용자가 `/ait:logs`로 진입했으면 이 facet을 실행한다. status facet(위)과 달리 콘솔 조회
 명령을 부르지 않는다.
 
 **확인된 콘솔 갭 (정직하게 전달)**: 앱인토스 콘솔은 현재 **런타임 로그 API를 공개하지
@@ -178,7 +178,7 @@ Apps in Toss 콘솔은 현재 런타임 로그 API를 공개하지 않습니다.
 ```
 
 그다음 **실행 가능한 대안 네 가지**를 안내한다: (1) `aitcc app events` 커스텀 이벤트
-카탈로그, (2) `aitcc app metrics` 전환 지표, (3) `/ait debug` DevTools 콘솔(환경 1 브라우저 /
+카탈로그, (2) `aitcc app metrics` 전환 지표, (3) `/ait:debug` DevTools 콘솔(환경 1 브라우저 /
 환경 3 on-device relay), (4) 외부 텔레메트리(Sentry 등). 각 대안의 구체 명령·zero-install
 형태·Sentry 단계별 안내·logs facet 분기 seam·하지 말아야 할 것은 —
 
@@ -235,7 +235,7 @@ aitcc login은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토�
 - ❌ `aitcc login` / `logout` / `deploy` / `register`를 자동 호출. 이 skill은
   read-only.
 - ❌ `aitcc.yaml`을 자동 생성하거나 수정. (그건 `new-miniapp` 또는
-  `/ait register` 책임)
+  `/ait:register` 책임)
 - ❌ JSON 응답을 통째로 덤프. 핵심 필드만 추려서 보여준다.
 - ❌ 응답에서 access token, cookie, session blob 등 민감 정보를 그대로
   화면에 보여주기. `aitcc whoami`는 기본적으로 redact 되어 있지만, 출력에

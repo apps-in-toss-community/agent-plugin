@@ -1,6 +1,6 @@
 # logs facet — 런타임 로그 대안 상세
 
-`/ait logs`의 상태는 **deferred**다: `aitcc logs` 명령은 구현되지 않았다. 앱인토스 콘솔 UI에
+`/ait:logs`의 상태는 **deferred**다: `aitcc logs` 명령은 구현되지 않았다. 앱인토스 콘솔 UI에
 런타임 로그를 서피스하는 엔드포인트가 없음이 확인되었기 때문이다(2026-05-02 조사 결과).
 이건 콘솔 설계 현황이지 플러그인 버그가 아니다. 따라서 `aitcc logs`를 호출하는 대신
 **현재 가능한 대안 네 가지**를 안내한다. 사용자 컨텍스트에 따라 가장 관련성 높은 것을
@@ -43,7 +43,7 @@ aitcc app metrics --time-unit DAY|WEEK|MONTH --start YYYY-MM-DD --end YYYY-MM-DD
 
 ## 대안 3: DevTools 콘솔 — 로컬 브라우저(환경 1) 또는 on-device relay(환경 3)
 
-`/ait debug`는 두 가지 경로를 지원한다. 상황에 맞는 경로를 선택한다.
+`/ait:debug`는 두 가지 경로를 지원한다. 상황에 맞는 경로를 선택한다.
 
 **환경 1 — 로컬 브라우저 (개발 중, 빠른 확인)**
 
@@ -51,7 +51,7 @@ aitcc app metrics --time-unit DAY|WEEK|MONTH --start YYYY-MM-DD --end YYYY-MM-DD
 devtools MCP가 활성화되어 있으면:
 
 ```
-/ait debug → 브라우저 상태·콘솔 오류 캡처 (환경 1)
+/ait:debug → 브라우저 상태·콘솔 오류 캡처 (환경 1)
 ```
 
 devtools MCP가 없으면 사용자에게 직접 확인을 안내한다:
@@ -60,19 +60,19 @@ devtools MCP가 없으면 사용자에게 직접 확인을 안내한다:
 브라우저 F12 → Console 탭 → 미니앱 런타임 오류/로그 확인
 ```
 
-devtools 설정이 안 되어 있으면 `/ait inject-devtools`를 먼저 실행한다.
+devtools 설정이 안 되어 있으면 `/ait:inject-devtools`를 먼저 실행한다.
 
 **환경 3 — on-device CDP relay (배포된 앱의 실 토스 WebView 런타임 관측)**
 
 로컬 브라우저(환경 1)는 mock SDK를 사용하므로 실 토스 WebView 런타임 동작을 관측할 수
-없다. 배포 후 실기기의 실제 런타임 콘솔·네트워크·예외를 보려면 `/ait debug`의 on-device
+없다. 배포 후 실기기의 실제 런타임 콘솔·네트워크·예외를 보려면 `/ait:debug`의 on-device
 CDP relay 경로를 사용한다.
 
 - **환경 3 (intoss-private dog-food, QR/deep-link relay 주입)**: PREPARE 상태 번들에서도
   실기기 토스 WebView에 CDP relay를 붙일 수 있다. `ait-devtools` MCP의 `start_attach`로
   QR/deep-link를 생성해 실기기에 발사한다.
 
-환경 3은 실기기와 배포된 번들이 필요하며, 브라우저 F12로는 대체할 수 없다. `/ait debug`를
+환경 3은 실기기와 배포된 번들이 필요하며, 브라우저 F12로는 대체할 수 없다. `/ait:debug`를
 실행하면 현재 상황에 맞는 환경 진입 경로를 안내한다.
 
 ## 대안 4: 프로덕션 텔레메트리 (외부 서비스 연동)
@@ -127,12 +127,12 @@ aitcc app events ls --json
 
 devtools가 설치되지 않아 브라우저 콘솔 관측이 안 된다면:
 ```
-/ait inject-devtools
+/ait:inject-devtools
 ```
 
 앱 콘솔 상태(serviceStatus, 검수 결과)를 함께 보려면:
 ```
-/ait status
+/ait:status
 ```
 
 Sentry DSN을 준비했다면 에이전트에게 Sentry 설정을 요청하세요:

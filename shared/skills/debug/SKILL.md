@@ -5,7 +5,7 @@ description: |
   (devtools panel, `window.__ait`, browser DevTools), AITC Sandbox PWA
   (real-device WebKit via `ait-devtools` MCP relay-sandbox attach), and
   on-device intoss-private candidate (relay-staging QR attach). Branches by
-  what it observes. Triggered by `/ait debug` (no args). Distinct from
+  what it observes. Triggered by `/ait:debug` (no args). Distinct from
   `status`/`logs` (console-side, not live device state).
 argument-hint: ''
 adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_background, /mcp auto-start, notifications/tools/list_changed handling are Claude Code-specific. Replace §5 with an adapter-specific overlay when targeting other agents.'
@@ -15,7 +15,7 @@ adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_backgro
 
 ## 목적
 
-`/ait debug`는 미니앱을 **세 겹의 환경**에서 디버깅하는 경로를 안내한다. 한 명령이
+`/ait:debug`는 미니앱을 **세 겹의 환경**에서 디버깅하는 경로를 안내한다. 한 명령이
 관찰 결과에 따라 환경을 분기한다 (umbrella `CLAUDE.md` §1.1 환경 3겹 모델):
 
 | 환경 | 실행 면 | 이 skill의 경로 |
@@ -30,7 +30,7 @@ adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_backgro
   - `window.__ait` — 런타임 mock SDK 상태 객체. 콘솔이나 에이전트가 직접 읽는다.
   - 브라우저 기본 DevTools — console / network / sources.
 - **환경 2·3**은 `ait-devtools` MCP 서버로 닿는다. 이 서버는 plugin이 manifest에
-  등록해 **상시 기동**되므로, `/ait debug`는 새 서버를 띄우지 않고 **`start_attach({mode})`로
+  등록해 **상시 기동**되므로, `/ait:debug`는 새 서버를 띄우지 않고 **`start_attach({mode})`로
   환경 전환과 QR attach 경로 발급을 한 호출로** 처리한다(아래 5). 환경 2(`relay-sandbox` mode)는
   launcher QR이 PWA로 연결되고, 환경 3은 intoss-private WebView로 연결된다.
   **환경 2에서 `call_sdk`/`evaluate` 실 SDK 호출은 불가**하다(mock SDK) — CDP 기반
@@ -47,18 +47,18 @@ adapter-note: '§5 (on-device MCP attach) is Claude Code-only — run_in_backgro
 ## 의존
 
 - **`@ait-co/devtools`가 devDependencies에 있어야** floating panel을 쓸 수 있다.
-  없으면 `/ait inject-devtools`를 먼저 안내한다 (없어도 브라우저 기본 DevTools
+  없으면 `/ait:inject-devtools`를 먼저 안내한다 (없어도 브라우저 기본 DevTools
   가이드는 진행 가능).
 - **`package.json`이 cwd에 있어야 한다**. 없으면 프로젝트 루트로 이동 안내.
 - **환경 1**: 에이전트가 필요 시 dev 서버를 자동 기동한다(아래 2-A 사전 기동 블록).
-- **환경 2**: 이 skill이 `pnpm dev:phone:cdp`를 자동으로 기동한다(`dev:phone:cdp` 스크립트가 없으면 먼저 `/ait setup-phone-preview` 안내).
-- **환경 3**: candidate 빌드에 `@ait-co/debug-console`이 `dependencies`로 설치돼 있어야 attach 표면이 남는다(없으면 `/ait inject-debug-console` 먼저 안내 — `inject` skill의 debug-console facet).
+- **환경 2**: 이 skill이 `pnpm dev:phone:cdp`를 자동으로 기동한다(`dev:phone:cdp` 스크립트가 없으면 먼저 `/ait:setup-phone-preview` 안내).
+- **환경 3**: candidate 빌드에 `@ait-co/debug-console`이 `dependencies`로 설치돼 있어야 attach 표면이 남는다(없으면 `/ait:inject-debug-console` 먼저 안내 — `inject` skill의 debug-console facet).
 
 > 이 skill은 콘솔 인증을 요구하지 않는다. 브라우저 디버깅은 로컬 전용.
 
 ## 입력
 
-`/ait debug`는 인자를 받지 않는다. 사용자가 증상을 자연어로 설명하면 (예: "로그인
+`/ait:debug`는 인자를 받지 않는다. 사용자가 증상을 자연어로 설명하면 (예: "로그인
 버튼을 눌러도 authorizationCode가 안 옴", "swipe로 뒤로 가면 앱이 종료됨") 그
 증상에 맞는 관찰 지점을 골라 안내한다.
 
@@ -74,7 +74,7 @@ ls package.json
 
 ```
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
-예: cd <project-root> && /ait debug
+예: cd <project-root> && /ait:debug
 ```
 
 `package.json`을 `Read`로 읽어 `@ait-co/devtools`가 `devDependencies`에 있는지
@@ -82,7 +82,7 @@ package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실�
 
 - **있으면**: floating panel 경로(아래 2-A)를 우선 안내.
 - **없으면**: 브라우저 기본 DevTools 경로(2-B)만 안내하고, panel을 원하면
-  `/ait inject-devtools`를 먼저 실행하라고 덧붙인다.
+  `/ait:inject-devtools`를 먼저 실행하라고 덧붙인다.
 
 ### 2-A. devtools floating panel로 mock 상태 관찰
 
@@ -171,7 +171,7 @@ CDP(Chrome DevTools Protocol) relay로 attach해야 관측된다.
 폰 디버깅은 두 환경 중 하나다. 사용자가 어느 환경을 보는지로 가른다:
 
 - **환경 2 (AITC Sandbox App (PWA))** — 토스 앱·검수 없이 실기기 WebKit 엔진을 볼 수 있는
-  launcher PWA(`devtools.aitc.dev/launcher/`). 전제: `/ait setup-phone-preview`가 `vite.config`에
+  launcher PWA(`devtools.aitc.dev/launcher/`). 전제: `/ait:setup-phone-preview`가 `vite.config`에
   tunnel 옵션(`tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false`)을
   주입하고 `dev:phone:cdp` 스크립트를 추가해야 한다(안 돼 있으면 먼저 실행). 이 skill이
   **`pnpm dev:phone:cdp`**(`AIT_TUNNEL=1 AIT_TUNNEL_CDP=1`)로 dev 서버를 자동 기동해
@@ -183,24 +183,24 @@ CDP(Chrome DevTools Protocol) relay로 attach해야 관측된다.
   candidate. PREPARE 상태에서도 cold-load된다. 출시 전 실기기 개발 루프.
 
 환경 2 진입에는 candidate 번들이 필요 없다(터널만). 환경 3에 candidate scheme URL이
-없으면 먼저 station 5(`/ait setup-bundle` → `/ait register` → `/ait deploy`)로
+없으면 먼저 station 5(`/ait:setup-bundle` → `/ait:register` → `/ait:deploy`)로
 candidate를 만들도록 안내한다.
 
 `start_debug`/`start_attach`의 mode 값·내부 동작(dual-connection 라우터, lazy-boot relay, 수동 `/mcp` 재구성 fallback)은 정상 경로에서는 몰라도 되는 세부다 — **상세가 필요하면 Read <이 skill의 base directory>/references/mode-switching.md**. attach까지 한 번에 처리하려면 바로 아래 5-B·5-C 순서를 따른다(`start_attach`가 환경 전환+QR 발급을 1호출로).
 
 ### 5-B. candidate 번들 준비 (환경 3만)
 
-환경 2(`relay-sandbox`) attach에는 candidate 번들이 필요 없다 — `/ait setup-phone-preview`가
+환경 2(`relay-sandbox`) attach에는 candidate 번들이 필요 없다 — `/ait:setup-phone-preview`가
 배선한 터널이 있으면 된다(이 skill이 자동 기동). 환경 3은 이미 올라가 있는 candidate scheme URL이 필요하다.
 
-candidate scheme URL이 없으면 에이전트는 이 자리에서 바로 `/ait deploy`를 dispatch한다 —
+candidate scheme URL이 없으면 에이전트는 이 자리에서 바로 `/ait:deploy`를 dispatch한다 —
 그 skill이 빌드·인증·업로드를 처리하고, 완료 출력 마지막에 `intoss-private://...` scheme URL을
-돌려준다. **에이전트는 그 URL을 `/ait deploy` 완료 출력에서 직접 읽어 같은 흐름에서
+돌려준다. **에이전트는 그 URL을 `/ait:deploy` 완료 출력에서 직접 읽어 같은 흐름에서
 5-C의 `start_attach({mode:'relay-staging', scheme_url})`으로 그대로 전달한다 — 사용자에게
 URL을 복사·재입력하게 하지 않는다.**
 
-(이 skill은 `ait deploy`를 직접 Bash로 호출하지 않는다 — 콘솔 변이는 `/ait deploy` skill
-경계 안에서, 그 skill의 인증·에러 복구 로직과 함께 일어난다. `/ait deploy`가 프로파일 미설정·
+(이 skill은 `ait deploy`를 직접 Bash로 호출하지 않는다 — 콘솔 변이는 `/ait:deploy` skill
+경계 안에서, 그 skill의 인증·에러 복구 로직과 함께 일어난다. `/ait:deploy`가 프로파일 미설정·
 4046 lock·약관 미체결 등으로 멈추면 scheme URL 없이 돌아오며, 에이전트는 그 에러를 사용자에게
 그대로 전달하고 5-C 진행을 중단한다.)
 
@@ -211,7 +211,7 @@ URL을 복사·재입력하게 하지 않는다.**
 사전 조건 확인·백그라운드 기동·폴링 등 단계별 상세는
 **Read <이 skill의 base directory>/references/attach-flow.md**.
 
-**환경 2 (relay-sandbox) 경로 요약**: `/ait setup-phone-preview` 배선 확인 →
+**환경 2 (relay-sandbox) 경로 요약**: `/ait:setup-phone-preview` 배선 확인 →
 `pnpm dev:phone:cdp` 백그라운드 기동(idempotent) → `<projectRoot>/.ait_urls` 생성 대기 →
 `start_attach({mode: 'relay-sandbox', projectRoot})` 호출(QR PNG 자동 오픈 + ASCII QR 병행 출력,
 attach까지 최대 60s 폴링) → 사용자가 폰 카메라로 QR 스캔 → launcher PWA가 열리고 relay에 attach.
@@ -248,12 +248,12 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
   브라우저는 사용자가 직접 연다(에이전트는 URL만 출력). 환경 2·3의 QR 스캔은 사람이 폰 카메라로 한다(이 skill은 QR을 발급).
 - ❌ `ait-devtools` MCP 서버 기동 — plugin manifest가 상시 기동하므로 이 skill은
   attach 경로만 발급한다.
-- ❌ candidate 번들 빌드·배포 — `/ait setup-bundle` → `/ait register` → `/ait deploy`.
+- ❌ candidate 번들 빌드·배포 — `/ait:setup-bundle` → `/ait:register` → `/ait:deploy`.
   (환경 2는 candidate 번들 불필요 — 터널만.)
 - ❌ 검수 큐 제출(환경 3 밖의 배포 상태 전환, 비가역) — 명시 승인 없이 하지 않는다.
-- ❌ devtools 설정 주입 — `/ait inject-devtools`.
-- ❌ 환경 2 PWA 터널 인프라 배선 — `/ait setup-phone-preview`(vite.config tunnel 옵션 주입 + `dev:phone:cdp` 스크립트 추가). 이 skill은 그 위에서(배선이 완료된 상태에서) dev 서버를 자동 기동하고 CDP attach/관측을 담당한다.
-- ❌ 콘솔 인증·앱 등록·운영 조회 — `/ait deploy`, `/ait register`, `/ait status`.
+- ❌ devtools 설정 주입 — `/ait:inject-devtools`.
+- ❌ 환경 2 PWA 터널 인프라 배선 — `/ait:setup-phone-preview`(vite.config tunnel 옵션 주입 + `dev:phone:cdp` 스크립트 추가). 이 skill은 그 위에서(배선이 완료된 상태에서) dev 서버를 자동 기동하고 CDP attach/관측을 담당한다.
+- ❌ 콘솔 인증·앱 등록·운영 조회 — `/ait:deploy`, `/ait:register`, `/ait:status`.
 - ❌ 코드 자동 수정 — 관찰·진단을 돕고, 수정은 에이전트의 일반 편집 흐름으로.
 
 ## 하지 말아야 할 것
@@ -264,12 +264,12 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 - ❌ `devicectl`/`adb` 등 device-control로 폰을 발사. 진입은 QR 스캔 단일 경로다(5-C).
 - ❌ 환경 2(`relay-sandbox`)에서 `call_sdk`/`evaluate`로 실 SDK 호출 시도. SDK가 mock이라
   불가하다. 실 SDK fidelity가 필요하면 환경 3(intoss-private dogfood)으로 올라간다.
-- ❌ 환경 2 진입 시 candidate scheme URL을 준비하려 `/ait deploy` 시작. 환경 2는
+- ❌ 환경 2 진입 시 candidate scheme URL을 준비하려 `/ait:deploy` 시작. 환경 2는
   candidate 번들 불필요 — `dev:phone:cdp` 스크립트 + `tunnel:{cdp:true}` 배선이 있으면 된다.
 - ❌ 환경 2에서 `pnpm dev` 또는 `pnpm dev:phone`(screen-only)으로 dev 서버를 띄우거나
   기동을 권장. CDP relay(`AIT_RELAY_BASE_URL`/`AIT_TUNNEL_BASE_URL`)는 `AIT_TUNNEL_CDP=1`일 때만
   boot된다 — 이 skill은 `pnpm dev:phone:cdp`를 백그라운드로 자동 기동한다(5-C 1단계).
-- ❌ 환경 2 relay 배선 없이 `relay-sandbox` 진입 기대. `/ait setup-phone-preview` +
+- ❌ 환경 2 relay 배선 없이 `relay-sandbox` 진입 기대. `/ait:setup-phone-preview` +
   `pnpm dev:phone:cdp`로 relay 주소를 먼저 채워야 한다 — 상세는 `references/mode-switching.md`.
 - ❌ `.ait_urls` 파일 내용(URL 값)을 읽거나 로그·메시지에 출력. 존재 여부만 확인한다(5-C 2단계).
 - ❌ 시크릿/인증 코드 값을 stdout·로그·메시지에 출력.
@@ -284,41 +284,41 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 - ❌ `ait build`/`ait deploy` 대신 `aitcc`로 번들 빌드 시도. `ait`(번들러)와
   `aitcc`(콘솔 자동화)는 별개 도구다(5-B).
 - ❌ 환경 3 scheme URL을 얻으려 `ait deploy`(또는 `pnpm exec ait deploy`)를 이 skill에서
-  직접 Bash로 호출. 콘솔 변이는 `/ait deploy` skill을 dispatch해 그 경계 안에서 일어난다 —
+  직접 Bash로 호출. 콘솔 변이는 `/ait:deploy` skill을 dispatch해 그 경계 안에서 일어난다 —
   이 skill은 read-only/build-only이며, eval e2e canUseTool 게이트가 `ait deploy` 직접 호출을
   차단한다(5-B).
 
 ## 다음 단계 (관찰 결과에 따라 분기)
 
 - **환경 1에서 재현·진단 끝** → 수정은 에이전트의 일반 편집 흐름으로. 브라우저에서
-  재현되지 않고 실기기 엔진 fidelity가 의심되면 먼저 `/ait setup-phone-preview`로
+  재현되지 않고 실기기 엔진 fidelity가 의심되면 먼저 `/ait:setup-phone-preview`로
   환경 2(AITC Sandbox App (PWA))를 배선한다(토스 앱 deploy 불필요, 실기기 WebKit 엔진
-  확인 가능). 배선 후 `/ait debug`를 다시 실행하면 이 skill이 `pnpm dev:phone:cdp`를
+  확인 가능). 배선 후 `/ait:debug`를 다시 실행하면 이 skill이 `pnpm dev:phone:cdp`를
   자동 기동하고 `start_attach({mode:'relay-sandbox'})` 1호출로 5-C relay-sandbox 경로를 진행한다.
   실 SDK fidelity(토스 WebView·네이티브 브리지)가 필요한 회귀라면 환경 3으로:
-  `/ait deploy`를 dispatch해 에이전트가 scheme URL을 받아 바로
+  `/ait:deploy`를 dispatch해 에이전트가 scheme URL을 받아 바로
   `start_attach({mode:'relay-staging', scheme_url})`으로 QR attach (복사 없음 — 5-B 참조).
-- **candidate scheme URL이 아직 없음** → `/ait setup-bundle` → `/ait register` →
-  `/ait deploy`로 candidate를 만든 뒤 다시 `/ait debug`.
+- **candidate scheme URL이 아직 없음** → `/ait:setup-bundle` → `/ait:register` →
+  `/ait:deploy`로 candidate를 만든 뒤 다시 `/ait:debug`.
 - **`start_attach` 스캔 대기 중** → 폰 카메라로 QR 스캔.
   attach 후 `list_pages`로 확인 → 페이지가 보이면 5-D의 13종 도구로 디버깅 시작.
 - **attach 후 미니앱에 `*.ait.test.ts` 테스트가 있으면** → `run_tests({ files: ["**/*.ait.test.ts"], projectRoot: "<프로젝트 루트>" })`로 실기기에서 실행 (5-E). env별 결과를 대조하면 SDK 버전·플랫폼 거동 차이를 잡는다.
 - **attach는 됐는데 도구가 아직 안 보임** → `notifications/tools/list_changed`가
   Claude Code에 전달되기까지 수 초 걸릴 수 있다. 잠시 후 에이전트의 도구 목록을
   다시 확인. 여전히 없으면 `get_debug_status`로 현재 환경/모드·relay 연결 상태 점검.
-- **콘솔 운영 관측** → `/ait status`, `/ait logs`로 콘솔 상태도 함께 확인.
+- **콘솔 운영 관측** → `/ait:status`, `/ait:logs`로 콘솔 상태도 함께 확인.
 
 ## 참고
 
 - 상세가 필요하면 Read <이 skill의 base directory>/references/panel-tabs.md (환경 1 패널 탭별 관찰 지점), references/mode-switching.md (`start_debug`/`start_attach` mode 내부 동작·fallback), references/attach-tools.md (attach 후 13종 도구 + `run_tests` 상세 + SECRET-HANDLING).
-- 짝 skill: `inject-devtools` (panel 설정), `inject-debug-console` (환경 3 candidate 빌드에 attach 표면 설치 — `@ait-co/debug-console` `dependencies`), `setup-phone-preview` (환경 2(AITC Sandbox App (PWA)) 인프라 배선 — `tunnel:{cdp:true}` + cloudflared 터널 기동. `/ait debug` relay-sandbox의 선행 단계).
+- 짝 skill: `inject-devtools` (panel 설정), `inject-debug-console` (환경 3 candidate 빌드에 attach 표면 설치 — `@ait-co/debug-console` `dependencies`), `setup-phone-preview` (환경 2(AITC Sandbox App (PWA)) 인프라 배선 — `tunnel:{cdp:true}` + cloudflared 터널 기동. `/ait:debug` relay-sandbox의 선행 단계).
 - 환경 3겹 × fidelity 설계 정본: umbrella `meta/three-environments-fidelity.md` (§1 환경 모델, §5 동적 도구 등록, §7 CDP 단일 transport).
 - 환경 3 진입 시나리오 + QR relay 흐름: https://github.com/apps-in-toss-community/devtools/blob/main/docs/scenarios/env-3.md
 - dogfood relay 루프 (candidate 빌드 → QR 스캔 → attach → 관측 사이클): https://github.com/apps-in-toss-community/devtools/blob/main/docs/dogfood-relay-loop.md
 - devtools (mock + panel + unplugin, 브라우저 dev 전용): https://github.com/apps-in-toss-community/devtools
 - devtools live demo: https://devtools.aitc.dev/
 - on-device debug MCP 데몬(`start_debug`/`start_attach` 등 attach 도구): `@ait-co/debugger`(`/mcp/server` + `/mcp/cli` exports, `debugger`·`debugger-test` bin) — plugin manifest `mcpServers."ait-devtools"`가 `npx -y -p @ait-co/debugger debugger`로 기동. server key `ait-devtools`는 유지하되 실제 데몬 패키지는 `@ait-co/debugger`다(Phase 3 분리, 이전에는 devtools repo의 `devtools-mcp` bin이었다): https://github.com/apps-in-toss-community/debugger
-- on-device attach 런타임(WebView 안에서 relay에 붙는 코드 + eruda): `@ait-co/debug-console`(`.` + `/auto` exports) — 환경 3(intoss-private candidate)은 `ait build` production-adjacent 빌드라 devtools unplugin의 dev-only CDP 브리지가 자동 비활성화되므로, attach 표면을 남기려면 미니앱 `dependencies`로 별도 설치해야 한다. 설치·와이어업은 `/ait inject-debug-console` (`inject` skill의 debug-console facet)이 담당한다.
+- on-device attach 런타임(WebView 안에서 relay에 붙는 코드 + eruda): `@ait-co/debug-console`(`.` + `/auto` exports) — 환경 3(intoss-private candidate)은 `ait build` production-adjacent 빌드라 devtools unplugin의 dev-only CDP 브리지가 자동 비활성화되므로, attach 표면을 남기려면 미니앱 `dependencies`로 별도 설치해야 한다. 설치·와이어업은 `/ait:inject-debug-console` (`inject` skill의 debug-console facet)이 담당한다.
 - env-2 부트스트랩 설계 근거 (approach B): https://github.com/apps-in-toss-community/devtools/issues/428
 - 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://docs.aitc.dev/guides/navigation-flow
 - 커뮤니티 docs — on-device CDP relay 디버깅 구조·진입 경로: https://docs.aitc.dev/guides/debug-relay

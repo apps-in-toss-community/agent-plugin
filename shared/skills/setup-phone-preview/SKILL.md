@@ -5,7 +5,7 @@ description: |
   the dev app on a real phone (environment 2, WebKit engine, no review
   needed) — patches vite.config.ts, pnpm-workspace.yaml, adds a `dev:phone`
   script, pre-caches cloudflared. Idempotent. Triggered by
-  `/ait setup-phone-preview`, no args. Prerequisite for `debug`'s environment 2.
+  `/ait:setup-phone-preview`, no args. Prerequisite for `debug`'s environment 2.
 argument-hint: ''
 ---
 
@@ -13,7 +13,7 @@ argument-hint: ''
 
 ## 목적
 
-`/ait setup-phone-preview` 한 번으로 **실기기(폰) 미리보기** 환경을 준비한다.
+`/ait:setup-phone-preview` 한 번으로 **실기기(폰) 미리보기** 환경을 준비한다.
 
 devtools `tunnel` 옵션([`@ait-co/devtools@^0.1.19`](https://github.com/apps-in-toss-community/devtools))은
 Vite dev server가 뜰 때 Cloudflare quick tunnel을 자동으로 열고, 터미널에
@@ -32,7 +32,7 @@ Vite dev server가 뜰 때 Cloudflare quick tunnel을 자동으로 열고, 터�
 
 - **Vite 프로젝트**여야 한다 (`vite.config.ts` 또는 `vite.config.js`가 cwd에 있어야 함).
 - **`@ait-co/devtools`가 이미 devDependencies에 있어야 한다** (버전 `^0.1.19` 이상).
-  - 없으면 먼저 `/ait inject-devtools`를 실행하도록 안내하고 중단.
+  - 없으면 먼저 `/ait:inject-devtools`를 실행하도록 안내하고 중단.
   - 있지만 `^0.1.12` 이하면 `pnpm add -D @ait-co/devtools@^0.1.19`로 업그레이드.
 - **pnpm**이 패키지 매니저여야 한다 (`pnpm-lock.yaml` 존재 확인).
   - npm/yarn/bun 프로젝트는 step 3의 `pnpm-workspace.yaml` `allowBuilds` 패치가 해당 매니저에서 무의미하므로 사용자에게 그 점을 알리고 skip한다.
@@ -51,7 +51,7 @@ ls package.json vite.config.ts vite.config.js 2>/dev/null
 
 ```
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
-예: cd <project-root> && /ait setup-phone-preview
+예: cd <project-root> && /ait:setup-phone-preview
 ```
 
 중단.
@@ -74,9 +74,9 @@ Next.js / Rspack / Webpack 프로젝트에서 cloudflared tunnel을 쓰려면
 ```
 @ait-co/devtools가 devDependencies에 없습니다.
 먼저 devtools unplugin을 설치해주세요:
-  /ait inject-devtools
+  /ait:inject-devtools
 
-inject-devtools 완료 후 다시 /ait setup-phone-preview를 실행해주세요.
+inject-devtools 완료 후 다시 /ait:setup-phone-preview를 실행해주세요.
 ```
 
 중단.
@@ -161,7 +161,7 @@ aitDevtools.vite({ panel: true, tunnel: process.env.AIT_TUNNEL ? { cdp: !!proces
       tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false
     })
 
-  추가 후 다시 /ait setup-phone-preview를 실행하거나, 다음 단계부터 수동으로 진행하세요.
+  추가 후 다시 /ait:setup-phone-preview를 실행하거나, 다음 단계부터 수동으로 진행하세요.
   ```
 
 **수정 원칙**: `Edit` tool로 최소 변경. 기존 코드 포맷·주석·설정은 유지.
@@ -324,18 +324,18 @@ setup-phone-preview 완료
 
   이후 환경 2 CDP 관측(start_debug({mode:'relay-sandbox'}))은 plugin 기본 데몬에서
   바로 됩니다 — 데몬이 .ait_urls(또는 AIT_RELAY_BASE_URL)로 외부 relay를 발견해
-  런타임에 붙습니다. 별도 데몬을 띄울 필요 없이 relay 배선(위 단계) 후 /ait debug를
+  런타임에 붙습니다. 별도 데몬을 띄울 필요 없이 relay 배선(위 단계) 후 /ait:debug를
   실행하면 됩니다 — 구체 절차와 fallback(/mcp 수동 재구성)은 debug skill §5-A 참조.
 
 다음 단계:
-  screen-only 미리보기 후: /ait setup-bundle  # 배포 준비
-  CDP 디버깅으로 진행:    /ait debug           # relay 배선 후 기본 데몬에서 바로 진입 (debug §5-A)
+  screen-only 미리보기 후: /ait:setup-bundle  # 배포 준비
+  CDP 디버깅으로 진행:    /ait:debug           # relay 배선 후 기본 데몬에서 바로 진입 (debug §5-A)
 
 참고:
   - tunnel URL은 실행마다 바뀝니다 (*.trycloudflare.com, 인증 없음).
   - tunnel은 pnpm dev에는 영향 없습니다 (AIT_TUNNEL=1 일 때만 켜짐).
   - 환경 2에서 실 SDK 호출(call_sdk/evaluate)은 불가합니다 (mock SDK).
-    실 토스 WebView fidelity가 필요하면 환경 3: /ait deploy 후 /ait debug.
+    실 토스 WebView fidelity가 필요하면 환경 3: /ait:deploy 후 /ait:debug.
   - 환경 3겹 설계: umbrella CLAUDE.md §1.1 + meta/three-environments-fidelity.md
 ```
 
@@ -345,11 +345,11 @@ setup-phone-preview 완료
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ `@ait-co/devtools` 신규 설치 — `/ait inject-devtools` (`inject` skill의 devtools facet).
+- ❌ `@ait-co/devtools` 신규 설치 — `/ait:inject-devtools` (`inject` skill의 devtools facet).
 - ❌ Next.js / Rspack / Webpack 프로젝트 — Vite 전용. 다른 빌드 도구는 cloudflared CLI 직접 사용.
 - ❌ 실제 tunnel URL 확인·연결 테스트 — `pnpm dev:phone` 직접 실행 후 확인.
 - ❌ launcher PWA 홈화면 추가 자동화 — OS gesture 필요, 수동.
-- ❌ 콘솔 인증·배포 — 별도 skill (`/ait deploy`).
+- ❌ 콘솔 인증·배포 — 별도 skill (`/ait:deploy`).
 - ❌ `pnpm-workspace.yaml`의 `allowBuilds` 외 다른 pnpm 설정 변경.
 - ❌ cloudflare 계정 설정 / 유료 tunnel — quick tunnel만 (인증·계정 불필요).
 

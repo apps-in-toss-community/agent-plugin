@@ -4,7 +4,7 @@ description: |
   Fetch ONE curated Apps in Toss docs page for a topic the user already
   named, from the community `docs` repo, via `Read` (if cloned locally) or
   `WebFetch`. Use for "앱인토스 docs에서 X 찾아줘", "how do I use X API?",
-  `/ait docs <topic>` (e.g. `clipboard`, `auth/login`); asks back if topic
+  `/ait:docs <topic>` (e.g. `clipboard`, `auth/login`); asks back if topic
   omitted. Not the lookup step of a build request — "필요한 SDK 도메인/권한/
   약관 정리해줘" is `plan`, "로그인 배선해줘" is `auth-setup`.
 argument-hint: '[topic]'
@@ -59,7 +59,7 @@ docs/                              # repo root
 - 사용자가 슬래시 경로(`api/clipboard/setClipboardText`, `guides/auth-flow`)를
   주면 그대로 사용. 이 경우 섹션 prefix 추측은 건너뛴다.
 
-**리졸빙 순서** (사용자가 `/ait docs <topic>`으로 호출, 슬래시 없는 단일 토픽):
+**리졸빙 순서** (사용자가 `/ait:docs <topic>`으로 호출, 슬래시 없는 단일 토픽):
 
 1. **Root 단발 페이지** — `intro` 같은 짧은 토픽은 `docs/<topic>.md` /
    `.mdx`를 먼저 시도 (현재 `docs/intro.md` 하나만 해당).
@@ -69,7 +69,7 @@ docs/                              # repo root
       live 경로다. docs 규칙상 overview(`index.mdx`)는 메서드 ≥2개 그룹만
       두므로(docs `CLAUDE.md`), 메서드가 하나뿐인 그룹(현재 `contacts` →
       `fetchContacts`, `haptic` → `generateHapticFeedback`)은 index 없이
-      method 파일 하나만 있어 이 경로로 해석된다. 예: `/ait docs contacts`
+      method 파일 하나만 있어 이 경로로 해석된다. 예: `/ait:docs contacts`
       → `api/contacts/fetchContacts.mdx`
    3. 여러 파일이면 목록을 사용자에게 제시하고 **되묻는다** ("이 중 어느 것을
       볼까요?")
@@ -78,7 +78,7 @@ docs/                              # repo root
 4. `docs/recipes/<topic>.md` / `.mdx` — 실제 구현 패턴 레시피 (예:
    `haptic-feedback`, `copy-paste-ux`, `deeplink-routing`). 현재 20+ 파일 존재.
 5. `docs/reference/<topic>.md` / `.mdx` — glossary 등 레퍼런스 (예:
-   `/ait docs glossary` → `reference/glossary.md`). 현재 존재.
+   `/ait:docs glossary` → `reference/glossary.md`). 현재 존재.
 6. (향후 확장) `docs/getting-started/` — 현재 미존재. 디렉토리가 추가되면 같은
    `<topic>.{md,mdx}` 패턴으로 시도.
 7. (드물다) `docs/api/<topic>.md` / `.mdx` — 현재 모든 `api/` 항목이
@@ -115,28 +115,28 @@ https://raw.githubusercontent.com/apps-in-toss-community/docs/main/docs/<resolve
 
 위 "리졸빙 순서"대로 차례로 시도. 첫 hit에서 중단.
 
-예: `/ait docs clipboard`
+예: `/ait:docs clipboard`
 - `ls ../docs/docs/api/clipboard/` → 디렉토리 있음
 - `index.mdx` 발견 → 그것을 로드 (그룹 개요 페이지). 사용자가 method 단위가
-  필요하면 개요의 method 표를 따라 `/ait docs api/clipboard/setClipboardText`
+  필요하면 개요의 method 표를 따라 `/ait:docs api/clipboard/setClipboardText`
   같은 슬래시 경로로 다시 호출
 - 로컬 없으면 `WebFetch https://api.github.com/repos/apps-in-toss-community/docs/contents/docs/api/clipboard`
   로 디렉토리 목록 → 동일 처리
 
-예: `/ait docs api/clipboard/setClipboardText`
+예: `/ait:docs api/clipboard/setClipboardText`
 - `Read ../docs/docs/api/clipboard/setClipboardText.mdx` → 로드
 - 로컬 실패 시 `Read ../docs/docs/api/clipboard/setClipboardText.md`로 확장자 변경 재시도
 - 여전히 실패 시 원격 WebFetch (`.mdx` → `.md` 순)
 
-예: `/ait docs permissions-pattern`
+예: `/ait:docs permissions-pattern`
 - `docs/permissions-pattern.*` 없음 → `api/permissions-pattern/` 없음 →
   `guides/permissions-pattern.mdx` 발견 → 로드
 
-예: `/ait docs haptic-feedback`
+예: `/ait:docs haptic-feedback`
 - `docs/haptic-feedback.*` 없음 → `api/haptic-feedback/` 없음 →
   `guides/haptic-feedback.*` 없음 → `recipes/haptic-feedback.mdx` 발견 → 로드
 
-예: `/ait docs intro`
+예: `/ait:docs intro`
 - `../docs/docs/intro.md` 발견 → 로드 (root 단발 페이지)
 
 ### 3. 로드한 내용을 사용자 컨텍스트로 요약
@@ -162,10 +162,10 @@ deep-link한다. 관련 카드가 있으면 링크로 제안한다:
 
 | 로드한 토픽 | 다음 `/ait` 명령 |
 |---|---|
-| `guides/auth-flow`, `api/auth/*` | `/ait auth-setup` (로그인 배선) |
-| `api/<group>/*` (clipboard, location 등) | `/ait inject-polyfill` (표준 Web API 경로) 또는 sdk-example 카드 |
-| 배포·번들 관련 | `/ait setup-bundle` → `/ait register` → `/ait deploy` |
-| 디버깅·mock 관련 | `/ait debug` |
+| `guides/auth-flow`, `api/auth/*` | `/ait:auth-setup` (로그인 배선) |
+| `api/<group>/*` (clipboard, location 등) | `/ait:inject-polyfill` (표준 Web API 경로) 또는 sdk-example 카드 |
+| 배포·번들 관련 | `/ait:setup-bundle` → `/ait:register` → `/ait:deploy` |
+| 디버깅·mock 관련 | `/ait:debug` |
 
 토픽이 station과 무관한 순수 레퍼런스면 seam 없이 출처 링크로 마무리한다 — 억지로 명령을 갖다 붙이지 않는다.
 
@@ -182,7 +182,7 @@ deep-link한다. 관련 카드가 있으면 링크로 제안한다:
 - 토픽 이름이 다를 수 있음 — 다음 경로에서 직접 탐색해보세요:
   https://github.com/apps-in-toss-community/docs/tree/main/docs
 - method 이름만 줬다면 `api/<group>/<method>` 형태로 다시 시도해보세요
-  (예: `setClipboardText` → `/ait docs api/clipboard/setClipboardText`)
+  (예: `setClipboardText` → `/ait:docs api/clipboard/setClipboardText`)
 
 대안으로:
 - 앱인토스 개발자 사이트의 원본 문서를 `WebFetch`로 조회해볼 수 있습니다

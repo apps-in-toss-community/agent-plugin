@@ -138,9 +138,6 @@ function checkA1(root) {
   const skillDirs = listDirs(skillsDir);
   const commandFiles = listFiles(commandsDir).filter((f) => f.endsWith('.md'));
 
-  // EXCEPTION: changeset는 ait- prefix 면제 메인테이너 도구
-  const EXEMPT_COMMAND = 'changeset.md';
-
   // skill frontmatter 수집
   /** @type {Map<string, { argumentHint: string, filePath: string, hasArgumentHint: boolean }>} */
   const skillMeta = new Map();
@@ -207,7 +204,6 @@ function checkA1(root) {
   const commandMeta = new Map();
 
   for (const cmdFile of commandFiles) {
-    const isExempt = cmdFile === EXEMPT_COMMAND;
     const relFile = path.join('shared', 'commands', cmdFile);
     const fullFile = path.join(commandsDir, cmdFile);
     const src = readFile(fullFile);
@@ -235,12 +231,6 @@ function checkA1(root) {
       );
     }
 
-    if (!isExempt && !cmdFile.startsWith('ait-')) {
-      violations.push(
-        mkv(relFile, 1, 'A1/cmd-no-ait-prefix', `명령 파일명이 'ait-' 로 시작하지 않음`),
-      );
-    }
-
     // skill 참조 파싱: "Load the `<skill>` skill" 또는 "Load the <skill> skill"
     const match = body.match(/Load the `?([a-zA-Z0-9_-]+)`? skill/);
     if (!match) {
@@ -255,6 +245,25 @@ function checkA1(root) {
       continue;
     }
     const referencedSkill = match[1];
+
+    // 이름 shadowing 검증 (#286).
+    //   설치 형상에서 command 와 skill 은 **같은 슬래시 목록**에 오른다 —
+    //   command `<v>.md` 는 `ait:<v>`, skill `<v>/` 도 `ait:<v>`. 이름이 겹치면
+    //   한 칸을 두고 다투고 사용자가 `/ait:<v>` 로 무엇을 얻는지가 불확정해진다.
+    //   단, 겹치는 command 가 **그 같은 이름의 skill 로 위임**하면 어느 쪽이
+    //   이기든 결과가 같으므로 무해하다(changeset.md → changeset skill).
+    //   그래서 "겹치면 금지"가 아니라 "겹치면 자기 자신에게 위임해야 한다".
+    const cmdVerb = cmdFile.replace(/\.md$/, '');
+    if (skillMeta.has(cmdVerb) && referencedSkill !== cmdVerb) {
+      violations.push(
+        mkv(
+          relFile,
+          1,
+          'A1/cmd-name-shadows-skill',
+          `명령 이름 '${cmdVerb}' 가 같은 이름의 skill 을 가리는데 다른 skill '${referencedSkill}' 로 위임한다 — 설치 형상에서 둘 다 '/ait:${cmdVerb}' 로 올라가 충돌한다 (fix: 명령 파일명을 skill 과 겹치지 않는 verb 로 변경)`,
+        ),
+      );
+    }
 
     // argument-hint 동기화 검증
     //   병합 skill(issue #273)에는 여러 command 가 서로 다른 facet 인자로 위임한다.
@@ -407,7 +416,7 @@ const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp']);
 // docs.aitc.dev/<주제>로 deep-link 필수")를 코드로 강제하되, deep-link 의무가
 // 면제되는 skill 을 명시한다. 면제 사유 3종 (영구):
 //   1. entry/scaffold (welcome·new-miniapp): docs 루트 링크가 적절 (§1.2 예외)
-//   2. harness-external (changeset): /ait prefix 예외, docs 주제 페이지 무관
+//   2. harness-external (changeset): zero→ship station 이 아님, docs 주제 페이지 무관
 //   3. docs 로더 자체 (docs): self-link 가 무의미
 //
 // issue #200 Layer 3 완료: "대상 docs 페이지 미존재" 임시 면제는 모두 해소됐다.
@@ -441,26 +450,20 @@ const DOCS_DEEPLINK_RE = /docs\.aitc\.dev\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_
 // 이 stub 들은 argument-hint sync 검사에서 면제된다 — 병합 skill 은 hint 를
 // 하나만 가지므로 secondary facet 의 hint 와는 본질적으로 어긋나기 때문.
 const MERGED_SECONDARY_FACET_CMDS = new Set([
-  'ait-logs.md', // → status
-  'ait-deploy-key.md', // → deploy
-  'ait-inject-devtools.md', // → inject
-  'ait-inject-polyfill.md', // → inject
-  'ait-inject-debug-console.md', // → inject
+  'logs.md', // → status
+  'deploy-key.md', // → deploy
+  'inject-devtools.md', // → inject
+  'inject-polyfill.md', // → inject
+  'inject-debug-console.md', // → inject
 ]);
 
 /** @type {Record<string, string>} */
 const EXPECTED_CMD_TO_SKILL = {
   'ait-auth-setup.md': 'auth-setup',
   'ait-debug.md': 'debug',
-  'ait-deploy-key.md': 'deploy',
   'ait-deploy.md': 'deploy',
   'ait-design.md': 'design',
   'ait-docs.md': 'docs',
-  'ait-inject-devtools.md': 'inject',
-  'ait-inject-polyfill.md': 'inject',
-  'ait-inject-debug-console.md': 'inject',
-  'ait-logs.md': 'status',
-  'ait-new.md': 'new-miniapp',
   'ait-plan.md': 'plan',
   'ait-register.md': 'register',
   'ait-setup-bundle.md': 'setup-bundle',
@@ -468,6 +471,12 @@ const EXPECTED_CMD_TO_SKILL = {
   'ait-status.md': 'status',
   'ait-welcome.md': 'welcome',
   'changeset.md': 'changeset',
+  'deploy-key.md': 'deploy',
+  'inject-debug-console.md': 'inject',
+  'inject-devtools.md': 'inject',
+  'inject-polyfill.md': 'inject',
+  'logs.md': 'status',
+  'new.md': 'new-miniapp',
 };
 
 /** @param {string} root @returns {Violation[]} */
@@ -588,21 +597,22 @@ function checkA2(root) {
       }
     }
 
-    // next-station seam 검사: ## Out of scope / ## 참고 이전 본문에 /ait 가 있어야 한다.
-    // read-only skill(status·logs)도 분기 표에서 /ait 를 참조하므로 자연히 통과한다.
+    // next-station seam 검사: ## Out of scope / ## 참고 이전 본문에 /ait: 가 있어야 한다.
+    // read-only skill(status·logs)도 분기 표에서 /ait: 를 참조하므로 자연히 통과한다.
+    // 토큰이 '/ait ' 가 아니라 '/ait:' 인 이유는 A8 주석 참조 (#286).
     if (!SEAM_EXEMPT_SKILLS.has(skillName)) {
       // 본문에서 ## Out of scope 또는 ## 참고 이전 영역만 검사
       const seamBodyEndIdx = bodyLines.findIndex(
         (l) => l.startsWith('## Out of scope') || l.startsWith('## 참고'),
       );
       const seamBody = seamBodyEndIdx === -1 ? body : bodyLines.slice(0, seamBodyEndIdx).join('\n');
-      if (!seamBody.includes('/ait ')) {
+      if (!seamBody.includes('/ait:')) {
         violations.push(
           mkv(
             relFile,
             1,
             'A2/no-seam',
-            `다음 station 세am 없음: skill 본문(## Out of scope / ## 참고 이전)에 '/ait ' 참조 필요 (umbrella §1.3 규칙 3)`,
+            `다음 station seam 없음: skill 본문(## Out of scope / ## 참고 이전)에 '/ait:' 참조 필요 (umbrella §1.3 규칙 3)`,
           ),
         );
       } else {
@@ -615,7 +625,7 @@ function checkA2(root) {
         const fencedLines = fencedCodeLineNumbers(bodyLines);
         const seamEnd = seamBodyEndIdx === -1 ? bodyLines.length : seamBodyEndIdx;
         const seamInFence = bodyLines.some(
-          (l, i) => i < seamEnd && fencedLines.has(i + 1) && l.includes('/ait '),
+          (l, i) => i < seamEnd && fencedLines.has(i + 1) && l.includes('/ait:'),
         );
         if (!seamInFence) {
           violations.push(
@@ -1079,30 +1089,42 @@ function checkA7(root) {
 // A8 — seam-verb resolvability (hard-fail)
 // ---------------------------------------------------------------------------
 //
-// A2 의 seam 검사는 본문에 `/ait ` 토큰이 (1) ## 참고 이전에 있고 (2) fenced
+// A2 의 seam 검사는 본문에 seam 토큰이 (1) ## 참고 이전에 있고 (2) fenced
 // 블록 안에 인쇄되는지만 본다 — 그 verb 가 실재 명령으로 resolve 되는지는
-// 검사하지 않는다. 그래서 skill 이 `/ait deploy-bundle` (실재는 setup-bundle)
+// 검사하지 않는다. 그래서 skill 이 `/ait:deploy-bundle` (실재는 setup-bundle)
 // 같은 stale·typo verb 를 fenced seam 으로 인쇄해도 A1/A2 전부 통과하고,
 // 비개발자가 그 seam 을 따라가면 존재하지 않는 명령에서 dead-end 한다.
-// A8 은 인쇄되는(= fenced) `/ait <verb>` 의 verb 가 합법 집합에 속하는지
-// 게이트한다 (#254 — A7 의 'mcpServers npx resolvability' 와 같은 클래스:
-// "인쇄되는 게 실재하는가").
+// A8 은 인쇄되는(= fenced) seam 의 verb 가 합법 집합에 속하는지 게이트한다
+// (#254 — A7 의 'mcpServers npx resolvability' 와 같은 클래스: "인쇄되는 게
+// 실재하는가").
 //
-// 합법 verb 집합 = EXPECTED_CMD_TO_SKILL 키에서 도출(`ait-<verb>.md` → verb).
-// harness-external `changeset` 은 `/ait` prefix 가 없으므로 집합에서 제외한다.
+// #286 — A8 은 오래도록 **틀린 불변식**을 쟀다. `shared/commands/ait-<verb>.md`
+// 파일이 있으면 통과시켰는데, 정작 런타임이 받는 건 파일명이 아니라 **명령 키**다.
+// 설치 형상(`/plugin install`)에서 플러그인 이름이 네임스페이스가 되어 키는
+// `ait:<basename>` 이 된다 — 공백 형태 `/ait <verb>` 는 어떤 형상에서도 존재한
+// 적이 없고(`Unknown command: /ait`), 파일 검사만으로는 그게 안 잡혔다. 그래서
+// 아래 두 가지를 함께 본다:
+//   (1) 인쇄되는 형태가 `/ait:<verb>` 인가 (공백 형태는 하드 실패)
+//   (2) 그 verb 가 실재 명령 키로 resolve 되는가
+//
+// 합법 verb 집합 = command basename ∪ skill 이름. skill 도 같은 슬래시 목록에
+// `ait:<skill>` 로 오르므로(런타임 확인) 대응 stub 없이도 그 자체로 호출된다.
 // 산문(non-fenced) 언급은 검사하지 않는다 — seam 계약은 '인쇄되는' 토큰에
 // 한정되며(A2/seam-not-printed 와 동일 스코프), 설명문 속 우연한 `/ait` 는
 // false-positive 가 되기 때문이다.
 
-/** EXPECTED_CMD_TO_SKILL 에서 합법 `/ait <verb>` 집합을 도출한다. */
-function legalAitVerbs() {
+/**
+ * 합법 `/ait:<verb>` 집합 = command basename ∪ skill 이름.
+ * @param {string} root
+ */
+function legalAitVerbs(root) {
   /** @type {Set<string>} */
   const verbs = new Set();
   for (const cmdFile of Object.keys(EXPECTED_CMD_TO_SKILL)) {
-    // ait- prefix 가 없는 command(예: changeset.md, harness-external 도구)는
-    // /ait <verb> seam verb 가 아니다 — 정규식 비매치로 자연히 제외된다.
-    const m = /^ait-(.+)\.md$/.exec(cmdFile);
-    if (m) verbs.add(m[1]);
+    verbs.add(cmdFile.replace(/\.md$/, ''));
+  }
+  for (const skillName of listDirs(path.join(root, 'shared', 'skills'))) {
+    verbs.add(skillName);
   }
   return verbs;
 }
@@ -1111,7 +1133,7 @@ function legalAitVerbs() {
 function checkA8(root) {
   const violations = [];
   const skillsDir = path.join(root, 'shared', 'skills');
-  const legal = legalAitVerbs();
+  const legal = legalAitVerbs(root);
 
   for (const skillName of listDirs(skillsDir)) {
     const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
@@ -1127,7 +1149,25 @@ function checkA8(root) {
     for (let i = 0; i < srcLines.length; i++) {
       if (!fencedLines.has(i + 1)) continue; // 인쇄되는(fenced) 토큰만 검사
       const line = srcLines[i];
+
+      // (1) 공백 형태는 존재하지 않는 명령이다 (#286).
       for (const match of line.matchAll(/\/ait ([a-z][a-z0-9-]*)/g)) {
+        const verb = match[1];
+        const key = `space:${verb}`;
+        if (reported.has(key)) continue;
+        reported.add(key);
+        violations.push(
+          mkv(
+            relFile,
+            i + 1,
+            'A8/seam-verb-space-form',
+            `인쇄된 seam '/ait ${verb}' 는 존재하지 않는 명령이다 — '/ait' 라는 명령이 없어 'Unknown command: /ait' 로 끝난다 (fix: '/ait:${verb}' 로 표기)`,
+          ),
+        );
+      }
+
+      // (2) 콜론 형태의 verb 가 실재 명령 키로 resolve 되는가.
+      for (const match of line.matchAll(/\/ait:([a-z][a-z0-9-]*)/g)) {
         const verb = match[1];
         if (legal.has(verb) || reported.has(verb)) continue;
         reported.add(verb);
@@ -1136,7 +1176,7 @@ function checkA8(root) {
             relFile,
             i + 1,
             'A8/seam-verb-unresolved',
-            `인쇄된 seam '/ait ${verb}' 가 실재 명령으로 resolve 되지 않는다 — shared/commands/ait-${verb}.md 가 없다 (fix: verb 오타·stale rename 정정, 또는 명령 추가 + EXPECTED_CMD_TO_SKILL 갱신). 합법 verb: ${[...legal].sort().join(', ')}`,
+            `인쇄된 seam '/ait:${verb}' 가 실재 명령으로 resolve 되지 않는다 — shared/commands/${verb}.md 도 shared/skills/${verb}/ 도 없다 (fix: verb 오타·stale rename 정정, 또는 명령 추가 + EXPECTED_CMD_TO_SKILL 갱신). 합법 verb: ${[...legal].sort().join(', ')}`,
           ),
         );
       }
@@ -1337,7 +1377,7 @@ function printViolations(violations) {
     A5: 'A5 — plugin.json ↔ package.json 버전 드리프트',
     A6: 'A6 — 링크 liveness (opt-in, warn)',
     A7: 'A7 — mcpServers npx args 해석 가능성',
-    A8: 'A8 — seam /ait verb 해석 가능성',
+    A8: 'A8 — seam /ait:verb 형태·해석 가능성',
   };
 
   for (const [prefix, items] of groups) {
