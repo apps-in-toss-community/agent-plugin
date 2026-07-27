@@ -1,5 +1,30 @@
 # @ait-co/agent-plugin
 
+## 0.1.21
+
+### Patch Changes
+
+- 3e0e37e: 문서가 안내하던 `/ait <verb>`가 실재하지 않는 명령이던 것을 `/ait:<verb>`로 정정 (#286)
+
+  설치 형상에서 플러그인 이름이 네임스페이스가 되므로 사용자가 실제로 치는 형태는
+  `/ait:<verb>`이고, 공백 형태는 `Unknown command: /ait`로 끝났다. facet command
+  6개를 bare verb로 개명해(`ait-new.md`→`new.md` 등) 문서화된 18개 verb 전부가
+  `/ait:<verb>`로 해석되도록 맞추고, skill seam·README·CLAUDE.md의 표기를 정정했다.
+  검증기 A8은 파일 존재가 아니라 실제 명령 키를 보도록 고쳐 공백 형태를 하드 실패로
+  잡고, A1은 명령 이름이 다른 skill을 가리는 경우를 새로 막는다.
+
+- 8f44cbe: `docs`가 build 요청의 조사 단계로 오인돼 `plan`·`auth-setup`을 밀어내던 라우팅 약점 수정 (#275).
+
+  "필요한 SDK 도메인/권한/약관 정리해줘"(→`plan`), "로그인 배선해줘"(→`auth-setup`) 같은 발화에서 모델이 `docs`를 1단계 도구로 골라 정작 담당 skill이 안 뜨는 문제. `docs`의 description·command stub에 역-구분자를 넣고(조회 대상은 **사용자가 이미 이름을 댄 토픽 하나**, build 요청의 조사 단계가 아님) 본문에 `## Out of scope` 표를 추가했다.
+
+  슈트 A에 두 번째 러너 `eval/routing/`(`claude -p --plugin-dir`)을 추가한다 — 기존 promptfoo fixture는 skill을 project skill로 얹어 **실제 설치 형상**(skill이 `ait:` 네임스페이스 + command stub 17개 동반)을 재현하지 못했고, 그래서 이 약점을 못 잡고 있었다. API 키도 필요 없다.
+
+- 0ebb28a: 슈트 B 드라이버가 존재하지 않는 슬래시 명령(`/ait new`)을 시키고 있던 것을 실제 키로 교정 (#226).
+
+  slash-command 키 표현이 확정됐다(2026-07-27 실측): **command 파일의 basename**이고(`ait-new`), 플러그인으로 얹히면 `ait:ait-new`가 된다. `"ait new"`(다단어)도 `"ait"`(단일 prefix)도 아니다 — `/ait new`는 `Unknown command: /ait`로 떨어진다.
+
+  드라이버 프롬프트를 `/ait-new`·`/ait-setup-bundle`로 바꾸고, "ait가 들어간 키가 하나라도 있으면 OK"였던 느슨한 init assert를 `ait-new` 명령 + `new-miniapp` skill 둘 다 노출됐는지로 정밀화했다(`exposesKey` 순수 함수로 분리 + 테스트 6건). 문서가 안내하는 `/ait <verb>` 표면과 실제 이름이 어긋나는 별개 결함은 #286이 추적한다.
+
 ## 0.1.20
 
 ### Patch Changes
