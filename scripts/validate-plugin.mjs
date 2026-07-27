@@ -313,7 +313,9 @@ function checkA1(root) {
   }
 
   // 병합 skill: 여러 command stub이 한 skill로 위임하는 것은 의도된 many-to-one 이다
-  // (skill 통합 17→14, issue #273 — command 표면은 17개 유지, 겹치는 skill만 병합).
+  // (skill 통합 17→14, issue #273 — 병합 자체는 command 표면 무변경. agent-plugin#280 은
+  // 병합이 아니라 순수 추가라 command 표면이 17→18 로 늘었다 — inject 에 debug-console
+  // facet 신설, EXPECTED_CMD_TO_SKILL 참조).
   // 어떤 command 가 어떤 skill 로 위임하는지는 아래 EXPECTED_CMD_TO_SKILL 스냅샷이
   // 권위 있게 못박으므로, "skill 이 2개 이상 command 에서 참조됨"은 그 자체로는
   // 위반이 아니다 — 스냅샷에 없는 예기치 못한 매핑만 A1/routing-mismatch 로 잡는다.
@@ -425,12 +427,16 @@ const DOCS_DEEPLINK_RE = /docs\.aitc\.dev\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_
 // shared/commands/ 전수를 열거한다. 변경 시 이 상수도 함께 갱신.
 // ---------------------------------------------------------------------------
 
-// 17개 command stub → 14개 skill 매핑 (issue #273, skill 통합 17→14).
+// 18개 command stub → 14개 skill 매핑 (issue #273 skill 통합 17→14; agent-plugin#280
+// 이 inject 에 debug-console facet 을 추가하며 command 표면이 17→18 로 늘었다 — devtools
+// 단일 패키지가 debugger repo 로 분리되며 생긴 실제 갭(온디바이스 attach 설치 안내 부재)을
+// 메우는 신규 facet 이라 병합이 아니라 순수 추가다).
 // 병합 3건은 여러 command 가 한 skill 로 위임한다(command 표면은 무변경):
-//   ait-logs            → status  (status+logs 병합: 같은 read-only 콘솔 조회 계열)
-//   ait-deploy-key      → deploy  (deploy-key 를 deploy 로 흡수: deploy 의 인증 전제)
-//   ait-inject-devtools → inject  (inject-devtools+inject-polyfill 병합: 둘 다 기존
-//   ait-inject-polyfill → inject   프로젝트 빌드 셋업 패치 — 병합 skill 이름은 중립적 `inject`)
+//   ait-logs               → status  (status+logs 병합: 같은 read-only 콘솔 조회 계열)
+//   ait-deploy-key         → deploy  (deploy-key 를 deploy 로 흡수: deploy 의 인증 전제)
+//   ait-inject-devtools    → inject  (inject-devtools+inject-polyfill+inject-debug-console
+//   ait-inject-polyfill    → inject   3-facet 병합: 셋 다 기존 프로젝트 빌드 셋업 패치 —
+//   ait-inject-debug-console → inject 병합 skill 이름은 중립적 `inject`)
 // 병합 skill 의 secondary-facet command stub (primary 는 skill 과 같은 verb).
 // 이 stub 들은 argument-hint sync 검사에서 면제된다 — 병합 skill 은 hint 를
 // 하나만 가지므로 secondary facet 의 hint 와는 본질적으로 어긋나기 때문.
@@ -439,6 +445,7 @@ const MERGED_SECONDARY_FACET_CMDS = new Set([
   'ait-deploy-key.md', // → deploy
   'ait-inject-devtools.md', // → inject
   'ait-inject-polyfill.md', // → inject
+  'ait-inject-debug-console.md', // → inject
 ]);
 
 /** @type {Record<string, string>} */
@@ -451,6 +458,7 @@ const EXPECTED_CMD_TO_SKILL = {
   'ait-docs.md': 'docs',
   'ait-inject-devtools.md': 'inject',
   'ait-inject-polyfill.md': 'inject',
+  'ait-inject-debug-console.md': 'inject',
   'ait-logs.md': 'status',
   'ait-new.md': 'new-miniapp',
   'ait-plan.md': 'plan',

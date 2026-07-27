@@ -121,6 +121,14 @@ tests:
       - type: skill-used
         value: inject
 
+  # --- station 2/3: dev/debug — on-device attach 패키지 설치 (inject skill의 debug-console facet, agent-plugin#280) ---
+  - description: 'POS inject (debug-console facet) — 온디바이스 attach 패키지 설치'
+    vars:
+      utterance: '실기기 candidate 빌드에서 디버그 콘솔로 attach할 수 있게 debug-console 패키지 설치해줘'
+    assert:
+      - type: skill-used
+        value: inject
+
   # --- station 2: dev — 실기기 미리보기 ---
   - description: 'POS setup-phone-preview — 실폰 미리보기 터널'
     vars:

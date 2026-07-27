@@ -10,7 +10,7 @@ AI 코딩 에이전트 안에서 앱인토스 미니앱을 생성·개발·테�
 
 - `/ait new` — 새 미니앱 스캐폴딩
 - `/ait docs <topic>` — 큐레이트된 SDK 문서를 세션에 로드
-- `/ait inject-devtools` / `/ait inject-polyfill` — 기존 프로젝트에 설정 주입
+- `/ait inject-devtools` / `/ait inject-polyfill` / `/ait inject-debug-console` — 기존 프로젝트에 설정 주입
 - `/ait status` / `/ait logs` — console-cli 기반 상태 조회
 - `/ait auth-setup` — oidc-bridge 연결 구성
 - `/ait debug` — 브라우저 디버깅 안내 (devtools 패널 · `window.__ait` · 브라우저 DevTools). 폰 안 번들의 on-device CDP 디버깅은 진행 중
