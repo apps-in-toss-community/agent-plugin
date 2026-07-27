@@ -1,11 +1,12 @@
 ---
 name: docs
 description: |
-  Fetch a curated Apps in Toss SDK docs page by topic from the community
-  `docs` repo, via `Read` (if cloned locally) or `WebFetch`. Use when the
-  user asks "앱인토스 docs에서 X 찾아줘", "how do I use X API?", or invokes
-  `/ait docs <topic>` (e.g. `clipboard`, `auth/login`). Asks back if topic
-  omitted.
+  Fetch ONE curated Apps in Toss docs page for a topic the user already
+  named, from the community `docs` repo, via `Read` (if cloned locally) or
+  `WebFetch`. Use for "앱인토스 docs에서 X 찾아줘", "how do I use X API?",
+  `/ait docs <topic>` (e.g. `clipboard`, `auth/login`); asks back if topic
+  omitted. Not the lookup step of a build request — "필요한 SDK 도메인/권한/
+  약관 정리해줘" is `plan`, "로그인 배선해줘" is `auth-setup`.
 argument-hint: '[topic]'
 ---
 
@@ -193,6 +194,20 @@ deep-link한다. 관련 카드가 있으면 링크로 제안한다:
 
 추측으로 API 동작을 꾸며내지 **말 것**. 문서에 없으면 "모릅니다"를
 명시적으로 말하고, sdk-example 또는 앱인토스 개발자 사이트의 원본 문서로 넘긴다.
+
+## Out of scope
+
+이 skill은 **사용자가 이미 이름을 댄 토픽 하나**를 가져오는 조회 도구다. 무엇을
+만들지·무엇이 필요한지를 정하는 단계는 이 skill이 아니다:
+
+| 발화 | 이 skill이 아니라 |
+|---|---|
+| "필요한 SDK 도메인/권한/약관 먼저 정리해줘" | `plan` (요구사항 분석) |
+| "로그인/인증 배선해줘" | `auth-setup` (station 4 배선) |
+| "번들·등록·배포해줘" | `setup-bundle` → `register` → `deploy` |
+
+그 skill들이 진행 중에 레퍼런스가 필요하면 자기 흐름 안에서 이 skill을 부른다 —
+반대 방향(조회를 먼저 하고 사용자가 알아서 다음을 찾게 두는 것)이 아니다.
 
 ## 하지 말아야 할 것
 
