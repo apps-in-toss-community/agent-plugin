@@ -6,8 +6,10 @@ description: |
   ("기존 Vite 프로젝트에 devtools 붙여줘"); `/ait:inject-polyfill` wires
   `@ait-co/polyfill` so standard Web API calls route to the SDK ("표준 Web API로
   마이그레이션해줘"); `/ait:inject-debug-console` installs `@ait-co/debug-console`
-  (on-device attach + eruda) as a dependency for on-device debugging. Idempotent,
-  minimal edits.
+  (on-device attach + eruda) as a dependency. Idempotent, minimal edits.
+  This skill only INSTALLS packages into a build setup — it never diagnoses a
+  running app. "폰에서 이상하게 동작하는데 디버깅하고 싶어" / "라이브 상태를
+  보고 싶어" is `debug`, not this.
 argument-hint: '[--entry <path>]'
 ---
 
@@ -119,6 +121,7 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 - ❌ (devtools) panel 마운트 E2E 검증 — 사용자가 직접 `pnpm dev`로 확인.
 - ❌ (devtools) Rollup/esbuild 라이브러리 빌드에 mock 주입 — 앱(미니앱) 전용.
 - ❌ (polyfill) Tier-1 외 API 자동 변환 / `@apps-in-toss/web-framework` 제거.
+- ❌ **실행 중인 앱을 진단하는 것** — 이 skill은 패키지를 *설치*할 뿐이다. "폰에서 이상하게 동작한다", "라이브 상태를 보고 싶다"는 `/ait:debug`(`debug` skill). debug-console facet은 그 진단을 *가능하게 하는 준비물*이지 진단 자체가 아니다.
 - ❌ (debug-console) MCP 데몬 등록 — plugin manifest가 이미 처리(`/ait:debug` §5 참조).
 - ❌ (debug-console) `devDependencies` 설치 — 프로덕션 번들 포함이 목적이라 반드시 `dependencies`.
 

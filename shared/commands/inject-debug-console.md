@@ -1,5 +1,5 @@
 ---
-description: 'Install @ait-co/debug-console (on-device attach + eruda) into an existing project as a dependency.'
+description: 'Install @ait-co/debug-console into an existing project as a dependency — setup only, not a diagnosis (use /ait:debug to debug a running app).'
 argument-hint: ''
 ---
 
