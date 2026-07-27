@@ -52,7 +52,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 
 ## 의존
 
-- 호스트에 **pnpm 10+ + Node 24+**가 있어야 `pnpm install`이 통과한다.
+- 호스트에 **pnpm 11+ + Node 24+**가 있어야 `pnpm install`이 통과한다.
   **Step 0이 실행 전 자동으로 검사·안내**하므로 수동 확인 불필요.
 - 템플릿 자체는 plugin 패키지에 포함되어 있어 별도 다운로드가 없다.
 - 첫 install은 `@ait-co/devtools`(npm), `@apps-in-toss/web-framework`(npm),
@@ -95,7 +95,7 @@ pnpm --version   # 10.x.x 이어야 한다 (또는 corepack이 활성화돼 있�
 
 검사 결과에 따른 분기:
 
-1. **Node 24+ & pnpm 10+ 모두 충족** — 침묵 통과. Step 1로 진행.
+1. **Node 24+ & pnpm 11+ 모두 충족** — 침묵 통과. Step 1로 진행.
 
 2. **Node 없음 또는 24 미만** — 즉시 멈추고 아래 안내 후 종료:
 
@@ -127,10 +127,10 @@ pnpm --version   # 10.x.x 이어야 한다 (또는 corepack이 활성화돼 있�
    설치 후 /ait new 를 다시 실행하세요.
    ```
 
-4. **pnpm 있지만 10 미만** — 멈추고 안내 후 종료:
+4. **pnpm 있지만 11 미만** — 멈추고 안내 후 종료:
 
    ```
-   pnpm 10 이상이 필요합니다 (현재: <감지된 버전>).
+   pnpm 11 이상이 필요합니다 (현재: <감지된 버전>).
 
    업그레이드:
      npm install -g pnpm@latest
@@ -235,7 +235,7 @@ cd ./<package_name> && pnpm install
 mock으로 대체한다. 사용자에게도 이 점을 한 줄로 알린다.
 
 `pnpm`이 없으면 npm/bun으로 fallback할지 사용자에게 묻지 말고, "이 템플릿은
-pnpm 10을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려면
+pnpm 11을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려면
 `--no-install`로 만든 뒤 `pnpm`을 설치하거나 본인 환경에 맞게 변경하세요"
 정도로 안내하고 종료.
 
