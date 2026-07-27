@@ -72,21 +72,36 @@ bun add @ait-co/debug-console       # bun
 @ait-co/debug-console import가 이미 있습니다. 와이어업을 건너뜁니다.
 ```
 
-없으면 진입점에 self-gating `/auto` import를 추가한다:
+없으면 두 가지 와이어업 방식 중 하나를 안내한다 — 이 skill은 기본으로 **방식 A**를
+적용한다(패키지 자체 README가 "권장"으로 문서화한 방식과 동일).
+
+**방식 A — `/auto` self-gating entry (기본)**:
 
 ```ts
 import '@ait-co/debug-console/auto';
 ```
 
-`/auto`는 런타임 환경(예: `RELEASE_CHANNEL=dogfood` candidate)에서만 스스로 활성화되는
-self-gating 진입점이다 — 일반 프로덕션 빌드나 브라우저 dev 환경에서는 no-op이다. 수동
-attach 제어가 필요하면 named export를 안내한다:
+런타임 self-gate다 — DEV 빌드이거나 URL에 `?debug=1`+`?relay=`가 함께 있을 때만(즉 환경 3
+debug relay deep-link로 열렸을 때만) 활성화되고, 일반 프로덕션 로드에서는 아무 동작도
+하지 않는다. 단 "번들에서 코드가 물리적으로 0바이트"까지는 보장하지 않는다 — 비활성
+상태로 잠들어 있는 청크가 release 번들 안에 그대로 남는다.
+
+**방식 B — build-time `__DEBUG_BUILD__` 게이트 (release 번들에서 완전히 제거하고 싶을 때)**:
 
 ```ts
-import { attach } from '@ait-co/debug-console';
-// 조건에 맞을 때만 명시적으로 attach
-if (shouldEnableDebugConsole) attach();
+if (__DEBUG_BUILD__) {
+  import('@ait-co/debug-console').then((m) => m.maybeAttach());
+}
 ```
+
+`maybeAttach(gateResult?: GateResult): void`는 인자 없이 호출하면 내부적으로
+`checkDebugGate()`(호스트 allowlist + `debug=1`/`relay=` opt-in + TOTP 게이트)를 스스로
+수행하는 self-gating 함수다 — 호출부에 별도 boolean 조건을 씌울 필요가 없고, 반환값은
+`void`(Promise 아님). 대신 `__DEBUG_BUILD__`는 consumer 번들러의 `define`(예: Vite
+`define: { __DEBUG_BUILD__: 'false' }`) 값이다 — release 빌드에서 `false`로 두면
+번들러가 `@ait-co/debug-console` 그래프 전체를 dead-code-eliminate한다(방식 A의 "잠든
+청크"가 아예 남지 않는다). `__DEBUG_BUILD__`는 ambient global이므로 consumer 쪽에
+`declare const __DEBUG_BUILD__: boolean;` 선언이 필요하다.
 
 ## 5. debug-console facet 완료 seam
 
@@ -101,8 +116,9 @@ if (shouldEnableDebugConsole) attach();
   - @ait-co/debug-console은 dependencies입니다 — 프로덕션 번들에 실제로 포함되는
     유일한 디버그 패키지입니다. attach 표면을 남기고 싶지 않으면 이 skill을
     실행하지 마세요.
-  - /auto는 self-gating — 일반 프로덕션/브라우저 dev에서는 no-op, candidate 빌드에서만
-    활성화됩니다.
+  - /auto는 런타임 self-gate — DEV 빌드이거나 URL에 debug=1+relay=가 있을 때만 활성화,
+    일반 프로덕션 로드에서는 no-op입니다. release 번들에서 코드 자체를 제거하려면
+    __DEBUG_BUILD__ 빌드타임 게이트(방식 B, 위 §4)를 쓰세요.
   - eruda 기반 in-app 콘솔은 attach 후 화면에서 직접 열 수 있습니다.
 
 다음 단계:
