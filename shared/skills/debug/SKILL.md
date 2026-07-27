@@ -323,4 +323,4 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 - 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://docs.aitc.dev/guides/navigation-flow
 - 커뮤니티 docs — on-device CDP relay 디버깅 구조·진입 경로: https://docs.aitc.dev/guides/debug-relay
 - 커뮤니티 docs — relay TOTP 인증(터널 URL 유출 차단): https://docs.aitc.dev/guides/relay-auth-totp
-- 환경 3겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/three-environments-fidelity.md
+- 환경 3겹 설계: umbrella CLAUDE.md §1.1 + meta/three-environments-fidelity.md
