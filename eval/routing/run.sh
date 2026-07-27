@@ -75,20 +75,40 @@ _one() {
   printf '%s\n' "${out:-ERR}"
 }
 
-# expect 대비 실제 호출 목록 → PASS/FAIL.
+# 관측된 이름을 skill 정본 이름으로 정규화한다.
+#
+# 모델은 skill(`plan`)을 직접 부르기도 하고 command stub(`ait-plan`)을 부르기도
+# 하는데, stub은 곧바로 그 skill로 위임하므로 라우팅상 같은 결과다. 게다가 stub
+# 17개 중 4개는 이름이 skill과 다르다(§제공물의 facet 병합) — 그걸 안 펴면
+# `ait-deploy-key`만 부른 run이 "deploy 안 뜸"으로 오판된다.
+_canon() {
+  case "$1" in
+    ait-new|new)                        echo new-miniapp ;;
+    ait-logs|logs)                      echo status ;;
+    ait-deploy-key|deploy-key)          echo deploy ;;
+    ait-inject-devtools|ait-inject-polyfill|inject-devtools|inject-polyfill) echo inject ;;
+    ait-*)                              echo "${1#ait-}" ;;
+    *)                                  echo "$1" ;;
+  esac
+}
+
+# expect 대비 실제 호출 목록 → PASS/FAIL. 비교는 정규화된 이름으로 한다.
 _verdict() {
-  local expect="$1" got="$2" b
+  local expect="$1" got="$2" b s canon=","
+  for s in $(printf '%s' "${got}" | tr ',' ' '); do
+    canon="${canon}$(_canon "${s}"),"
+  done
   case "${expect}" in
-    +*) case ",${got}," in *",${expect#+},"*) echo PASS;; *) echo FAIL;; esac ;;
+    +*) case "${canon}" in *",${expect#+},"*) echo PASS;; *) echo FAIL;; esac ;;
     -*) for b in $(printf '%s' "${expect#-}" | tr ',' ' '); do
-          case ",${got}," in *",${b},"*) echo FAIL; return;; esac
+          case "${canon}" in *",${b},"*) echo FAIL; return;; esac
         done
         echo PASS ;;
     *)  echo ERR ;;
   esac
 }
 
-export -f _one _verdict
+export -f _one _verdict _canon
 export REPO_ROOT MODEL CASES
 
 echo "라우팅 게이트 — 설치 플러그인 형상 (--plugin-dir), model=${MODEL}, reps=${REPS}"
