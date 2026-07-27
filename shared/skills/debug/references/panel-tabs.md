@@ -1,6 +1,6 @@
 # devtools floating panel — 탭별 관찰 지점 (환경 1)
 
-`/ait debug`가 환경 1(로컬 브라우저)에서 devtools floating panel을 안내할 때, 증상별로 어느 탭을 봐야 하는지의 상세 매핑이다.
+`/ait:debug`가 환경 1(로컬 브라우저)에서 devtools floating panel을 안내할 때, 증상별로 어느 탭을 봐야 하는지의 상세 매핑이다.
 
 | 증상 | 탭 | 확인할 것 |
 |---|---|---|

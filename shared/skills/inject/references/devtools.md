@@ -1,8 +1,8 @@
-# devtools facet — `/ait inject-devtools` 상세
+# devtools facet — `/ait:inject-devtools` 상세
 
 이미 `@apps-in-toss/web-framework`를 사용하는 기존 프로젝트에 `@ait-co/devtools` unplugin을
 추가해, 토스 앱 없이 브라우저에서 개발·테스트할 수 있게 한다. brownfield 진입점 — 기존
-파일을 최소한으로 수정하고, 이미 설정이 있으면 skip한다. `/ait inject-devtools`는 인자를
+파일을 최소한으로 수정하고, 이미 설정이 있으면 skip한다. `/ait:inject-devtools`는 인자를
 받지 않는다.
 
 생성되는 파일/주석에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·
@@ -25,7 +25,7 @@ ls package.json
 
 ```
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
-예: cd <project-root> && /ait inject-devtools
+예: cd <project-root> && /ait:inject-devtools
 ```
 
 ## 2. 빌드 도구 감지
@@ -183,7 +183,7 @@ module.exports = {
 **config 파일 수정 원칙**:
 - `Edit`로 최소 변경. 기존 코드 포맷·주석·설정은 유지.
 - `aitDevtools.vite({ panel: true })`로 쓴다 — `panel: true`가 정본이며 템플릿·sdk-example과
-  동일하게 맞춘다(실기기 미리보기 tunnel이 필요하면 `/ait setup-phone-preview`가 별도로
+  동일하게 맞춘다(실기기 미리보기 tunnel이 필요하면 `/ait:setup-phone-preview`가 별도로
   `tunnel` 옵션을 설정).
 - `production` 빌드에서는 unplugin이 자동으로 비활성화된다(`NODE_ENV=production` 감지). 빌드
   결과물에 mock이 포함되지 않으므로 추가 조건 분기는 불필요.
@@ -199,8 +199,8 @@ module.exports = {
 
 다음 단계:
   pnpm dev                  # (또는 npm run dev / yarn dev / bun dev)
-  /ait debug                # 브라우저 패널·window.__ait 상태로 디버깅
-  /ait setup-phone-preview  # (선택) 실기기에서 dev 앱 미리보기
+  /ait:debug                # 브라우저 패널·window.__ait 상태로 디버깅
+  /ait:setup-phone-preview  # (선택) 실기기에서 dev 앱 미리보기
 
 브라우저에서 앱을 열면 하단에 AIT DevTools 패널이 나타납니다.
 패널에서 mock 상태(권한, 위치, IAP 등)를 실시간으로 제어할 수 있습니다.

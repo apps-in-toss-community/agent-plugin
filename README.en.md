@@ -8,13 +8,13 @@ Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from in
 
 Ties together `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, and the community docs into a single integrated experience. Slash commands available today:
 
-- `/ait new` — scaffold a new mini-app
-- `/ait docs <topic>` — load curated SDK docs into the session
-- `/ait inject-devtools` / `/ait inject-polyfill` / `/ait inject-debug-console` — inject config into an existing project
-- `/ait status` / `/ait logs` — console-cli-backed status queries
-- `/ait auth-setup` — configure oidc-bridge connection
-- `/ait debug` — browser debugging guidance (devtools panel · `window.__ait` · browser DevTools). On-device CDP debugging of phone bundles is in progress
-- `/ait deploy` — deploy the mini-app
+- `/ait:new` — scaffold a new mini-app
+- `/ait:docs <topic>` — load curated SDK docs into the session
+- `/ait:inject-devtools` / `/ait:inject-polyfill` / `/ait:inject-debug-console` — inject config into an existing project
+- `/ait:status` / `/ait:logs` — console-cli-backed status queries
+- `/ait:auth-setup` — configure oidc-bridge connection
+- `/ait:debug` — browser debugging guidance (devtools panel · `window.__ait` · browser DevTools). On-device CDP debugging of phone bundles is in progress
+- `/ait:deploy` — deploy the mini-app
 
 See the "Skills" table in [`CLAUDE.md`](./CLAUDE.md) for the full skill list and dependency repos.
 
@@ -43,7 +43,7 @@ In Claude Code, add the marketplace and install the plugin:
 /plugin install ait@aitc
 ```
 
-After installation the `/ait` commands (`/ait new`, `/ait deploy`, etc.) become available.
+After installation the `/ait:` commands (`/ait:new`, `/ait:deploy`, etc.) become available. The plugin name is the namespace, so the colon form is the real command — a space form (`/ait new`) does not exist.
 
 Codex / Gemini CLI / Cursor / Windsurf are planned for Phase 2+. See the deployment-phases section in [`CLAUDE.md`](./CLAUDE.md).
 

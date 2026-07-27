@@ -5,7 +5,7 @@ description: |
   + Vite + TypeScript + `@ait-co/devtools` by default) — copies the
   template, substitutes tokens, runs `pnpm install` so `pnpm dev` works
   immediately. Greenfield only (see `inject-devtools` for existing
-  projects). Triggered by `/ait new <app-name> [--template <name>] [--no-install]`.
+  projects). Triggered by `/ait:new <app-name> [--template <name>] [--no-install]`.
 argument-hint: '<app-name> [--template <name>] [--no-install]'
 ---
 
@@ -13,7 +13,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 
 ## 목적
 
-`/ait new <app-name>` 한 번으로 새 앱인토스 미니앱 프로젝트를 빈 상태에서
+`/ait:new <app-name>` 한 번으로 새 앱인토스 미니앱 프로젝트를 빈 상태에서
 시작할 수 있게 한다. 사용자가 묻기 전에 답해야 할 것:
 
 - React 19 + Vite + TypeScript + `@apps-in-toss/web-framework` 조합으로
@@ -24,7 +24,7 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
   뜨는 `unmet peer react-native` 경고는 그래서 무시해도 된다 — 아래 install 단계.)
 - `@ait-co/devtools`가 dev 시점에 SDK를 mock해주므로, 토스 앱 없이
   브라우저에서 개발할 수 있다.
-- 다음 단계(`pnpm dev` → 코드 수정 → `/ait setup-bundle` → `/ait design` → `/ait register` → `/ait deploy-key` → `/ait deploy`)가 명확히 안내된다.
+- 다음 단계(`pnpm dev` → 코드 수정 → `/ait:setup-bundle` → `/ait:design` → `/ait:register` → `/ait:deploy-key` → `/ait:deploy`)가 명확히 안내된다.
 
 이 skill은 **단순 파일 복사 + 토큰 치환 + 1회 install**만 담당한다. 콘솔
 등록(`aitcc app register`), 로그인, 배포는 다른 skill 또는 console-cli의
@@ -45,9 +45,9 @@ argument-hint: '<app-name> [--template <name>] [--no-install]'
 호출 예:
 
 ```
-/ait new my-mini-app
-/ait new "내 미니앱"            # app_name = "내 미니앱", package_name = "naemini-app" 정도로 슬러그화
-/ait new my-app --no-install
+/ait:new my-mini-app
+/ait:new "내 미니앱"            # app_name = "내 미니앱", package_name = "naemini-app" 정도로 슬러그화
+/ait:new my-app --no-install
 ```
 
 ## 의존
@@ -106,7 +106,7 @@ pnpm --version   # 10.x.x 이어야 한다 (또는 corepack이 활성화돼 있�
      • nvm 사용 중: nvm install 24 && nvm use 24
      • nvm 없음: https://nodejs.org/en/download/ 에서 LTS 설치
 
-   설치 후 터미널을 재시작하고 /ait new 를 다시 실행하세요.
+   설치 후 터미널을 재시작하고 /ait:new 를 다시 실행하세요.
    ```
 
 3. **pnpm 없음** — 에이전트가 먼저 자동으로 아래를 시도한다:
@@ -124,7 +124,7 @@ pnpm --version   # 10.x.x 이어야 한다 (또는 corepack이 활성화돼 있�
    설치 방법:
      npm install -g pnpm
 
-   설치 후 /ait new 를 다시 실행하세요.
+   설치 후 /ait:new 를 다시 실행하세요.
    ```
 
 4. **pnpm 있지만 11 미만** — 멈추고 안내 후 종료:
@@ -135,7 +135,7 @@ pnpm --version   # 10.x.x 이어야 한다 (또는 corepack이 활성화돼 있�
    업그레이드:
      npm install -g pnpm@latest
 
-   업그레이드 후 /ait new 를 다시 실행하세요.
+   업그레이드 후 /ait:new 를 다시 실행하세요.
    ```
 
 `--no-install` 플래그가 있으면 install이 없으므로 pnpm 버전 검사는 건너뛴다.
@@ -251,14 +251,14 @@ pnpm 11을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   pnpm dev          # 브라우저에서 devtools panel과 함께 실행
 
 토스 로그인이 필요하면:
-  /ait auth-setup   # oidc-bridge로 로그인 배선 (appLogin → OIDC → 백엔드 세션)
+  /ait:auth-setup   # oidc-bridge로 로그인 배선 (appLogin → OIDC → 백엔드 세션)
 
 배포 준비가 되면:
-  /ait setup-bundle  # .ait 번들 빌드 환경 추가 (granite.config.ts + bundle:ait 스크립트)
-  /ait design        # 등록용 이미지 자산 생성 (앱 아이콘·스크린샷 — register 전제)
-  /ait register      # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
-  /ait deploy-key    # Deploy Key 발급 — 처음 배포면 deploy 전에
-  /ait deploy        # 번들을 콘솔에 업로드 (ait build → ait deploy --profile <name>)
+  /ait:setup-bundle  # .ait 번들 빌드 환경 추가 (granite.config.ts + bundle:ait 스크립트)
+  /ait:design        # 등록용 이미지 자산 생성 (앱 아이콘·스크린샷 — register 전제)
+  /ait:register      # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
+  /ait:deploy-key    # Deploy Key 발급 — 처음 배포면 deploy 전에
+  /ait:deploy        # 번들을 콘솔에 업로드 (ait build → ait deploy --profile <name>)
 
 문서: https://docs.aitc.dev/  (커뮤니티 docs)
 ```
@@ -314,9 +314,9 @@ pnpm --dir <project_abs_path> dev
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ 콘솔 인증 (`aitcc login`) — 인증이 필요한 작업은 별도 skill.
-- ❌ `aitcc.yaml` 생성 / 콘솔에 앱 등록 — `/ait register` skill의 역할.
-- ❌ 배포 — `/ait deploy` (`deploy` skill).
-- ❌ 기존 프로젝트에 devtools 주입 — `/ait inject-devtools`
+- ❌ `aitcc.yaml` 생성 / 콘솔에 앱 등록 — `/ait:register` skill의 역할.
+- ❌ 배포 — `/ait:deploy` (`deploy` skill).
+- ❌ 기존 프로젝트에 devtools 주입 — `/ait:inject-devtools`
   (`inject` skill의 devtools facet).
 - ❌ Workspace 등록 / 멤버 초대 / billing — console-cli + 콘솔 UI.
 - ❌ Lockfile commit — 템플릿에는 lockfile을 포함하지 않는다 (사용처마다

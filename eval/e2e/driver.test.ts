@@ -84,7 +84,7 @@ describe('exposesKey', () => {
     expect(exposesKey(PLUGIN_FORM, 'new-miniapp')).toBe(true);
   });
 
-  it('존재하지 않는 다단어 표현은 못 찾는다 (`/ait new` 는 명령이 아니다)', () => {
+  it('존재하지 않는 다단어 표현은 못 찾는다 (`/ait:new` 는 명령이 아니다)', () => {
     expect(exposesKey(PROJECT_FORM, 'ait new')).toBe(false);
     expect(exposesKey(PLUGIN_FORM, 'ait new')).toBe(false);
   });

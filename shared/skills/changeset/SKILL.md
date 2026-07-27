@@ -4,7 +4,8 @@ description: |
   Create a `.changeset/*.md` entry for an npm version bump. Default bump is
   ALWAYS patch; minor/major only with explicit user instruction. Use when
   the user says "changeset 만들어줘", "add a changeset", "버전 올려줘", or
-  invokes `/changeset`. Harness-external maintainer tool, no `/ait` prefix.
+  invokes `/ait:changeset`. Harness-external maintainer tool — it is not a
+  station of the zero→ship flow, though it shares the plugin's `ait:` namespace.
 argument-hint: '[patch|minor|major]'
 ---
 
@@ -21,7 +22,7 @@ Changesets(https://github.com/changesets/changesets)를 쓰는 repo에서
 
 ### 기본값: patch
 
-사용자가 명시적 지시 없이 `/changeset` 또는 "changeset 만들어줘"라고 하면
+사용자가 명시적 지시 없이 `/ait:changeset` 또는 "changeset 만들어줘"라고 하면
 **항상 patch**. 변경 규모가 얼마나 커 보이든 patch.
 
 ### Minor / Major는 자율 금지
@@ -46,7 +47,7 @@ Changesets(https://github.com/changesets/changesets)를 쓰는 repo에서
 - "minor로 올려줘"
 - "major bump로 changeset 만들어줘"
 - "breaking change니까 major"
-- "/changeset minor"
+- "/ait:changeset minor"
 - "0.2.0으로 가자"
 
 그 외 전부 **patch**.

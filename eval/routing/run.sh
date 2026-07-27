@@ -86,7 +86,8 @@ _canon() {
     ait-new|new)                        echo new-miniapp ;;
     ait-logs|logs)                      echo status ;;
     ait-deploy-key|deploy-key)          echo deploy ;;
-    ait-inject-devtools|ait-inject-polyfill|inject-devtools|inject-polyfill) echo inject ;;
+    ait-inject-devtools|ait-inject-polyfill|ait-inject-debug-console) echo inject ;;
+    inject-devtools|inject-polyfill|inject-debug-console) echo inject ;;
     ait-*)                              echo "${1#ait-}" ;;
     *)                                  echo "$1" ;;
   esac

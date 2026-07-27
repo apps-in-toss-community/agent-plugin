@@ -1,6 +1,6 @@
 # `aitcc.yaml` 매니페스트 필드 레퍼런스
 
-`/ait register`가 매니페스트를 새로 생성할 때(SKILL.md §입력·§4·§5) 참조하는 필드 제약 전체다.
+`/ait:register`가 매니페스트를 새로 생성할 때(SKILL.md §입력·§4·§5) 참조하는 필드 제약 전체다.
 
 ## 필수 필드 (console-cli가 검증)
 

@@ -2,18 +2,20 @@
 name: inject
 description: |
   Patch an existing Apps in Toss mini-app's build setup. Three facets:
-  `/ait inject-devtools` adds the `@ait-co/devtools` unplugin for browser dev
-  ("기존 Vite 프로젝트에 devtools 붙여줘"); `/ait inject-polyfill` wires
+  `/ait:inject-devtools` adds the `@ait-co/devtools` unplugin for browser dev
+  ("기존 Vite 프로젝트에 devtools 붙여줘"); `/ait:inject-polyfill` wires
   `@ait-co/polyfill` so standard Web API calls route to the SDK ("표준 Web API로
-  마이그레이션해줘"); `/ait inject-debug-console` installs `@ait-co/debug-console`
-  (on-device attach + eruda) as a dependency for on-device debugging. Idempotent,
-  minimal edits.
+  마이그레이션해줘"); `/ait:inject-debug-console` installs `@ait-co/debug-console`
+  (on-device attach + eruda) as a dependency. Idempotent, minimal edits.
+  This skill only INSTALLS packages into a build setup — it never diagnoses a
+  running app. "폰에서 이상하게 동작하는데 디버깅하고 싶어" / "라이브 상태를
+  보고 싶어" is `debug`, not this.
 argument-hint: '[--entry <path>]'
 ---
 
 # inject skill
 
-이 skill은 세 facet을 담는다 — `/ait inject-devtools`(devtools unplugin 주입), `/ait inject-polyfill`(polyfill 모드 마이그레이션), `/ait inject-debug-console`(on-device attach 패키지 설치). 셋 다 기존 프로젝트의 빌드 셋업을 최소 변경으로 패치하는 brownfield station 2 도구라 하나로 묶였다(issue #273 devtools+polyfill 병합, agent-plugin#280 debug-console facet 추가). 사용자가 어느 command로 진입했는지에 따라 아래 해당 facet으로 분기한다 — 세 facet은 독립이며 서로를 자동 실행하지 않는다.
+이 skill은 세 facet을 담는다 — `/ait:inject-devtools`(devtools unplugin 주입), `/ait:inject-polyfill`(polyfill 모드 마이그레이션), `/ait:inject-debug-console`(on-device attach 패키지 설치). 셋 다 기존 프로젝트의 빌드 셋업을 최소 변경으로 패치하는 brownfield station 2 도구라 하나로 묶였다(issue #273 devtools+polyfill 병합, agent-plugin#280 debug-console facet 추가). 사용자가 어느 command로 진입했는지에 따라 아래 해당 facet으로 분기한다 — 세 facet은 독립이며 서로를 자동 실행하지 않는다.
 
 ## 목적
 
@@ -24,17 +26,17 @@ argument-hint: '[--entry <path>]'
 
 세 facet은 목적이 다르다:
 
-- **devtools facet** (`/ait inject-devtools`): `@ait-co/devtools` unplugin을 빌드 config에
+- **devtools facet** (`/ait:inject-devtools`): `@ait-co/devtools` unplugin을 빌드 config에
   추가해 토스 앱 없이 브라우저에서 mock SDK로 개발·테스트한다. 인자 없음.
-- **polyfill facet** (`/ait inject-polyfill`): `@ait-co/polyfill`을 도입해 앱 코드가 표준 Web
+- **polyfill facet** (`/ait:inject-polyfill`): `@ait-co/polyfill`을 도입해 앱 코드가 표준 Web
   API(`navigator.clipboard` 등)를 그대로 써도 런타임에 SDK로 라우팅되게 한다. `--entry <path>`
   로 진입점을 지정할 수 있다(기본값 자동 감지).
-- **debug-console facet** (`/ait inject-debug-console`): `@ait-co/debug-console`(on-device
+- **debug-console facet** (`/ait:inject-debug-console`): `@ait-co/debug-console`(on-device
   attach + eruda)을 **`dependencies`**로 설치하고 `/auto` self-gating import를 진입점에
   와이어업한다. 환경 3(intoss-private candidate) on-device 디버깅에 attach 표면을 남긴다.
   인자 없음.
 
-## devtools facet — `/ait inject-devtools`
+## devtools facet — `/ait:inject-devtools`
 
 빌드 도구(Vite / Next.js / Rspack / Webpack)를 감지하고, lockfile로 패키지 매니저를 감지해
 `@ait-co/devtools`를 devDep으로 설치한 뒤, config 파일을 멱등하게 패치한다
@@ -47,7 +49,7 @@ dev 전용이다.
 
 **상세가 필요하면 Read `<이 skill의 base directory>/references/devtools.md`.**
 
-## polyfill facet — `/ait inject-polyfill`
+## polyfill facet — `/ait:inject-polyfill`
 
 `@ait-co/polyfill`을 **runtime dependency**로 설치하고, 진입점 맨 첫 줄에
 `import '@ait-co/polyfill/auto'`를 멱등하게 삽입한 뒤, Tier-1 SDK 직접 호출 코드를 표준 Web
@@ -60,7 +62,7 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 
 **상세가 필요하면 Read `<이 skill의 base directory>/references/polyfill.md`.**
 
-## debug-console facet — `/ait inject-debug-console`
+## debug-console facet — `/ait:inject-debug-console`
 
 `@ait-co/debug-console`을 **runtime dependency**로 설치하고, 진입점에 self-gating
 `import '@ait-co/debug-console/auto'`를 멱등하게 삽입한다. 이 패키지는 예전
@@ -84,8 +86,8 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 
 다음 단계:
   pnpm dev                  # 브라우저에서 앱 실행 (하단에 AIT DevTools 패널)
-  /ait debug                # 브라우저 패널·window.__ait 상태로 디버깅
-  /ait setup-phone-preview  # (선택) 실기기에서 dev 앱 미리보기
+  /ait:debug                # 브라우저 패널·window.__ait 상태로 디버깅
+  /ait:setup-phone-preview  # (선택) 실기기에서 dev 앱 미리보기
 ```
 
 **polyfill facet** 완료 후:
@@ -95,8 +97,8 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 
 다음 단계:
   pnpm dev              # 표준 API 경로가 동작하는지 브라우저에서 확인
-  /ait inject-devtools  # (권장) devtools와 함께 쓰면 브라우저에서도 mock SDK 경유 확인
-  /ait setup-bundle     # 배포 준비가 되면 .ait 번들 환경 구성
+  /ait:inject-devtools  # (권장) devtools와 함께 쓰면 브라우저에서도 mock SDK 경유 확인
+  /ait:setup-bundle     # 배포 준비가 되면 .ait 번들 환경 구성
 ```
 
 **debug-console facet** 완료 후:
@@ -106,20 +108,21 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 
 다음 단계:
   RELEASE_CHANNEL=dogfood ait build   # candidate 빌드에 attach 표면 포함
-  /ait debug                          # 환경 3 QR attach로 on-device 디버깅
+  /ait:debug                          # 환경 3 QR attach로 on-device 디버깅
 ```
 
 각 facet의 완전한 완료 블록(변경 요약·주의사항 포함)은 위 references 파일에 있다.
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 새 프로젝트 생성 (greenfield) — `/ait new` (`new-miniapp` skill).
-- ❌ 콘솔 인증·배포 — `/ait deploy` (`deploy` skill).
-- ❌ `.ait` 번들 빌드 환경 설정 — `/ait setup-bundle`.
+- ❌ 새 프로젝트 생성 (greenfield) — `/ait:new` (`new-miniapp` skill).
+- ❌ 콘솔 인증·배포 — `/ait:deploy` (`deploy` skill).
+- ❌ `.ait` 번들 빌드 환경 설정 — `/ait:setup-bundle`.
 - ❌ (devtools) panel 마운트 E2E 검증 — 사용자가 직접 `pnpm dev`로 확인.
 - ❌ (devtools) Rollup/esbuild 라이브러리 빌드에 mock 주입 — 앱(미니앱) 전용.
 - ❌ (polyfill) Tier-1 외 API 자동 변환 / `@apps-in-toss/web-framework` 제거.
-- ❌ (debug-console) MCP 데몬 등록 — plugin manifest가 이미 처리(`/ait debug` §5 참조).
+- ❌ **실행 중인 앱을 진단하는 것** — 이 skill은 패키지를 *설치*할 뿐이다. "폰에서 이상하게 동작한다", "라이브 상태를 보고 싶다"는 `/ait:debug`(`debug` skill). debug-console facet은 그 진단을 *가능하게 하는 준비물*이지 진단 자체가 아니다.
+- ❌ (debug-console) MCP 데몬 등록 — plugin manifest가 이미 처리(`/ait:debug` §5 참조).
 - ❌ (debug-console) `devDependencies` 설치 — 프로덕션 번들 포함이 목적이라 반드시 `dependencies`.
 
 ## 참고
@@ -131,4 +134,4 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 - 짝 skill: `new-miniapp` (새 프로젝트 생성 — devtools/polyfill 포함 템플릿), `debug` (devtools facet이 깔아둔 panel·CDP relay 또는 debug-console facet이 깔아둔 환경 3 attach 표면을 소비하는 on-device 디버깅), `setup-phone-preview` (실기기 WebKit 미리보기 병행), `deploy` (설정 완료 후 콘솔 배포).
 - `@ait-co/devtools`(mock+panel+unplugin, 브라우저 dev 전용): https://github.com/apps-in-toss-community/devtools · live demo: https://devtools.aitc.dev/
 - `@ait-co/polyfill`: https://github.com/apps-in-toss-community/polyfill · 통합 가이드: [`polyfill/INTEGRATION.md`](https://github.com/apps-in-toss-community/polyfill/blob/main/INTEGRATION.md)
-- `@ait-co/debug-console`(on-device attach + eruda) · `@ait-co/debugger`(MCP 데몬, `/ait debug`가 상시 기동): https://github.com/apps-in-toss-community/debugger
+- `@ait-co/debug-console`(on-device attach + eruda) · `@ait-co/debugger`(MCP 데몬, `/ait:debug`가 상시 기동): https://github.com/apps-in-toss-community/debugger

@@ -5,8 +5,8 @@ description: |
   the runtime permissions they prompt for, and console terms (약관) that
   gate registration. Use when the user asks "미니앱 만들 건데 필요한 SDK
   도메인/권한/약관 먼저 정리해줘" — requirements analysis, not a docs
-  lookup. Analysis only; hands off to `/ait new`. Triggered by
-  `/ait plan [requirements]`.
+  lookup. Analysis only; hands off to `/ait:new`. Triggered by
+  `/ait:plan [requirements]`.
 argument-hint: '[requirements]'
 ---
 
@@ -14,7 +14,7 @@ argument-hint: '[requirements]'
 
 ## 목적
 
-`/ait plan <요구사항>` 한 번으로, 만들려는 미니앱을 자연어로 설명하면
+`/ait:plan <요구사항>` 한 번으로, 만들려는 미니앱을 자연어로 설명하면
 출시까지 필요한 세 가지를 산출한다:
 
 1. **SDK 도메인** — 어떤 `@apps-in-toss/web-framework` API 그룹이 필요한가
@@ -27,14 +27,14 @@ argument-hint: '[requirements]'
 
 이 skill은 harness의 **첫 station**이다(station 7 "plan"은 개발 순서상
 마지막에 추가됐지만, 흐름상으로는 scaffold 앞에 온다). 빈 디렉토리에서
-`/ait new`로 프로젝트를 만들기 **전에**, 무엇을 쓰게 될지 미리 지도를 그려서
+`/ait:new`로 프로젝트를 만들기 **전에**, 무엇을 쓰게 될지 미리 지도를 그려서
 나중에 register/deploy에서 약관 게이트에 막혀 되돌아오는 일을 줄인다.
 
 이 skill은 **분석만** 한다. 파일을 만들지 않고, CLI를 호출하지 않고,
 아무것도 등록하지 않는다. 산출물은 구조화된 계획 한 장이고, 그 hand-off는
-`/ait new`다.
+`/ait:new`다.
 
-도메인·권한·약관 이름을 **지어내지 않는다**. 확신이 없으면 `/ait docs <topic>`로
+도메인·권한·약관 이름을 **지어내지 않는다**. 확신이 없으면 `/ait:docs <topic>`로
 커뮤니티 docs를 조회하거나 사용자에게 되묻는다. "공식(official)",
 "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현은 쓰지 않는다.
 
@@ -61,7 +61,7 @@ argument-hint: '[requirements]'
 매핑의 기준이 되는 도메인은 sdk-example이 실증하는 18개다(`Home`은 셸이라
 도메인 분류에서 제외). 각 행의 "권한"과 "약관"이 비어 있으면 그 도메인은 별도
 런타임 권한·콘솔 약관을 요구하지 않는다는 뜻이다. **이 표는 출발점이고,
-정확한 메서드·권한 상수는 호출 시점에 `/ait docs <group>`로 확인한다.**
+정확한 메서드·권한 상수는 호출 시점에 `/ait:docs <group>`로 확인한다.**
 
 | 도메인 | 무엇에 쓰나 | 권한(런타임) | 약관(콘솔) | docs |
 |---|---|---|---|---|
@@ -87,12 +87,12 @@ argument-hint: '[requirements]'
 > `photos`(앨범) 권한은 카메라로 찍은 이미지를 앨범에서 고르거나 저장하는
 > 흐름에서 함께 등장한다 — `camera`/`contacts`처럼 도메인에 1:1로 묶이기보다
 > "사진을 다루는 기능"에 붙으므로, 그런 요구사항이 보이면 권한 목록에 `photos`를
-> 추가한다. 정확한 권한 상수는 `/ait docs permissions`로 확인.
+> 추가한다. 정확한 권한 상수는 `/ait:docs permissions`로 확인.
 
 ## 약관(terms) 카탈로그 (참조 테이블)
 
 콘솔 약관은 `aitcc`(= console-cli)가 5개 type으로 노출한다. 등록·배포는 해당
-약관에 동의가 되어 있어야 통과한다 — `/ait plan`은 어떤 약관이 **걸릴지**만
+약관에 동의가 되어 있어야 통과한다 — `/ait:plan`은 어떤 약관이 **걸릴지**만
 미리 알려주고, 실제 동의(`aitcc workspace terms agree <type>`)는 register/deploy
 단계에서 사용자 확인을 거쳐 처리한다. 약관 type:
 
@@ -125,7 +125,7 @@ argument-hint: '[requirements]'
 - 거의 항상 필요한 보조 도메인을 함께 본다: 화면이 여럿이면 `navigation`,
   값을 로컬에 저장하면 `storage`, 권한을 다루면 `permissions`, 사용 분석이
   필요하면 `analytics`.
-- 카탈로그에 없거나 메서드 수준 확인이 필요하면 `/ait docs <group>`로 조회한다.
+- 카탈로그에 없거나 메서드 수준 확인이 필요하면 `/ait:docs <group>`로 조회한다.
   추측으로 메서드/도메인을 지어내지 않는다.
 
 ### 3. 도메인 → 권한 도출
@@ -133,7 +133,7 @@ argument-hint: '[requirements]'
 매핑된 각 도메인의 "권한" 열을 모아 **중복 제거**한 런타임 권한 목록을 만든다
 (예: `geolocation`, `camera`, `contacts`, `microphone`, `photos`).
 권한이 없는 도메인(haptic, storage 등)은 권한 목록에 기여하지 않는다.
-권한 상수의 정확한 이름이 필요하면 `/ait docs permissions`로 확인한다.
+권한 상수의 정확한 이름이 필요하면 `/ait:docs permissions`로 확인한다.
 
 ### 4. 능력(capability) → 약관 도출
 
@@ -156,10 +156,10 @@ argument-hint: '[requirements]'
 SDK 도메인 (필요)
 | 도메인 | 왜 필요한가 | docs |
 |---|---|---|
-| auth        | 토스 로그인으로 사용자 식별            | /ait docs guides/auth-flow |
-| location    | 현재 위치로 주변 매장 정렬             | /ait docs guides/location-permission-fallback |
-| storage     | 즐겨찾기를 로컬에 저장                  | /ait docs storage |
-| navigation  | 목록 ↔ 상세 화면 전환                   | /ait docs guides/navigation-flow |
+| auth        | 토스 로그인으로 사용자 식별            | /ait:docs guides/auth-flow |
+| location    | 현재 위치로 주변 매장 정렬             | /ait:docs guides/location-permission-fallback |
+| storage     | 즐겨찾기를 로컬에 저장                  | /ait:docs storage |
+| navigation  | 목록 ↔ 상세 화면 전환                   | /ait:docs guides/navigation-flow |
 
 런타임 권한 (사용자에게 요청)
   - geolocation     # 위치 기반 정렬
@@ -168,27 +168,27 @@ SDK 도메인 (필요)
   - BIZ_WORKSPACE   # 모든 미니앱 출시의 기본 약관
   - TOSS_LOGIN      # 토스 로그인 사용
   → 동의는 등록/배포 단계에서: aitcc workspace terms agree <type>
-    (지금 동의하지 않는다 — /ait plan은 무엇이 걸릴지만 알려준다)
+    (지금 동의하지 않는다 — /ait:plan은 무엇이 걸릴지만 알려준다)
 
 확인이 필요한 항목 (있으면)
   - <불확실한 매핑 — docs 또는 사용자 확인 필요>
 
 다음 단계:
-  /ait new <app-name>     # 이 계획대로 빈 프로젝트 생성 (scaffold)
-                          # 이후: pnpm dev → /ait setup-bundle → /ait design (등록 이미지 자산) → /ait register → /ait deploy-key → /ait deploy
+  /ait:new <app-name>     # 이 계획대로 빈 프로젝트 생성 (scaffold)
+                          # 이후: pnpm dev → /ait:setup-bundle → /ait:design (등록 이미지 자산) → /ait:register → /ait:deploy-key → /ait:deploy
 ```
 
 "확인이 필요한 항목"이 없으면 그 섹션은 생략한다. seam의 핵심은 **다음 station이
-`/ait new`**라는 것 — 계획이 곧바로 scaffold로 이어진다.
+`/ait:new`**라는 것 — 계획이 곧바로 scaffold로 이어진다.
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 프로젝트 scaffold — 그건 `/ait new` (`new-miniapp` skill).
+- ❌ 프로젝트 scaffold — 그건 `/ait:new` (`new-miniapp` skill).
 - ❌ CLI·API 호출 — `aitcc`/`ait` 어느 것도 실행하지 않는다(약관 조회·동의 포함). 분석 전용.
-- ❌ 콘솔 등록·배포 — `/ait register`, `/ait deploy`.
+- ❌ 콘솔 등록·배포 — `/ait:register`, `/ait:deploy`.
 - ❌ 약관 동의 실행(`aitcc workspace terms agree`) — 어떤 약관이 걸릴지만 예고하고, 동의는 register/deploy에서 사용자 확인을 거친다.
-- ❌ 권한 상수·메서드 이름 지어내기 — 불확실하면 `/ait docs <topic>`로 확인하거나 명시적으로 "확인 필요"로 남긴다.
-- ❌ 이미지·디자인 자산 산출 — 디자인 station(`/ait design`)의 책임.
+- ❌ 권한 상수·메서드 이름 지어내기 — 불확실하면 `/ait:docs <topic>`로 확인하거나 명시적으로 "확인 필요"로 남긴다.
+- ❌ 이미지·디자인 자산 산출 — 디자인 station(`/ait:design`)의 책임.
 
 ## 하지 말아야 할 것
 
@@ -200,8 +200,8 @@ SDK 도메인 (필요)
 
 ## 참고
 
-- 짝 skill: `new-miniapp` (`/ait new`) — 이 계획대로 빈 프로젝트를 만드는 다음 station.
-- 짝 skill: `docs` (`/ait docs <topic>`) — 도메인·권한·약관 매핑이 불확실할 때 라이브로 확인하는 로더.
+- 짝 skill: `new-miniapp` (`/ait:new`) — 이 계획대로 빈 프로젝트를 만드는 다음 station.
+- 짝 skill: `docs` (`/ait:docs <topic>`) — 도메인·권한·약관 매핑이 불확실할 때 라이브로 확인하는 로더.
 - 짝 skill: `register` — 약관 동의(`aitcc workspace terms agree`)와 매니페스트 생성을 실제로 수행하는 단계.
 - 약관·권한 패턴 가이드: https://docs.aitc.dev/guides/permissions-pattern
 - 토스 로그인 흐름: https://docs.aitc.dev/guides/auth-flow

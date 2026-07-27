@@ -18,7 +18,7 @@ export type FailClass =
 /** committed task 정의 (tasks/*.task.json). */
 export interface Task {
   id: string;
-  /** `/ait new <appName>` 에 넘길 이름. */
+  /** `/ait:new <appName>` 에 넘길 이름. */
   appName: string;
   /** 에이전트에 주입할 "작은 아이디어" 발화 (verbatim). */
   prompt: string;

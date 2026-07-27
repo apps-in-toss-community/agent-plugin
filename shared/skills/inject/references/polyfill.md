@@ -1,4 +1,4 @@
-# polyfill facet — `/ait inject-polyfill` 상세
+# polyfill facet — `/ait:inject-polyfill` 상세
 
 기존 앱인토스 미니앱 프로젝트에 `@ait-co/polyfill`을 도입해, 앱 코드가 SDK를 직접 호출하지
 않고 **표준 Web API**(`navigator.clipboard`, `navigator.geolocation` 등)를 그대로 써도
@@ -18,7 +18,7 @@
 
 - `--entry <path>` (선택): 진입점 파일 경로 (기본값: 자동 감지). 자동 감지가 실패하면 사용자에게 묻는다.
 
-호출 예: `/ait inject-polyfill` · `/ait inject-polyfill --entry src/index.tsx`
+호출 예: `/ait:inject-polyfill` · `/ait:inject-polyfill --entry src/index.tsx`
 
 ## 의존
 
@@ -206,8 +206,8 @@ Tier-1 매핑:
 
 [다음 단계]
   pnpm dev              # 표준 API 경로가 동작하는지 브라우저에서 확인
-  /ait inject-devtools  # (권장) devtools와 함께 쓰면 브라우저에서도 mock SDK 경유 확인
-  /ait setup-bundle     # 배포 준비가 되면 .ait 번들 환경 구성
+  /ait:inject-devtools  # (권장) devtools와 함께 쓰면 브라우저에서도 mock SDK 경유 확인
+  /ait:setup-bundle     # 배포 준비가 되면 .ait 번들 환경 구성
 
 참고: https://github.com/apps-in-toss-community/polyfill
 ```

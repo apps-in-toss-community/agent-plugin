@@ -1,6 +1,6 @@
 # consumer backend 구현 — bridge `POST /oidc/token` 교환
 
-`/ait auth-setup` §4(consumer backend 구현)의 코드 예시 + bridge 요청/응답 계약 전체다.
+`/ait:auth-setup` §4(consumer backend 구현)의 코드 예시 + bridge 요청/응답 계약 전체다.
 
 mini-app은 authorizationCode를 **자신의 백엔드**로 전달하고, 백엔드가 bridge를 호출한다.
 

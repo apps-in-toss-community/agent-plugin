@@ -1,7 +1,7 @@
-# debug-console facet — `/ait inject-debug-console` 상세
+# debug-console facet — `/ait:inject-debug-console` 상세
 
 기존 앱인토스 미니앱 프로젝트에 `@ait-co/debug-console`을 설치해, on-device 디버깅
-(환경 3 — intoss-private candidate)에 attach 표면을 남긴다. `/ait inject-debug-console`는
+(환경 3 — intoss-private candidate)에 attach 표면을 남긴다. `/ait:inject-debug-console`는
 인자를 받지 않는다.
 
 `@ait-co/debug-console`은 예전 `@ait-co/devtools`의 `./in-app` export였다 — devtools의
@@ -38,7 +38,7 @@ ls package.json
 
 ```
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
-예: cd <project-root> && /ait inject-debug-console
+예: cd <project-root> && /ait:inject-debug-console
 ```
 
 ## 2. 이미 설치됐는지 확인 (idempotency)
@@ -123,7 +123,7 @@ if (__DEBUG_BUILD__) {
 
 다음 단계:
   RELEASE_CHANNEL=dogfood ait build   # candidate 빌드에 attach 표면 포함
-  /ait debug                          # 환경 3 QR attach로 on-device 디버깅
+  /ait:debug                          # 환경 3 QR attach로 on-device 디버깅
 
 참고: https://github.com/apps-in-toss-community/debugger
 ```
@@ -134,7 +134,7 @@ if (__DEBUG_BUILD__) {
   유일한 패키지다.
 - ❌ 진입점 이외 파일에 자동 import 삽입.
 - ❌ `@ait-co/devtools`·`@ait-co/debugger`와 혼동 — 이 facet은 온디바이스 attach +
-  eruda 전용이다. MCP 데몬 등록은 plugin manifest가 이미 처리(`/ait debug` 참조),
+  eruda 전용이다. MCP 데몬 등록은 plugin manifest가 이미 처리(`/ait:debug` 참조),
   브라우저 mock/panel은 `inject-devtools` facet.
 - ❌ 생성·수정하는 내용에 "공식(official)", "토스가 제공하는", "powered by Toss" 등
   제휴·후원·인증 암시 표현.

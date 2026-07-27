@@ -35,9 +35,9 @@ export function App() {
           <code>@ait-co/devtools</code>가 자동으로 mock으로 대체합니다.
         </li>
         <li>
-          배포 준비는 순서대로: <code>/ait setup-bundle</code>(번들 설정) → <code>/ait design</code>
-          (등록 자산) → <code>/ait register</code>(앱 등록) → <code>/ait deploy-key</code>(Deploy
-          Key 발급) → <code>/ait deploy</code>(콘솔 업로드).
+          배포 준비는 순서대로: <code>/ait:setup-bundle</code>(번들 설정) → <code>/ait:design</code>
+          (등록 자산) → <code>/ait:register</code>(앱 등록) → <code>/ait:deploy-key</code>(Deploy
+          Key 발급) → <code>/ait:deploy</code>(콘솔 업로드).
         </li>
       </ul>
     </main>

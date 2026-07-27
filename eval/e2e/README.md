@@ -1,7 +1,7 @@
 # 슈트 B — e2e 완주·비용·분산 측정
 
 "작은 아이디어 → 작동하는 미니앱"을 **에이전트가 자율로 얼마나·얼마의 비용으로 완주하는가**를
-정량 측정하는 harness다. `/ait new` → (`/ait setup-bundle`) → 번들 빌드(`.ait` 생성)까지의
+정량 측정하는 harness다. `/ait:new` → (`/ait:setup-bundle`) → 번들 빌드(`.ait` 생성)까지의
 멀티턴 완주를 [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk)
 직접 드라이버로 격리 실행하고, **모델·공급자별로 (완주율 · 성공당 토큰 · run-to-run 분산)** 을
 수집한다 — Anthropic tier(opus/sonnet/haiku)와 Qwen 등 비-Anthropic(게이트웨이) 둘 다.
@@ -81,7 +81,7 @@ op run --env-file=.env.eval -- pnpm eval:e2e --task timer --model claude-haiku-4
 | project `.claude/commands` (이 드라이버) | `ait-new`, `ait-plan`, `changeset` | `/ait-new` |
 | 설치 플러그인 (`/plugin install`) | `ait:ait-new`, `ait:changeset` | `/ait:ait-new` |
 
-`/ait new`는 **어느 쪽에서도 존재하지 않는 명령**이고 `Unknown command: /ait`로 떨어진다 —
+`/ait:new`는 **어느 쪽에서도 존재하지 않는 명령**이고 `Unknown command: /ait`로 떨어진다 —
 문서가 안내하는 표면과 실제 이름이 어긋나는 별개 결함으로 issue #286이 추적한다. 이 드라이버는
 측정이 "명령이 없어서" 실패하지 않도록 실제 키(`/ait-new`)를 쓰고, init assert도 그 키를
 정확히 확인한다(`ait-new` 명령 + `new-miniapp` skill 둘 다 노출됐는가). 접두어가 붙는 설치

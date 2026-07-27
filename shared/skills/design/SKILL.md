@@ -4,8 +4,8 @@ description: |
   Bridge a Figma design into a mini-app — reads it via a Figma MCP if
   configured (else manual walkthrough), checks Apps in Toss UX constraints
   (safe-area, swipe-back, PageHeader), and produces registration image
-  assets at `/ait register`'s exact specs (logo, thumbnail, screenshots).
-  Never registers/deploys. Triggered by `/ait design [figma-url]`.
+  assets at `/ait:register`'s exact specs (logo, thumbnail, screenshots).
+  Never registers/deploys. Triggered by `/ait:design [figma-url]`.
 argument-hint: '[figma-url]'
 ---
 
@@ -13,7 +13,7 @@ argument-hint: '[figma-url]'
 
 ## 목적
 
-`/ait design` 한 번으로 Figma 디자인을 앱인토스 미니앱으로 잇는다.
+`/ait:design` 한 번으로 Figma 디자인을 앱인토스 미니앱으로 잇는다.
 이 skill은 두 가지를 한다:
 
 1. **디자인을 앱인토스 UX 제약으로 매핑** — safe-area inset, swipe-back 제스처,
@@ -22,7 +22,7 @@ argument-hint: '[figma-url]'
    시스템(TDS)을 모사·의존하도록 권하지 않는다 — 디자인 자유도를 묶고, 모델이
    실제 토큰 값을 알지 못한 채 "TDS 호환"을 추측하게 만들기 때문이다. 미니앱은
    자체 토큰으로 일관되게 디자인하면 충분하다.
-2. **등록 이미지 자산을 정확한 규격으로 생성** — `/ait register`가 소비하는
+2. **등록 이미지 자산을 정확한 규격으로 생성** — `/ait:register`가 소비하는
    `./assets/`의 PNG들(logo·thumbnail·세로 스크린샷 등)을 register가 검증하는
    것과 **동일한 규격**으로 만든다.
 
@@ -34,7 +34,7 @@ argument-hint: '[figma-url]'
 이 skill이 완료되면:
 - 프로젝트 루트 `./assets/`에 register 규격에 맞는 PNG 자산이 준비된다.
 - 화면별 UX 제약 점검 결과(safe-area / swipe-back / PageHeader / 토큰 일관성)가 정리된다.
-- 곧바로 `/ait register`로 넘어가 같은 자산으로 등록을 진행할 수 있다.
+- 곧바로 `/ait:register`로 넘어가 같은 자산으로 등록을 진행할 수 있다.
 
 생성·수정하는 모든 파일과 안내에서 "공식(official)", "토스가 제공하는",
 "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다. 토스의 디자인
@@ -54,11 +54,11 @@ argument-hint: '[figma-url]'
   채우게 한다(절벽이 아니라 seam — register와 동일한 규격을 그대로 전달).
 
 > 이 skill은 콘솔 인증을 **요구하지 않는다**. 디자인 매핑·자산 생성은 로컬 작업이고,
-> 등록(`/ait register`)이 콘솔 세션을 쓴다.
+> 등록(`/ait:register`)이 콘솔 세션을 쓴다.
 
 ## 입력
 
-- **Figma 입력** (선택): `/ait design <figma-url>`로 파일/프레임 URL을 줄 수 있다.
+- **Figma 입력** (선택): `/ait:design <figma-url>`로 파일/프레임 URL을 줄 수 있다.
   생략하면 1단계에서 Figma MCP를 탐지하거나 사용자에게 디자인 출처를 묻는다.
 - **자산 의도**: 어떤 화면이 앱 아이콘·대표 썸네일·스크린샷이 될지. Figma 프레임이
   있으면 그 프레임을 후보로 제시한다.
@@ -115,8 +115,8 @@ argument-hint: '[figma-url]'
 | **토큰 일관성** | 색·타이포·간격을 하드코딩된 값이 아니라 화면 전반에서 일관된 자체 design token으로 쓰는가. 같은 역할의 값이 화면마다 제각각이지 않은가 | 하드코딩된 hex/px가 화면마다 미세하게 달라 시각적으로 들쭉날쭉. 토큰 없이 매번 새 값 |
 
 매핑 산출물은 화면별 "통과 / 조정 필요 + 구체적 사유" 목록이다. 코드 변경까지는
-하지 않는다 — design은 진단·산출이고, 실제 화면 코드 수정은 사용자(또는 `/ait
-debug`로 회귀 점검)의 몫이다. UX 패턴의 근거는 마지막 docs 링크(`navigation-flow`
+하지 않는다 — design은 진단·산출이고, 실제 화면 코드 수정은 사용자(또는
+`/ait:debug`로 회귀 점검)의 몫이다. UX 패턴의 근거는 마지막 docs 링크(`navigation-flow`
 등)로 잇는다.
 
 ### 3. 등록 이미지 자산 생성 (정확한 규격)
@@ -190,7 +190,7 @@ mkdir -p assets
   완료 안내에 다음 한 줄을 반드시 추가한다:
 
   ```
-  이 자산은 플레이스홀더입니다. /ait register 전에 실제 디자인으로 교체하세요.
+  이 자산은 플레이스홀더입니다. /ait:register 전에 실제 디자인으로 교체하세요.
   ```
 
   > 참고: `sips`는 기존 파일 리사이즈 전용이므로 소스 파일이 없는 합성에는
@@ -250,21 +250,21 @@ UX 매핑:
   규격은 생성 직후 검증했고, 등록 시 로컬 + 서버에서 다시 강제됩니다.
 
 다음 단계:
-  /ait register          # 이 자산으로 미니앱을 콘솔에 등록
+  /ait:register          # 이 자산으로 미니앱을 콘솔에 등록
 ```
 
 ## Out of scope (이 skill이 하지 않는 것)
 
 - ❌ MCP server 추가·제공 — 이 플러그인은 순수 skills 패키지(idle context 비용 0).
   Figma MCP는 **소비만** 한다(있으면 쓰고 없으면 수동 경로). 설치를 강요하지 않는다.
-- ❌ 등록·배포 — design은 그 **앞** 단계(자산 생산자). 등록은 `/ait register`,
-  배포는 `/ait deploy`.
+- ❌ 등록·배포 — design은 그 **앞** 단계(자산 생산자). 등록은 `/ait:register`,
+  배포는 `/ait:deploy`.
 - ❌ 이미지 렌더링 백엔드 노릇 — 임의 디자인을 픽셀부터 창작하지 않는다. 가용
   로컬 도구로 규격에 맞춰 리사이즈/검증하거나, 소스가 없으면 단색 플레이스홀더를
   자동 생성한다(사용자가 이후 실제 디자인으로 교체). Figma export를 직접 실행하지
   않는다.
 - ❌ 화면 코드 수정 — UX 제약 매핑은 진단·산출이지 자동 리팩터가 아니다. 실제
-  화면 회귀 점검은 `/ait debug`.
+  화면 회귀 점검은 `/ait:debug`.
 - ❌ 종횡비 왜곡 — 규격에 안 맞는 소스를 임의로 늘려 채우지 않는다. 크롭/패딩
   의도를 사용자에게 확인한다.
 

@@ -1,11 +1,11 @@
 # `start_attach` QR — 단계별 상세 (환경 2·3)
 
-`/ait debug` §5-C(attach — `start_attach` QR)의 실행 단계 상세다. SKILL.md의 요약만으로 부족할 때, 또는 각 단계에서 에러가 나서 원인을 짚어야 할 때 참조한다.
+`/ait:debug` §5-C(attach — `start_attach` QR)의 실행 단계 상세다. SKILL.md의 요약만으로 부족할 때, 또는 각 단계에서 에러가 나서 원인을 짚어야 할 때 참조한다.
 
 ## 환경 2 (relay-sandbox) 경로
 
 0. **사전 조건 확인**: `vite.config`에 tunnel 옵션(`tunnel: process.env.AIT_TUNNEL ? {...} : false` 형태)이 있고 `package.json`에 `dev:phone:cdp` 스크립트가 있는지 확인한다.
-   - 없으면: **환경 2 배선이 아직 완료되지 않았습니다. 먼저 `/ait setup-phone-preview`를 실행하세요.** 여기서 중단.
+   - 없으면: **환경 2 배선이 아직 완료되지 않았습니다. 먼저 `/ait:setup-phone-preview`를 실행하세요.** 여기서 중단.
 
 1. **dev 서버 기동 (idempotent)**: `<projectRoot>/.ait_urls` 파일이 이미 존재하면 dev 서버가 이미 기동 중이므로 이 단계를 건너뛴다. 존재하지 않으면 에이전트가 Bash 도구로 **`pnpm dev:phone:cdp`를 백그라운드에서 기동**한다(`run_in_background: true`):
 
@@ -35,7 +35,7 @@
 ## 환경 3 경로
 
 1. **`start_attach({mode: 'relay-staging', scheme_url, projectRoot})`** 도구를 호출한다
-   (5-B에서 `/ait deploy`가 돌려준 scheme URL을 에이전트가 그대로 `scheme_url`로 전달 — 사용자 복사 없음).
+   (5-B에서 `/ait:deploy`가 돌려준 scheme URL을 에이전트가 그대로 `scheme_url`로 전달 — 사용자 복사 없음).
    이 한 번의 호출이 relay-staging 환경으로 전환하고, `?debug=1&relay=<wss://<random>.trycloudflare.com>`을 splice해 attach용 deep-link를 합성하며, **QR PNG를 OS 기본 이미지 뷰어로 자동 열고** ASCII QR도 터미널에 병행 출력한다.
    `start_attach`는 attach까지 폴링하며 대기한다(`wait_timeout_seconds` 기본 60s). TOTP 코드가 만료되면 자동으로 재발행해 QR/대시보드를 갱신하므로 타임아웃마다 재호출할 필요가 없다.
 

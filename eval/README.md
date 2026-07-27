@@ -6,7 +6,7 @@
 | 슈트 | 프레임워크 | 무엇을 보나 | 채점 방식 | 모델 |
 |---|---|---|---|---|
 | **A** (`promptfoo/` + `routing/`) | promptfoo / `claude -p` | skill 트리거링 **정합성** — 맞는 발화에서 맞는 skill 이 뜨고(positive), off-topic 발화에서 안 뜨는가(negative control). single-turn 라우팅 판정 | **deterministic** — `skill-used` / `not-skill-used` metadata assertion (LLM-judge 아님) | `claude-sonnet-4-5` |
-| **B** (`e2e/`) | Claude Agent SDK 직접 드라이버 | **완주·비용·분산** — "작은 아이디어 → 작동하는 미니앱"(`/ait new`→번들 빌드)을 멀티턴으로 자율 완주시켜 완주율·성공당 토큰·run-to-run 분산을 모델·공급자별로 측정. **build-only 기본(콘솔 무접촉)** | **deterministic** — 파일 존재 + dep + `.ait` 산출 여부(LLM-judge 아님) | Anthropic tier(opus/sonnet/haiku) + Qwen 등 비-Anthropic(게이트웨이) |
+| **B** (`e2e/`) | Claude Agent SDK 직접 드라이버 | **완주·비용·분산** — "작은 아이디어 → 작동하는 미니앱"(`/ait:new`→번들 빌드)을 멀티턴으로 자율 완주시켜 완주율·성공당 토큰·run-to-run 분산을 모델·공급자별로 측정. **build-only 기본(콘솔 무접촉)** | **deterministic** — 파일 존재 + dep + `.ait` 산출 여부(LLM-judge 아님) | Anthropic tier(opus/sonnet/haiku) + Qwen 등 비-Anthropic(게이트웨이) |
 
 > **이 슈트는 CI 에 묶여 있지 않다.** 메인테이너가 clean 세션에서 로컬로 수동 실행한다.
 > API 키·모델 호출 비용·약한 모델 run-to-run 변동 때문에 PR gate 로 두지 않는다. 회귀가
@@ -132,21 +132,21 @@ path 를 손으로 한 번 훑는다. 자동 eval 이 못 잡는 것 — skill �
 
 | # | station | 명령 | 기대 산출물 | seam (다음 명령을 인쇄?) |
 |---|---|---|---|---|
-| 0 | install | `/plugin marketplace add apps-in-toss-community/agent-plugin` → `/plugin install` | `/ait *` 명령이 존재 | (플러그인 메커니즘) → `/ait new` 안내 |
-| 1 | scaffold | `/ait new demo-shop` | `./demo-shop/` + package.json + index.html | ✅ `pnpm dev` → `/ait setup-bundle` → `/ait register` → `/ait deploy` 인쇄 |
-| 2 | dev | `cd demo-shop && pnpm dev` | 브라우저에서 devtools panel 과 함께 실행 | ✅ 회귀 의심 시 `/ait debug` 로 분기 |
-| 3 | debug | `/ait debug` | 환경 3겹 분기 안내(환경 1 브라우저 / 2 PWA / 3 MCP attach) | ✅ 환경에 맞는 다음 동작(`setup-phone-preview` 등) |
-| 4 | auth | `/ait auth-setup` | oidc-bridge 연결 옵션 배선 | ✅ 다음 단계(번들/배포) |
-| 5 | bundle | `/ait setup-bundle` | granite.config.ts + scripts.bundle:ait + cli devDep | ✅ `/ait register` → `/ait deploy-key` → `/ait deploy` 인쇄 |
-| 5 | register | `/ait register` | aitcc.yaml 생성 → `aitcc app register` | ✅ `/ait deploy` (또는 `/ait deploy-key` 선행) |
-| 5 | deploy | `/ait deploy` | `ait build` → `.ait` 업로드 → scheme URL 표시 | ✅ `/ait status` / `/ait logs` 로 운영 분기 |
+| 0 | install | `/plugin marketplace add apps-in-toss-community/agent-plugin` → `/plugin install` | `/ait *` 명령이 존재 | (플러그인 메커니즘) → `/ait:new` 안내 |
+| 1 | scaffold | `/ait:new demo-shop` | `./demo-shop/` + package.json + index.html | ✅ `pnpm dev` → `/ait:setup-bundle` → `/ait:register` → `/ait:deploy` 인쇄 |
+| 2 | dev | `cd demo-shop && pnpm dev` | 브라우저에서 devtools panel 과 함께 실행 | ✅ 회귀 의심 시 `/ait:debug` 로 분기 |
+| 3 | debug | `/ait:debug` | 환경 3겹 분기 안내(환경 1 브라우저 / 2 PWA / 3 MCP attach) | ✅ 환경에 맞는 다음 동작(`setup-phone-preview` 등) |
+| 4 | auth | `/ait:auth-setup` | oidc-bridge 연결 옵션 배선 | ✅ 다음 단계(번들/배포) |
+| 5 | bundle | `/ait:setup-bundle` | granite.config.ts + scripts.bundle:ait + cli devDep | ✅ `/ait:register` → `/ait:deploy-key` → `/ait:deploy` 인쇄 |
+| 5 | register | `/ait:register` | aitcc.yaml 생성 → `aitcc app register` | ✅ `/ait:deploy` (또는 `/ait:deploy-key` 선행) |
+| 5 | deploy | `/ait:deploy` | `ait build` → `.ait` 업로드 → scheme URL 표시 | ✅ `/ait:status` / `/ait:logs` 로 운영 분기 |
 
 확인 포인트(seam 규칙 — umbrella `CLAUDE.md` §1.3.3):
 
 - **각 skill 의 마지막 블록**이 다음 실행할 `/ait` 명령(또는 `pnpm dev`)을 **직접 인쇄**하는가.
   "사용자가 알아서 안다"고 가정하면 seam 이 끊긴 것.
 - read-only skill(`status`/`logs`)은 **관측 결과에 따라 분기하는** seam 인가
-  (예: 등록 안 됨 → `/ait register`).
+  (예: 등록 안 됨 → `/ait:register`).
 - 출력 톤: 차분한 한 블록 마무리. 과한 이모지·방어적 disclaimer·헤더 직후 `>` blockquote 금지.
 - "공식(official)" / "powered by Toss" / 제휴 암시 표현이 산출물 어디에도 없는가(커뮤니티 OSS).
 

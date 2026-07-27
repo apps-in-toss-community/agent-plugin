@@ -5,7 +5,7 @@ description: |
   installs `@apps-in-toss/cli`, generates `granite.config.ts`, adds the
   `bundle:ait` script, appends `.gitignore` entries, idempotently. Stops
   without overwriting if `granite.config.ts` already exists. Triggered by
-  `/ait setup-bundle`, no args. Precedes `/ait register`.
+  `/ait:setup-bundle`, no args. Precedes `/ait:register`.
 argument-hint: ''
 ---
 
@@ -13,13 +13,13 @@ argument-hint: ''
 
 ## 목적
 
-`/ait setup-bundle` 한 번으로 기존 앱인토스 미니앱 프로젝트에 네이티브 번들
+`/ait:setup-bundle` 한 번으로 기존 앱인토스 미니앱 프로젝트에 네이티브 번들
 빌드(`.ait`) 환경을 추가한다.
 
 이 skill이 완료되면:
 - `pnpm bundle:ait` 한 번으로 토스 앱이 로드할 수 있는 `.ait` 번들이 생성된다.
 - 번들 빌드 산출물(`.ait`, `.granite/`)은 자동으로 gitignore된다.
-- 다음 단계(`/ait register` → `/ait deploy`)로 바로 이어질 수 있다.
+- 다음 단계(`/ait:register` → `/ait:deploy`)로 바로 이어질 수 있다.
 
 생성·수정하는 모든 파일에서 "공식(official)", "토스가 제공하는", "powered by Toss" 등 제휴·후원·인증 암시 표현을 쓰지 않는다.
 
@@ -34,8 +34,8 @@ argument-hint: ''
 - 인터넷 연결 필요 (`@apps-in-toss/cli` npm 설치).
 
 이 skill은 콘솔 인증을 요구하지 않는다. 번들 빌드는 로컬 전용.
-앱 등록(`aitcc app register`)은 `/ait register`가, Deploy Key 발급·프로파일
-저장은 `/ait deploy-key`가 담당한다 — 이 skill의 범위 밖.
+앱 등록(`aitcc app register`)은 `/ait:register`가, Deploy Key 발급·프로파일
+저장은 `/ait:deploy-key`가 담당한다 — 이 skill의 범위 밖.
 
 ## 입력 (프롬프트)
 
@@ -53,7 +53,7 @@ argument-hint: ''
 - 사용자가 icon URL을 제공하지 않으면, 에이전트는 빌드가 통과하도록 다음 플레이스홀더 URL을 자동으로 삽입한다:
   `https://aitc.dev/apple-touch-icon.png`
   생성 직후 한 줄 안내를 출력한다: "이 아이콘은 플레이스홀더입니다 — 실제 브랜드 아이콘 URL로 교체하세요."
-- 실제 아이콘을 만들려면 `/ait design`을 실행하면 규격 PNG 자산을 생성할 수 있다. 단, `granite.config.ts`의 `icon` 필드는 **반드시 호스팅된 https URL**이어야 한다 — 로컬 PNG 경로는 유효하지 않으므로, 생성한 아이콘은 외부에 호스팅한 뒤 URL로 교체한다.
+- 실제 아이콘을 만들려면 `/ait:design`을 실행하면 규격 PNG 자산을 생성할 수 있다. 단, `granite.config.ts`의 `icon` 필드는 **반드시 호스팅된 https URL**이어야 한다 — 로컬 PNG 경로는 유효하지 않으므로, 생성한 아이콘은 외부에 호스팅한 뒤 URL로 교체한다.
 - `ait build` 실행 후 `플러그인 옵션이 올바르지 않습니다` 오류가 나타나면, `granite.config.ts`의 `brand` 블록(특히 `icon`, `displayName`, `primaryColor`)이 모두 올바른 값으로 채워졌는지 다시 확인한다 — SDK 버전에 따라 필수 필드가 바뀔 수 있다.
 
 ## 실행 순서
@@ -68,7 +68,7 @@ ls package.json
 
 ```
 package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실행해주세요.
-예: cd <project-root> && /ait setup-bundle
+예: cd <project-root> && /ait:setup-bundle
 ```
 
 `package.json`을 `Read` tool로 읽고 `dependencies`와 `devDependencies`를
@@ -80,7 +80,7 @@ package.json이 없습니다. 프로젝트 루트 디렉토리에서 다시 실�
 @apps-in-toss/web-framework가 package.json에 없습니다.
 이 명령은 앱인토스 미니앱 프로젝트에서만 실행할 수 있습니다.
 
-새 프로젝트를 시작하려면: /ait new <app-name>
+새 프로젝트를 시작하려면: /ait:new <app-name>
 ```
 
 ### 2. `granite.config.ts` 충돌 확인 (idempotency 선행 검사)
@@ -196,7 +196,7 @@ export default defineConfig({
 ```
 이 아이콘은 플레이스홀더입니다 — 실제 브랜드 아이콘 URL로 교체하세요.
 실제 아이콘이 준비되면 granite.config.ts의 brand.icon 값을 https:// 로 시작하는 호스팅 URL로 업데이트하세요.
-아이콘 PNG를 생성하려면 /ait design 을 실행하세요 (단, 생성 후 외부 호스팅이 필요합니다).
+아이콘 PNG를 생성하려면 /ait:design 을 실행하세요 (단, 생성 후 외부 호스팅이 필요합니다).
 ```
 
 `permissions: []`는 처음 빌드 통과용 placeholder다. SDK 호출에 권한 prompt가
@@ -242,26 +242,26 @@ setup-bundle 완료
   pnpm bundle:ait        # ait build 실행 → <appName>.ait 생성
 
 다음 단계:
-  /ait design            # ./assets/ 이미지 자산 생성 (등록 규격 PNG — register 전 필요)
-  /ait register          # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
-  /ait deploy-key        # Deploy Key 발급 + ~/.ait/credentials 프로파일 저장 (처음이면 먼저)
-  /ait deploy            # 번들을 앱인토스 콘솔에 업로드 (ait deploy --profile <name>)
+  /ait:design            # ./assets/ 이미지 자산 생성 (등록 규격 PNG — register 전 필요)
+  /ait:register          # 앱인토스 콘솔에 앱 등록 (aitcc.yaml 생성 → aitcc app register)
+  /ait:deploy-key        # Deploy Key 발급 + ~/.ait/credentials 프로파일 저장 (처음이면 먼저)
+  /ait:deploy            # 번들을 앱인토스 콘솔에 업로드 (ait deploy --profile <name>)
 
 참고:
   - granite.config.ts의 permissions: []는 placeholder입니다.
     SDK 권한 prompt가 필요한 API를 사용한다면 여기에 추가하세요.
   - bundle:ait 명령은 내부적으로 vite build를 한 번 더 실행합니다.
     타입 체크는 별도로 pnpm typecheck를 돌리세요.
-  - Deploy Key 프로파일이 없으면 /ait deploy-key 를 먼저 실행하세요.
+  - Deploy Key 프로파일이 없으면 /ait:deploy-key 를 먼저 실행하세요.
     ~/.ait/credentials 에 저장한 프로파일로 ait deploy --profile <name> 을 씁니다.
 ```
 
 ## Out of scope (이 skill이 하지 않는 것)
 
-- ❌ 콘솔 앱 등록 — `/ait register` skill의 역할 (비대화형 앱 등록).
-- ❌ Deploy Key 발급·프로파일 저장 — `/ait deploy-key` (`deploy` skill의 Deploy Key facet).
+- ❌ 콘솔 앱 등록 — `/ait:register` skill의 역할 (비대화형 앱 등록).
+- ❌ Deploy Key 발급·프로파일 저장 — `/ait:deploy-key` (`deploy` skill의 Deploy Key facet).
 - ❌ 콘솔 인증(`aitcc login`) — 별도 작업.
-- ❌ 배포 업로드 — `/ait deploy` (`deploy` skill).
+- ❌ 배포 업로드 — `/ait:deploy` (`deploy` skill).
 - ❌ 기존 `granite.config.ts` 수정 — 수동 편집 내용을 보호하기 위해 파일이 있으면 중단.
 - ❌ `ait build` 실행 검증 — 설정만 추가하고 빌드 실행은 사용자에게 위임.
 - ❌ `web.commands.build`를 `tsc -b && vite build`로 설정 — 번들에는 타입 체크나
