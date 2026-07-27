@@ -1,7 +1,7 @@
 // eval/e2e — Suite B 드라이버
 // ------------------------------------------------------------------
-// 빈 격리 디렉토리에서 Claude Agent SDK 세션을 띄워 `/ait new` →
-// (`/ait setup-bundle`) → 번들 빌드까지의 멀티턴 완주를 1회 실행하고,
+// 빈 격리 디렉토리에서 Claude Agent SDK 세션을 띄워 `/ait-new` →
+// (`/ait-setup-bundle`) → 번들 빌드까지의 멀티턴 완주를 1회 실행하고,
 // 토큰 사용량(modelUsage)·턴 수·도달 station·실패 분류를 수집한다.
 //
 // 안전 불변(plan §3):
@@ -36,9 +36,16 @@ const REPO_ROOT = join(HERE, '..', '..');
 const SKILLS_SRC = join(REPO_ROOT, 'shared', 'skills');
 const COMMANDS_SRC = join(REPO_ROOT, 'shared', 'commands');
 
+// 프롬프트가 시킬 슬래시 명령. **command 파일의 basename이 곧 키**다 — `/ait new`
+// 같은 다단어 형태는 존재하지 않는 명령이고 `Unknown command: /ait` 로 떨어진다
+// (2026-07-27 실측, issue #226·#286). 측정이 "명령이 없어서" 실패하는 일이 없도록
+// 실제 키를 쓴다.
+const DISPATCH_COMMAND = 'ait-new';
+const SETUP_BUNDLE_COMMAND = 'ait-setup-bundle';
+
 // 디스패치 금지 명령 — build-only 경로 밖. register는 새 앱 자동 생성(반-패턴),
 // deploy/auth는 콘솔/인증 변이. 드라이버 프롬프트에 명시(soft) + canUseTool 게이트(hard).
-const FORBIDDEN_DISPATCH = ['/ait register', '/ait deploy', '/ait auth-setup'] as const;
+const FORBIDDEN_DISPATCH = ['/ait-register', '/ait-deploy', '/ait-auth-setup'] as const;
 
 // 콘솔/인증을 변이시키는 Bash 명령 패턴 — canUseTool 게이트가 결정적으로 차단한다.
 // register/deploy/auth-setup skill 은 결국 Bash 로 `aitcc …` / `ait deploy …` 를
@@ -63,6 +70,16 @@ const FORBIDDEN_BASH_PATTERNS: readonly RegExp[] = [
  */
 export function isForbiddenBashCommand(command: string): boolean {
   return FORBIDDEN_BASH_PATTERNS.some((re) => re.test(command));
+}
+
+/**
+ * init 메시지의 `slash_commands`/`skills` 목록에 특정 키가 노출됐는지 (순수 함수 —
+ * 단위 테스트 대상). 키는 command 파일의 basename이고, 플러그인으로 얹히면 앞에
+ * `<plugin>:`이 붙는다 — 두 형상 모두 같은 코드로 판정하려고 `:` suffix도 허용한다.
+ * 부분 문자열 매칭은 하지 않는다: `ait-new`가 `ait-new-thing`에 걸리면 안 된다.
+ */
+export function exposesKey(list: readonly string[], name: string): boolean {
+  return list.some((key) => key === name || key.endsWith(`:${name}`));
 }
 
 export interface DriverOptions {
@@ -171,8 +188,8 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
       `너는 빈 디렉토리에 있다. 아래 미니앱 아이디어를 앱인토스 미니앱으로 scaffold하고`,
       `로컬 번들(.ait)까지 빌드해라. 다음 순서로 진행한다:`,
       ``,
-      `1. \`/ait new ${task.appName}\` 로 프로젝트를 생성한다.`,
-      `2. 생성된 프로젝트 디렉토리로 들어가 \`/ait setup-bundle\` 로 번들 빌드 환경을 추가한다.`,
+      `1. \`/${DISPATCH_COMMAND} ${task.appName}\` 로 프로젝트를 생성한다.`,
+      `2. 생성된 프로젝트 디렉토리로 들어가 \`/${SETUP_BUNDLE_COMMAND}\` 로 번들 빌드 환경을 추가한다.`,
       `3. \`pnpm bundle:ait\` (= \`ait build\`) 로 \`.ait\` 번들을 생성한다.`,
       ``,
       `아이디어: ${task.prompt}`,
@@ -209,12 +226,14 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
         initSeen = true;
         initSlashCommands = message.slash_commands ?? [];
         initSkills = message.skills ?? [];
-        // 느슨한 fail-fast: ait 계열 명령(또는 skill)이 하나라도 노출됐는가.
-        // 다단어 명령 키 표현(`ait new` vs `ait` vs 파일명)은 미확정이라
-        // 정확 매칭 대신 prefix 존재로 시작하고, --log-init 으로 실제 키를 본다.
+        // 키 표현은 확정됐다 (2026-07-27 실측, issue #226): slash-command 키는
+        // **command 파일의 basename**이다 — `ait-new`, `ait-plan`, `changeset`.
+        // `"ait new"`(다단어)도 `"ait"`(단일 prefix)도 아니다. 플러그인으로 얹히면
+        // 앞에 `<plugin>:`이 붙어 `ait:ait-new`가 된다. 이 드라이버는 project
+        // `.claude/commands` 형상이라 접두어 없는 쪽이지만, 같은 코드가 설치
+        // 형상에서도 통하도록 `:` suffix 매칭을 함께 허용한다.
         initOk =
-          initSlashCommands.some((c) => c.includes('ait')) ||
-          initSkills.some((s) => s.includes('new-miniapp') || s.includes('ait'));
+          exposesKey(initSlashCommands, DISPATCH_COMMAND) && exposesKey(initSkills, 'new-miniapp');
         if (opts.logInit) {
           process.stderr.write(
             `[init] slash_commands=${JSON.stringify(initSlashCommands)}\n` +
