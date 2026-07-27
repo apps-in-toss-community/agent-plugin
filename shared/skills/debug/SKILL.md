@@ -250,7 +250,7 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
   attach 경로만 발급한다.
 - ❌ candidate 번들 빌드·배포 — `/ait setup-bundle` → `/ait register` → `/ait deploy`.
   (환경 2는 candidate 번들 불필요 — 터널만.)
-- ❌ 검수 큐 제출(환경 3→4 전환, 비가역) — 명시 승인 없이 하지 않는다.
+- ❌ 검수 큐 제출(환경 3 밖의 배포 상태 전환, 비가역) — 명시 승인 없이 하지 않는다.
 - ❌ devtools 설정 주입 — `/ait inject-devtools`.
 - ❌ 환경 2 PWA 터널 인프라 배선 — `/ait setup-phone-preview`(vite.config tunnel 옵션 주입 + `dev:phone:cdp` 스크립트 추가). 이 skill은 그 위에서(배선이 완료된 상태에서) dev 서버를 자동 기동하고 CDP attach/관측을 담당한다.
 - ❌ 콘솔 인증·앱 등록·운영 조회 — `/ait deploy`, `/ait register`, `/ait status`.
@@ -312,7 +312,7 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 
 - 상세가 필요하면 Read <이 skill의 base directory>/references/panel-tabs.md (환경 1 패널 탭별 관찰 지점), references/mode-switching.md (`start_debug`/`start_attach` mode 내부 동작·fallback), references/attach-tools.md (attach 후 13종 도구 + `run_tests` 상세 + SECRET-HANDLING).
 - 짝 skill: `inject-devtools` (panel 설정), `inject-debug-console` (환경 3 candidate 빌드에 attach 표면 설치 — `@ait-co/debug-console` `dependencies`), `setup-phone-preview` (환경 2(AITC Sandbox App (PWA)) 인프라 배선 — `tunnel:{cdp:true}` + cloudflared 터널 기동. `/ait debug` relay-sandbox의 선행 단계).
-- 환경 3겹 × fidelity 설계 정본: umbrella `meta/four-environments-fidelity.md` (§1 환경 모델, §5 동적 도구 등록, §7 CDP 단일 transport).
+- 환경 3겹 × fidelity 설계 정본: umbrella `meta/three-environments-fidelity.md` (§1 환경 모델, §5 동적 도구 등록, §7 CDP 단일 transport).
 - 환경 3 진입 시나리오 + QR relay 흐름: https://github.com/apps-in-toss-community/devtools/blob/main/docs/scenarios/env-3.md
 - dogfood relay 루프 (candidate 빌드 → QR 스캔 → attach → 관측 사이클): https://github.com/apps-in-toss-community/devtools/blob/main/docs/dogfood-relay-loop.md
 - devtools (mock + panel + unplugin, 브라우저 dev 전용): https://github.com/apps-in-toss-community/devtools
@@ -323,4 +323,4 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 - 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://docs.aitc.dev/guides/navigation-flow
 - 커뮤니티 docs — on-device CDP relay 디버깅 구조·진입 경로: https://docs.aitc.dev/guides/debug-relay
 - 커뮤니티 docs — relay TOTP 인증(터널 URL 유출 차단): https://docs.aitc.dev/guides/relay-auth-totp
-- 환경 3겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/four-environments-fidelity.md
+- 환경 3겹 설계: github.com/apps-in-toss-community/CLAUDE.md §1.1 + meta/three-environments-fidelity.md
