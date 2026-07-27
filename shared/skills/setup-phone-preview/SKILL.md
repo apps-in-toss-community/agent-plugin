@@ -35,7 +35,7 @@ Vite dev server가 뜰 때 Cloudflare quick tunnel을 자동으로 열고, 터�
   - 없으면 먼저 `/ait inject-devtools`를 실행하도록 안내하고 중단.
   - 있지만 `^0.1.12` 이하면 `pnpm add -D @ait-co/devtools@^0.1.19`로 업그레이드.
 - **pnpm**이 패키지 매니저여야 한다 (`pnpm-lock.yaml` 존재 확인).
-  - npm/yarn/bun 프로젝트는 step 3의 `pnpm-workspace.yaml` `onlyBuiltDependencies` 패치가 해당 매니저에서 무의미하므로 사용자에게 그 점을 알리고 skip한다.
+  - npm/yarn/bun 프로젝트는 step 3의 `pnpm-workspace.yaml` `allowBuilds` 패치가 해당 매니저에서 무의미하므로 사용자에게 그 점을 알리고 skip한다.
 
 > 이 skill은 콘솔 인증을 **요구하지 않는다**. tunnel은 로컬 dev 전용.
 
@@ -166,40 +166,44 @@ aitDevtools.vite({ panel: true, tunnel: process.env.AIT_TUNNEL ? { cdp: !!proces
 
 **수정 원칙**: `Edit` tool로 최소 변경. 기존 코드 포맷·주석·설정은 유지.
 
-### 3. `pnpm-workspace.yaml` + `package.json` 패치 — `onlyBuiltDependencies` + `dev:phone` (idempotent)
+### 3. `pnpm-workspace.yaml` + `package.json` 패치 — `allowBuilds` + `dev:phone` (idempotent)
 
-두 가지를 idempotent하게 적용한다: `pnpm-workspace.yaml`의 `onlyBuiltDependencies`(빌드 게이트)와 `package.json`의 `scripts.dev:phone`.
+두 가지를 idempotent하게 적용한다: `pnpm-workspace.yaml`의 `allowBuilds`(빌드 게이트)와 `package.json`의 `scripts.dev:phone`.
 
-#### 3-a. `pnpm-workspace.yaml`의 `onlyBuiltDependencies`에 `cloudflared` 추가
+#### 3-a. `pnpm-workspace.yaml`의 `allowBuilds`에 `cloudflared: true` 추가
 
 이 항목은 `cloudflared` postinstall(`~38 MB` 바이너리 다운로드)이 pnpm의
-[`onlyBuiltDependencies`](https://pnpm.io/settings#onlybuiltdependencies)
-보안 게이트를 통과하게 해준다. pnpm 10.33부터 이 설정은 `package.json`의
-`pnpm` 필드가 아니라 프로젝트 루트의 `pnpm-workspace.yaml`에서 읽힌다 — 옛
-`package.json` `pnpm.onlyBuiltDependencies`는 무시되고 경고만 뜬다.
+빌드 스크립트 게이트를 통과하게 해준다. pnpm 11은 이전의
+`onlyBuiltDependencies` / `ignoredBuiltDependencies`를 모두 제거하고
+`pnpm-workspace.yaml`의 단일
+[`allowBuilds`](https://pnpm.io/settings#allowbuilds) 맵(`<package>: true|false`)으로
+대체했다 — 이제 선언되지 않은 install script는 경고가 아니라 설치 자체를
+막는 `ERR_PNPM_IGNORED_BUILDS` 하드 실패다. `allowBuilds`는 pnpm 10.33 이상에서도
+읽히므로, 아직 pnpm 10을 쓰는 프로젝트에 적용해도 안전하다.
 
 프로젝트 루트의 `pnpm-workspace.yaml`을 `Read`로 확인한다.
 
-- 파일이 없으면 `cloudflared` 한 항목으로 신설:
+- 파일이 없으면 `cloudflared: true` 한 항목으로 신설:
 
   ```yaml
-  onlyBuiltDependencies:
-    - cloudflared
+  allowBuilds:
+    cloudflared: true
   ```
 
-- 파일이 있는데 `onlyBuiltDependencies` 키가 없으면 키를 추가.
-- 키가 있으면 `cloudflared`가 목록에 있는지 확인, 없으면 추가, 있으면 skip.
+- 파일이 있는데 `allowBuilds` 키가 없으면 키를 추가.
+- 키가 있으면 `cloudflared` 항목을 확인 — 없으면 `cloudflared: true`를 추가,
+  `false`로 있으면 `true`로 뒤집는다, 이미 `true`면 skip.
 
 기존에 다른 항목이 있으면 병합:
 
 ```yaml
-onlyBuiltDependencies:
-  - "@parcel/watcher"
-  - cloudflared
+allowBuilds:
+  "@parcel/watcher": false
+  cloudflared: true
 ```
 
 `@`로 시작하는 패키지 이름은 YAML에서 따옴표로 감싼다(`"@parcel/watcher"`).
-기존 키·주석은 유지하고 `cloudflared` 한 줄만 최소 추가한다.
+기존 키·주석·다른 패키지의 값은 유지하고 `cloudflared` 항목만 최소 추가/변경한다.
 
 #### 3-b. `scripts.dev:phone` 및 `scripts.dev:phone:cdp` 추가
 
@@ -226,7 +230,7 @@ unplugin이 직접 읽어 분기한다. (devtools PR #425부터 unplugin이 `tun
 `pnpm-workspace.yaml` 패치는 건너뛰고 사용자에게 알린다:
 
 ```
-onlyBuiltDependencies(pnpm-workspace.yaml)는 pnpm 전용 설정입니다.
+allowBuilds(pnpm-workspace.yaml)는 pnpm 전용 설정입니다.
 npm/yarn/bun 프로젝트는 효과가 없으므로 건너뜁니다.
 
 cloudflared 바이너리가 postinstall에서 실패하면 다음을 실행해보세요:
@@ -287,7 +291,7 @@ setup-phone-preview 완료
 
 변경 내용:
   - vite.config.ts: tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false 추가
-  - pnpm-workspace.yaml: onlyBuiltDependencies에 cloudflared 추가
+  - pnpm-workspace.yaml: allowBuilds에 cloudflared: true 추가
   - package.json: scripts.dev:phone / scripts.dev:phone:cdp 추가
   - .gitignore: .ait_relay·.ait_urls 추가 (로컬 TOTP 시크릿·터널 URL 커밋 방지)
   - pnpm install 완료 (cloudflared 바이너리 캐시됨)
@@ -346,7 +350,7 @@ setup-phone-preview 완료
 - ❌ 실제 tunnel URL 확인·연결 테스트 — `pnpm dev:phone` 직접 실행 후 확인.
 - ❌ launcher PWA 홈화면 추가 자동화 — OS gesture 필요, 수동.
 - ❌ 콘솔 인증·배포 — 별도 skill (`/ait deploy`).
-- ❌ `pnpm-workspace.yaml`의 `onlyBuiltDependencies` 외 다른 pnpm 설정 변경.
+- ❌ `pnpm-workspace.yaml`의 `allowBuilds` 외 다른 pnpm 설정 변경.
 - ❌ cloudflare 계정 설정 / 유료 tunnel — quick tunnel만 (인증·계정 불필요).
 
 ## 하지 말아야 할 것
@@ -357,7 +361,7 @@ setup-phone-preview 완료
   env-gate. (`pnpm dev`에서는 tunnel이 꺼져야 하고, `AIT_TUNNEL_CDP` 없이는 CDP relay도
   뜨면 안 됨.)
 - ❌ `cloudflared`를 `devDependencies`에 직접 추가. `@ait-co/devtools`가 이미
-  `dependencies`로 가져온다. `pnpm-workspace.yaml`의 `onlyBuiltDependencies` 허용만 하면 됨.
+  `dependencies`로 가져온다. `pnpm-workspace.yaml`의 `allowBuilds` 허용만 하면 됨.
 - ❌ `package.json` JSON 주석 추가 (표준 JSON에 주석 불가).
 - ❌ 생성·수정하는 내용에 "공식(official)", "토스가 제공하는", "powered by Toss"
   등 제휴·후원·인증 암시 표현.
