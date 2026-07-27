@@ -61,6 +61,6 @@ Apps in Toss Community 플러그인이 설치됐습니다. (커뮤니티 오픈�
 
 ## 참고
 
-- harness 전체 흐름·station map 정본: github.com/apps-in-toss-community/CLAUDE.md §1.1–§1.2
+- harness 전체 흐름·station map 정본: umbrella CLAUDE.md §1.1–§1.2
 - 각 station의 진척·blocker: GitHub Project `harness roadmap`
   (github.com/orgs/apps-in-toss-community/projects/1)
