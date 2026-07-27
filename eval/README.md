@@ -5,7 +5,7 @@
 
 | 슈트 | 프레임워크 | 무엇을 보나 | 채점 방식 | 모델 |
 |---|---|---|---|---|
-| **A** (`promptfoo/`) | promptfoo | skill 트리거링 **정합성** — 맞는 발화에서 맞는 skill 이 뜨고(positive), off-topic 발화에서 안 뜨는가(negative control). single-turn 라우팅 판정 | **deterministic** — `skill-used` / `not-skill-used` metadata assertion (LLM-judge 아님) | `claude-sonnet-4-5` |
+| **A** (`promptfoo/` + `routing/`) | promptfoo / `claude -p` | skill 트리거링 **정합성** — 맞는 발화에서 맞는 skill 이 뜨고(positive), off-topic 발화에서 안 뜨는가(negative control). single-turn 라우팅 판정 | **deterministic** — `skill-used` / `not-skill-used` metadata assertion (LLM-judge 아님) | `claude-sonnet-4-5` |
 | **B** (`e2e/`) | Claude Agent SDK 직접 드라이버 | **완주·비용·분산** — "작은 아이디어 → 작동하는 미니앱"(`/ait new`→번들 빌드)을 멀티턴으로 자율 완주시켜 완주율·성공당 토큰·run-to-run 분산을 모델·공급자별로 측정. **build-only 기본(콘솔 무접촉)** | **deterministic** — 파일 존재 + dep + `.ait` 산출 여부(LLM-judge 아님) | Anthropic tier(opus/sonnet/haiku) + Qwen 등 비-Anthropic(게이트웨이) |
 
 > **이 슈트는 CI 에 묶여 있지 않다.** 메인테이너가 clean 세션에서 로컬로 수동 실행한다.
@@ -19,11 +19,15 @@
 ```
 eval/
 ├── README.md                      # 이 문서
-├── promptfoo/                      # 슈트 A — skill 라우팅 정합성
+├── promptfoo/                      # 슈트 A — 케이스 정본 (project-skill 형상)
 │   ├── promptfooconfig.yaml        # positive + negative-control skill 트리거링 테스트
 │   ├── setup-fixture.sh            # shared/skills -> fixture/.claude/skills symlink (매 실행 선행)
 │   └── fixture/
 │       └── .gitignore              # 생성되는 symlink·런타임 파일 무시
+├── routing/                        # 슈트 A — 회귀 판정 (설치 플러그인 형상, API 키 불필요)
+│   ├── run.sh                      # claude -p --plugin-dir 러너
+│   ├── cases.tsv                   # promptfooconfig.yaml 발화의 사본
+│   └── README.md                   # 두 러너가 왜 갈리는지 + 실행법
 └── e2e/                            # 슈트 B — 완주·비용·분산 (자세한 건 e2e/README.md)
     ├── run.ts                      # 진입점 (pnpm eval:e2e)
     ├── driver.ts                   # Agent SDK query() 래퍼 (격리 + skills symlink)
@@ -86,6 +90,24 @@ npx promptfoo@latest view
 **결과 읽기**: 각 행이 한 발화. positive 행은 기대 skill 이 로드되면 PASS, negative 행은
 지정한 skill 들이 **모두** 로드되지 않으면 PASS. 실패하면 발화 문구나 skill `description`
 (트리거 신호)을 손본다 — skill 절차가 아니라 **라우팅**의 문제다.
+
+### 형상 주의 — 회귀 판정은 `routing/`으로 한다
+
+이 fixture 는 skill 을 **project skill**(`.claude/skills/`)로 얹는다. 실제 사용자는
+`/plugin install` 로 얹으므로 skill 이 `ait:` 네임스페이스에 들어가고 `shared/commands/`
+17개가 **같은 목록에 함께** 오른다. 이 차이가 측정값을 바꾼다 — issue #275 에서 두 케이스가
+project 형상에선 5/5 통과, 설치 형상에선 각각 0/5·2/5 였다.
+
+그래서 **케이스 정본은 여기**(`promptfooconfig.yaml`)에 두되, **라우팅 회귀 판정은
+[`routing/`](./routing/)** 로 한다 — `claude -p --plugin-dir` 라 설치 형상을 그대로 재고
+API 키도 필요 없다.
+
+```bash
+bash eval/routing/run.sh 3        # 전체 23케이스 × 3회
+bash eval/routing/run.sh 5 03 09  # 특정 케이스만 × 5회
+```
+
+케이스를 고칠 땐 `promptfooconfig.yaml` 을 먼저 고치고 `routing/cases.tsv` 로 옮긴다.
 
 ### 첫 실행 결과
 

@@ -22,6 +22,13 @@
 # 주의: setup-fixture.sh 를 먼저 돌리지 않으면 skill 이 0개라 모든 positive 가 실패한다.
 #   claude-agent-sdk provider 는 working_dir 의 .claude/skills/ 를
 #   setting_sources: ['project'] 로 발견한다.
+#
+# 형상 주의 (issue #275): 이 파일은 skill 을 **project skill** 로 얹는다. 실제
+#   사용자는 /plugin install 로 얹으므로 skill 이 `ait:` 네임스페이스에 들어가고
+#   shared/commands/ 17개가 같은 목록에 함께 오른다 — 그 차이가 측정값을 바꾼다
+#   (case 03·09 가 여기선 5/5, 설치 형상에선 0/5·2/5 였다). 여기는 **케이스 정본**
+#   이고, 라우팅 회귀 판정은 eval/routing/ (claude -p --plugin-dir, API 키 불필요)
+#   로 한다. 발화를 고치면 eval/routing/cases.tsv 로 함께 옮긴다.
 
 description: ait 플러그인 skill 트리거링 정합성 (positive + negative control)
 
