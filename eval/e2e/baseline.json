@@ -7,7 +7,7 @@
     "pricingAsOf": "2026-06-24",
     "templateBaseline": {
       "@apps-in-toss/web-framework": "^2.6.0",
-      "@ait-co/devtools": "^0.1.19"
+      "@ait-co/devtools": "^0.2.0"
     }
   },
   "kpi": {
