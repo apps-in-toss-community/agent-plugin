@@ -15,7 +15,7 @@ argument-hint: ''
 
 `/ait:setup-phone-preview` 한 번으로 **실기기(폰) 미리보기** 환경을 준비한다.
 
-devtools `tunnel` 옵션([`@ait-co/devtools@^0.1.19`](https://github.com/apps-in-toss-community/devtools))은
+devtools `tunnel` 옵션([`@ait-co/devtools`](https://github.com/apps-in-toss-community/devtools), 0.1.19+)은
 Vite dev server가 뜰 때 Cloudflare quick tunnel을 자동으로 열고, 터미널에
 `*.trycloudflare.com` URL + ASCII QR을 출력한다. 이 URL을 launcher PWA
 (`https://devtools.aitc.dev/launcher/`) 안에서 열면 폰 홈 화면에 고정된
@@ -31,9 +31,10 @@ Vite dev server가 뜰 때 Cloudflare quick tunnel을 자동으로 열고, 터�
 ## 의존
 
 - **Vite 프로젝트**여야 한다 (`vite.config.ts` 또는 `vite.config.js`가 cwd에 있어야 함).
-- **`@ait-co/devtools`가 이미 devDependencies에 있어야 한다** (버전 `^0.1.19` 이상).
+- **`@ait-co/devtools`가 이미 devDependencies에 있어야 한다** (현재 라인 `^0.2.0`. `tunnel` 옵션 자체는 0.1.19+에 있다).
   - 없으면 먼저 `/ait:inject-devtools`를 실행하도록 안내하고 중단.
-  - 있지만 `^0.1.12` 이하면 `pnpm add -D @ait-co/devtools@^0.1.19`로 업그레이드.
+  - 0.1 라인이거나 0.1.19 미만이면 `pnpm add -D @ait-co/devtools@^0.2.0`으로 올린다. 0.x에서 caret은 minor를 잠그므로 `^0.1.x`는 0.2.0을 받지 못한다 — 범위를 손으로 옮겨야 한다.
+  - 0.2.0에서 debug 표면이 `@ait-co/debugger`·`@ait-co/debug-console`로 분리됐다(devtools#818). 이 skill이 쓰는 `tunnel` 옵션은 devtools에 그대로 남아 있어 영향이 없지만, 대상 프로젝트가 `@ait-co/devtools/in-app`이나 `/mcp/*`를 직접 import하고 있었다면 그 import는 전환 스텁이 되므로 안내에 포함한다.
 - **pnpm**이 패키지 매니저여야 한다 (`pnpm-lock.yaml` 존재 확인).
   - npm/yarn/bun 프로젝트는 step 3의 `pnpm-workspace.yaml` `allowBuilds` 패치가 해당 매니저에서 무의미하므로 사용자에게 그 점을 알리고 skip한다.
 
