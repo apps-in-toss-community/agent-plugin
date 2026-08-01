@@ -1,8 +1,10 @@
 // eval/e2e — Suite B 드라이버
 // ------------------------------------------------------------------
-// 빈 격리 디렉토리에서 Claude Agent SDK 세션을 띄워 `/ait-new` →
-// (`/ait-setup-bundle`) → 번들 빌드까지의 멀티턴 완주를 1회 실행하고,
+// 빈 격리 디렉토리에서 Claude Agent SDK 세션을 띄워 `/new` →
+// (`/setup-bundle`) → 번들 빌드까지의 멀티턴 완주를 1회 실행하고,
 // 토큰 사용량(modelUsage)·턴 수·도달 station·실패 분류를 수집한다.
+// 슬래시 키에 접두어가 없는 건 project 형상이기 때문이다 — 같은 지점의
+// 설치 형상 사용자 표면은 `/ait:new`·`/ait:setup-bundle` 이다(README "키 표현").
 //
 // 안전 불변(plan §3):
 //   - **build-only가 기본** — 콘솔 API를 아예 안 부른다. 31146 구조적 무접촉.
@@ -83,7 +85,7 @@ export function isForbiddenBashCommand(command: string): boolean {
  * init 메시지의 `slash_commands`/`skills` 목록에 특정 키가 노출됐는지 (순수 함수 —
  * 단위 테스트 대상). 키는 command 파일의 basename이고, 플러그인으로 얹히면 앞에
  * `<plugin>:`이 붙는다 — 두 형상 모두 같은 코드로 판정하려고 `:` suffix도 허용한다.
- * 부분 문자열 매칭은 하지 않는다: `ait-new`가 `ait-new-thing`에 걸리면 안 된다.
+ * 부분 문자열 매칭은 하지 않는다: `new`가 `new-thing`에 걸리면 안 된다.
  */
 export function exposesKey(list: readonly string[], name: string): boolean {
   return list.some((key) => key === name || key.endsWith(`:${name}`));
@@ -239,8 +241,6 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
         // 앞에 `<plugin>:`이 붙어 `ait:new`가 된다. 이 드라이버는 project
         // `.claude/commands` 형상이라 접두어 없는 쪽이지만, 같은 코드가 설치
         // 형상에서도 통하도록 `:` suffix 매칭을 함께 허용한다.
-        // skill 도 같은 목록에 오르므로(`ait:plan` 등) stub 없는 verb 도 이 검사를
-        // 통과한다 — SETUP_BUNDLE_COMMAND 가 그 경우다.
         initOk =
           exposesKey(initSlashCommands, DISPATCH_COMMAND) && exposesKey(initSkills, 'new-miniapp');
         if (opts.logInit) {
