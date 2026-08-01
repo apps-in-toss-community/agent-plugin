@@ -127,11 +127,11 @@ API로 자동 변환한다(Grep+Edit). Tier-1 외 API(IAP·Auth·Payments)는 �
 
 ## 참고
 
-- 커뮤니티 docs — 표준 Web API → SDK 라우팅 shim과 dev 환경 셋업(브라우저 mock·실기기 미리보기): https://docs.aitc.dev/guides/dev-environment
+- 커뮤니티 docs — 표준 Web API → SDK 라우팅 shim과 dev 환경 셋업(브라우저 mock·실기기 미리보기): https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/dev-environment.mdx
 - devtools facet 상세: `<이 skill의 base directory>/references/devtools.md`
 - polyfill facet 상세: `<이 skill의 base directory>/references/polyfill.md`
 - debug-console facet 상세: `<이 skill의 base directory>/references/debug-console.md`
 - 짝 skill: `new-miniapp` (새 프로젝트 생성 — devtools/polyfill 포함 템플릿), `debug` (devtools facet이 깔아둔 panel·CDP relay 또는 debug-console facet이 깔아둔 환경 3 attach 표면을 소비하는 on-device 디버깅), `setup-phone-preview` (실기기 WebKit 미리보기 병행), `deploy` (설정 완료 후 콘솔 배포).
-- `@ait-co/devtools`(mock+panel+unplugin, 브라우저 dev 전용): https://github.com/apps-in-toss-community/devtools · live demo: https://devtools.aitc.dev/
+- `@ait-co/devtools`(mock+panel+unplugin, 브라우저 dev 전용): https://github.com/apps-in-toss-community/devtools
 - `@ait-co/polyfill`: https://github.com/apps-in-toss-community/polyfill · 통합 가이드: [`polyfill/INTEGRATION.md`](https://github.com/apps-in-toss-community/polyfill/blob/main/INTEGRATION.md)
 - `@ait-co/debug-console`(on-device attach + eruda) · `@ait-co/debugger`(MCP 데몬, `/ait:debug`가 상시 기동): https://github.com/apps-in-toss-community/debugger

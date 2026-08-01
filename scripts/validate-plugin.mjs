@@ -8,7 +8,7 @@
  *   A3 — 템플릿 + eval 동기화 (hard-fail)
  *   A4 — CLI 토큰 크로스체크 (optional warn, ../console-cli 없으면 skip)
  *   A5 — plugin.json ↔ package.json 버전 드리프트 (hard-fail)
- *   A6 — 링크 liveness (opt-in warn, VALIDATE_LINKS=1 일 때만 — *.aitc.dev 200 확인)
+ *   A6 — 링크 liveness (opt-in warn, VALIDATE_LINKS=1 일 때만 — 조직 GitHub 링크 200 확인)
  *
  * A1–A5 는 runChecks() 가 동기로 돈다(기본 `pnpm test` 경로, 네트워크 비의존).
  * A6 는 네트워크라 CLI 진입점에서만 비동기로 돌고, VALIDATE_LINKS=1 이 아니면 skip.
@@ -409,11 +409,12 @@ function fencedCodeLineNumbers(lines) {
   return inFence;
 }
 
-// docs link allowlist: welcome + new-miniapp 는 /intro 링크 허용
-const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp']);
+// docs link allowlist: welcome + new-miniapp 는 docs 루트 링크 허용(진입/스캐폴드
+// 안내라 주제가 없다). docs 로더 skill 자신도 repo 루트·탐색 경로를 인쇄하므로 포함.
+const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp', 'docs']);
 
 // A2 deep-link-required (positive) allowlist — §1.3.4("skill 말미 docs 링크는
-// docs.aitc.dev/<주제>로 deep-link 필수")를 코드로 강제하되, deep-link 의무가
+// docs 소스의 <주제> 페이지로 deep-link 필수")를 코드로 강제하되, deep-link 의무가
 // 면제되는 skill 을 명시한다. 면제 사유 3종 (영구):
 //   1. entry/scaffold (welcome·new-miniapp): docs 루트 링크가 적절 (§1.2 예외)
 //   2. harness-external (changeset): zero→ship station 이 아님, docs 주제 페이지 무관
@@ -428,8 +429,12 @@ const DOCS_LINK_ALLOWLIST = new Set(['welcome', 'new-miniapp']);
 // liveness 까지 강제 가능).
 const DOCS_DEEPLINK_EXEMPT = new Set(['welcome', 'new-miniapp', 'changeset', 'docs']);
 
-// docs deep-link 형태: docs.aitc.dev/guides/<slug> 또는 docs.aitc.dev/api/<group>[/<method>]
-const DOCS_DEEPLINK_RE = /docs\.aitc\.dev\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_-]*/;
+// docs deep-link 형태 (EOL 이후): docs repo 소스 파일의 GitHub URL.
+//   github.com/apps-in-toss-community/docs/blob/main/docs/(guides|api)/<slug>
+// docs.aitc.dev 는 aitc.dev 도메인 정리와 함께 사라지므로 더 이상 deep-link 타깃이 아니다.
+const DOCS_GITHUB_BASE = 'github.com/apps-in-toss-community/docs/blob/main/docs';
+const DOCS_DEEPLINK_RE =
+  /github\.com\/apps-in-toss-community\/docs\/blob\/main\/docs\/(guides|api)\/[a-zA-Z0-9][a-zA-Z0-9/_.-]*/;
 
 // ---------------------------------------------------------------------------
 // A1 라우팅 스냅샷 — 명령 파일 ↔ skill 매핑 기대값
@@ -559,21 +564,23 @@ function checkA2(root) {
       }
     }
 
-    // docs 링크 루트/intro 검출 (allowlist 제외)
+    // docs 링크 루트/intro 검출 (allowlist 제외).
+    // 죽은 docs.aitc.dev 호스트와, 살아있지만 주제가 없는 docs repo 루트/intro 를 함께 잡는다.
     if (!DOCS_LINK_ALLOWLIST.has(skillName)) {
       for (let i = 0; i < srcLines.length; i++) {
         const line = srcLines[i];
         if (
-          line.includes('docs.aitc.dev/intro') ||
-          /docs\.aitc\.dev\/?\s*[)\]'"\s]/.test(line) ||
-          /docs\.aitc\.dev\/$/.test(line)
+          line.includes('docs.aitc.dev') ||
+          line.includes(`${DOCS_GITHUB_BASE}/intro`) ||
+          /github\.com\/apps-in-toss-community\/docs\/?\s*[)\]'"\s]/.test(line) ||
+          /github\.com\/apps-in-toss-community\/docs\/?$/.test(line)
         ) {
           violations.push(
             mkv(
               relFile,
               i + 1,
               'A2/docs-root-link',
-              `docs.aitc.dev 루트/intro 링크 금지 — 주제별 deep-link 사용 (fix: docs.aitc.dev/guides/<slug> 등으로)`,
+              `docs 루트/intro 링크(또는 종료된 docs.aitc.dev) 금지 — 주제별 deep-link 사용 (fix: ${DOCS_GITHUB_BASE}/guides/<slug>.mdx 등으로)`,
             ),
           );
         }
@@ -581,7 +588,7 @@ function checkA2(root) {
     }
 
     // docs deep-link 존재 강제 (positive — §1.3.4 "deep-link 필수"를 코드로):
-    // exempt 가 아닌 skill 은 본문 어딘가에 docs.aitc.dev/(guides|api)/<slug>
+    // exempt 가 아닌 skill 은 본문 어딘가에 docs repo 소스의 (guides|api)/<slug>
     // deep-link 가 최소 1개 있어야 한다. (음성 검사 A2/docs-root-link 와 짝 — 그건
     // "루트 링크 금지", 이건 "deep-link 있어야 함". 둘 다 통과해야 §1.3.4 충족.)
     if (!DOCS_DEEPLINK_EXEMPT.has(skillName)) {
@@ -591,7 +598,7 @@ function checkA2(root) {
             relFile,
             1,
             'A2/docs-deeplink-required',
-            `docs deep-link 없음 — §1.3.4 위반. 본문에 docs.aitc.dev/guides/<slug> 또는 docs.aitc.dev/api/<group> 링크 필요 (대상 페이지가 아직 없으면 DOCS_DEEPLINK_EXEMPT 에 임시 등재 + issue #200 Layer 3 추적)`,
+            `docs deep-link 없음 — §1.3.4 위반. 본문에 ${DOCS_GITHUB_BASE}/guides/<slug>.mdx 또는 ${DOCS_GITHUB_BASE}/api/<group> 링크 필요 (대상 페이지가 아직 없으면 DOCS_DEEPLINK_EXEMPT 에 임시 등재)`,
           ),
         );
       }
@@ -1191,21 +1198,23 @@ function checkA8(root) {
 // ---------------------------------------------------------------------------
 //
 // 기본은 SKIP — 네트워크 비의존·결정적 CI 경로를 보존한다(A4 graceful-skip 동형).
-// VALIDATE_LINKS=1 일 때만 실행해 skill 전반의 *.aitc.dev 링크가 실제로
+// VALIDATE_LINKS=1 일 때만 실행해 skill 전반의 조직 GitHub 링크가 실제로
 // 200을 반환하는지 검사한다. 절대 error 로 올리지 않는다 — 외부 호스트라
 // 비결정적이고, 어디까지나 수동 link-sweep 자동화(advisory)다.
 // (#183 docs /intro 404, #185 외부 링크 rot 가 A2 정적 검사를 빠져나간 갭을 닫는다.)
+//
+// 대상이 *.aitc.dev 에서 github.com/apps-in-toss-community/* 로 바뀐 이유: aitc.dev
+// 도메인은 정리되고 조직 repo 는 archive 되어 read-only 로 남기 때문에, 링크가 살아
+// 있는지 물어볼 수 있는 유일한 호스트가 GitHub 다.
 
 // 추출했지만 검사에서 제외하는 링크 패턴 (확인된 false-positive — #181·#185 triage):
 //   - placeholder/template 토큰(<...>) 포함 링크
-//   - oidc-bridge.aitc.dev bare-root: tenant dispatcher 라 루트 404 가 정상 동작
 const A6_SKIP_LINK_RES = [
-  /[<>]/, // <tenantId>, <resolved-path> 등 placeholder
-  /^https:\/\/oidc-bridge\.aitc\.dev\/?$/, // bare-root = tenant dispatcher 정상 404
+  /[<>]/, // <resolved-path> 등 placeholder
 ];
 
 /**
- * skills 전반에서 *.aitc.dev 링크를 파일:행과 함께 추출한다.
+ * skills 전반에서 조직 GitHub 링크를 파일:행과 함께 추출한다.
  * @param {string} root
  * @returns {{ url: string, file: string, line: number }[]}
  */
@@ -1213,7 +1222,7 @@ function collectAitcLinks(root) {
   const skillsDir = path.join(root, 'shared', 'skills');
   /** @type {{ url: string, file: string, line: number }[]} */
   const out = [];
-  const linkRe = /https:\/\/[a-z0-9.-]*aitc\.dev[a-zA-Z0-9./_-]*/g;
+  const linkRe = /https:\/\/github\.com\/apps-in-toss-community\/[a-zA-Z0-9./_-]*/g;
   for (const skillName of listDirs(skillsDir)) {
     const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
     if (!fs.existsSync(skillFile)) continue;
@@ -1318,7 +1327,7 @@ async function checkA6(root) {
         '',
         0,
         'A6/ok',
-        `링크 liveness 통과 (${unique.size}개 *.aitc.dev 링크 전부 2xx/3xx)`,
+        `링크 liveness 통과 (${unique.size}개 조직 GitHub 링크 전부 2xx/3xx)`,
         'warn',
       ),
     );

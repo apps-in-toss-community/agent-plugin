@@ -150,12 +150,12 @@ https://raw.githubusercontent.com/apps-in-toss-community/docs/main/docs/<resolve
 
 ### 4. 후속 액션 유도 (선택)
 
-docs 페이지는 각 API에 대해 **"Try it"** 섹션으로 sdk-example의 대응 카드에
-deep-link한다. 관련 카드가 있으면 링크로 제안한다:
+docs 페이지는 각 API에 대해 **"Try it"** 섹션으로 sdk-example의 대응 카드를
+가리킨다. 관련 카드가 있으면 소스 링크로 제안한다:
 
 ```
-실제 동작을 보고 싶다면 sdk-example의 해당 카드에서 바로 실행해볼 수
-있습니다: https://sdk-example.aitc.dev/
+해당 API를 실제로 호출하는 예제는 sdk-example의 대응 카드 소스에
+있습니다: https://github.com/apps-in-toss-community/sdk-example
 ```
 
 로드한 토픽이 harness station과 직접 대응하면, 다음 `/ait` 명령으로 seam을 잇는다:
@@ -186,8 +186,8 @@ deep-link한다. 관련 카드가 있으면 링크로 제안한다:
 
 대안으로:
 - 앱인토스 개발자 사이트의 원본 문서를 `WebFetch`로 조회해볼 수 있습니다
-- sdk-example에서 실제 동작하는 예제를 보여드릴 수 있습니다:
-  https://sdk-example.aitc.dev/
+- sdk-example 소스에서 실제 동작하는 예제를 보여드릴 수 있습니다:
+  https://github.com/apps-in-toss-community/sdk-example
 
 문서 기여: https://github.com/apps-in-toss-community/docs/issues/new
 ```

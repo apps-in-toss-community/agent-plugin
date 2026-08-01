@@ -4,6 +4,10 @@
 
 Community plugin for building [Apps in Toss](https://toss.im/) mini-apps from inside coding agents — currently supports [Claude Code](https://claude.com/claude-code). Codex and other agents are planned for later phases.
 
+This project is no longer maintained. The repo is being archived and becomes read-only; the source and issue history stay on GitHub. This plugin ships as the Git repo itself rather than an npm package, so `/plugin marketplace add apps-in-toss-community/agent-plugin` keeps working after the archive, but it will not be updated. The `aitc.dev` domain and the sites served on it are being shut down, so the documentation links now point at GitHub sources — the community docs links printed by the skills resolve to source files in [`apps-in-toss-community/docs`](https://github.com/apps-in-toss-community/docs).
+
+Two parts of this repo depended on that domain. Environment 2 (real-device PWA preview), which `/ait:setup-phone-preview` and `/ait:debug` walk you through, has its entry point — the launcher PWA — hosted at `https://devtools.aitc.dev/launcher/`, and the tunnel QR / deep-link is built against that address; there is no replacement host. The shared oidc-bridge instance (`oidc-bridge.aitc.dev`) that `/ait:auth-setup` used as its default is also going away, leaving self-hosting the [`oidc-bridge`](https://github.com/apps-in-toss-community/oidc-bridge) source as the remaining path. Launchers already installed on a phone cannot be updated retroactively.
+
 ## Goal
 
 Ties together `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, and the community docs into a single integrated experience. Slash commands available today:
@@ -61,7 +65,7 @@ This is a developer convenience for fast feedback before push. CI runs the same 
 
 ## Status
 
-See the [organization landing page](https://aitc.dev/) for the full roadmap.
+Related repos live on the [organization's GitHub](https://github.com/apps-in-toss-community).
 
 ---
 

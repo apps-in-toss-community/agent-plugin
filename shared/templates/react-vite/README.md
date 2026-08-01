@@ -43,8 +43,8 @@ pnpm preview    # 로컬에서 빌드 결과 확인
 
 ## 참고
 
-- 커뮤니티 SDK 레퍼런스 앱: <https://sdk-example.aitc.dev/>
-- 커뮤니티 docs: <https://docs.aitc.dev/>
+- 커뮤니티 SDK 레퍼런스 앱: <https://github.com/apps-in-toss-community/sdk-example>
+- 커뮤니티 docs: <https://github.com/apps-in-toss-community/docs>
 - 이슈/제안: <https://github.com/apps-in-toss-community>
 
 ---

@@ -76,7 +76,7 @@ argument-hint: ''
 픽스처 skill 이다.
 
 <!-- docs deep-link (A2/docs-deeplink-required 통과용) -->
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 ## 실행
 
@@ -284,7 +284,7 @@ argument-hint: ''
 
 다른 제목으로 시작하면 안 된다.
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 \`\`\`
 /ait:new
@@ -311,7 +311,7 @@ argument-hint: ''
 
 본문.
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 \`\`\`
 /ait:new
@@ -322,7 +322,7 @@ argument-hint: ''
     expect(rulesFired(violations)).toContain('A2/blockquote-after-heading');
   });
 
-  it('A2/docs-root-link — docs.aitc.dev 루트 링크는 위반이 난다', async () => {
+  it('A2/docs-root-link — docs repo 루트 링크는 위반이 난다', async () => {
     buildValidFixture(tmpDir);
     const broken = `---
 name: ${SKILL_NAME}
@@ -336,7 +336,7 @@ argument-hint: ''
 
 본문.
 
-[전체 문서](https://docs.aitc.dev)
+[전체 문서](https://github.com/apps-in-toss-community/docs)
 
 \`\`\`
 /ait:new
@@ -386,7 +386,7 @@ argument-hint: ''
 
 본문. seam 없음.
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 ## 참고
 
@@ -412,7 +412,7 @@ argument-hint: ''
 
 본문. 다음으로 /ait:new 를 실행하세요 (산문에만 있음).
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 `;
     writeFile(path.join(tmpDir, 'shared', 'skills', SKILL_NAME, 'SKILL.md'), broken);
     const { violations } = await runChecks(tmpDir);
@@ -552,7 +552,7 @@ argument-hint: ''
 
 본문.
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 \`\`\`
 /ait:deploy-bundle
@@ -585,7 +585,7 @@ argument-hint: ''
 
 이전엔 /ait:deploy-bundle 를 안내했지만 지금은 아래 명령을 쓰세요 (산문 언급).
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 \`\`\`
 /ait:new
@@ -612,7 +612,7 @@ argument-hint: ''
 
 본문.
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 \`\`\`
 /ait new
@@ -656,7 +656,7 @@ argument-hint: ''
 
 본문.
 
-[가이드](https://docs.aitc.dev/guides/fixture-guide)
+[가이드](https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/fixture-guide.mdx)
 
 \`\`\`
 /ait:new

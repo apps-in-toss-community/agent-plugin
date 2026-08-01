@@ -150,5 +150,5 @@ Sentry DSN을 준비했다면 에이전트에게 Sentry 설정을 요청하세�
 ## 배경
 
 - console-cli: https://github.com/apps-in-toss-community/console-cli
-- 이벤트 로깅 가이드: https://docs.aitc.dev/guides/event-logging
+- 이벤트 로깅 가이드: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/event-logging.mdx
 - `aitcc logs` deferred (2026-05-02, 콘솔 측 런타임 로그 endpoint 부재 확정) — GitHub Project harness roadmap 추적

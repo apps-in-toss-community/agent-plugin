@@ -21,6 +21,13 @@ Vite dev server가 뜰 때 Cloudflare quick tunnel을 자동으로 열고, 터�
 (`https://devtools.aitc.dev/launcher/`) 안에서 열면 폰 홈 화면에 고정된
 앱처럼 실행된다.
 
+launcher PWA를 호스팅하는 `devtools.aitc.dev`는 `aitc.dev` 도메인 정리와
+함께 사라지며 대체 호스트가 없다. `@ait-co/devtools`가 출력하는 터널 QR /
+deep-link도 그 주소로 만들어진다(`https://devtools.aitc.dev/launcher/?url=…`).
+이미 배포된 패키지 버전과 폰에 이미 설치된 launcher에는 이 사실을 소급
+적용할 수 없다. 이 skill이 배선하는 나머지(cloudflared 터널·`dev:phone`
+스크립트·CDP relay)는 `aitc.dev` 호스트에 의존하지 않는다.
+
 이 skill이 완료되면:
 - `pnpm dev:phone` 한 번으로 터미널에 URL + QR이 뜬다.
 - 폰에서 launcher PWA를 홈 화면에 한 번 추가해두면 매일 QR 스캔만으로 새 tunnel URL에 접속된다.
@@ -304,6 +311,7 @@ setup-phone-preview 완료
     Android Chrome: ⋮ → "앱 설치" 또는 "홈 화면에 추가"
 
   이 launcher는 URL이 고정되어 있어 매일 다시 설치할 필요 없습니다.
+  다만 이 호스트는 aitc.dev 도메인 정리와 함께 사라지며 대체 호스트가 없습니다.
 
 [화면 미리보기 — screen-only]
   pnpm dev:phone          # AIT_TUNNEL=1 만 (앱 HTTP 터널)
@@ -370,11 +378,11 @@ setup-phone-preview 완료
 
 ## 참고
 
-- 커뮤니티 docs — 실기기 PWA 미리보기(환경 2)와 dev 환경 fidelity 사다리: https://docs.aitc.dev/guides/dev-environment
+- 커뮤니티 docs — 실기기 PWA 미리보기(환경 2)와 dev 환경 fidelity 사다리: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/dev-environment.mdx
 - 짝 skill: `inject-devtools` (`@ait-co/devtools` 신규 설치 + vite.config 기본 설정 — `setup-phone-preview`보다 먼저 실행), `inject-polyfill` (polyfill 병행 사용 시), `debug` (이 skill의 tunnel 위에서 도는 relay-sandbox on-device 디버깅), `deploy` (tunnel 검증 후 앱인토스 배포).
 - devtools tunnel 구현 (PR #131): https://github.com/apps-in-toss-community/devtools/pull/131
 - sdk-example wiring 사례 (PR #59): https://github.com/apps-in-toss-community/sdk-example/pull/59
 - devtools README "Run on a real phone" 섹션: https://github.com/apps-in-toss-community/devtools
-- launcher PWA: https://devtools.aitc.dev/launcher/
+- launcher PWA: https://devtools.aitc.dev/launcher/ (이 호스트는 `aitc.dev` 도메인 정리와 함께 사라지며 대체 호스트가 없다 — launcher 소스는 `devtools` repo의 `e2e/fixture/launcher/`)
 - cloudflared quick tunnel 문서: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/
-- 커뮤니티: https://aitc.dev/
+- 커뮤니티: https://github.com/apps-in-toss-community

@@ -45,7 +45,7 @@
   "bugs": {
     "url": "https://github.com/apps-in-toss-community/agent-plugin/issues"
   },
-  "homepage": "https://aitc.dev/",
+  "homepage": "https://github.com/apps-in-toss-community/agent-plugin",
   "vitest": {
     "include": [
       "shared/**/*.test.ts",
