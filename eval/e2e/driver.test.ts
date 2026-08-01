@@ -68,13 +68,23 @@ describe('isForbiddenBashCommand', () => {
 });
 
 // init assert 의 키 매칭. slash-command 키는 command 파일의 basename 이고, 플러그인으로
-// 얹히면 `ait:<basename>` 이 된다 — 2026-07-27 실측(#226). skill 도 같은 목록에 자기
-// 디렉토리 이름으로 오른다. `"ait new"` 같은 다단어 키는 어느 형상에도 존재하지 않는다.
+// 얹히면 `ait:<basename>` 이 된다 — 2026-07-27 실측(#226). 설치 형상에서는 skill 도 같은
+// `slash_commands` 목록에 `ait:<디렉토리 이름>` 으로 함께 오른다(#286 init dump 실측).
+// `"ait new"` 같은 다단어 키는 어느 형상에도 존재하지 않는다.
 //
 // 아래 픽스처는 **현재 출하되는 표면**에서 뽑는다 — #286 을 닫은 #290 이 facet stub 6개를
 // bare verb 로 개명해(`shared/commands/ait-new.md` → `new.md`) `ait-new` 는 어느 형상에도
 // 없고, 드라이버가 실제로 디스패치하는 키는 `new`(= driver.ts `DISPATCH_COMMAND`)다.
-// 픽스처가 옛 basename 을 들고 있으면 개명 회귀를 못 잡으므로 현재 키로 고정한다.
+//
+// **이 픽스처는 개명 회귀를 잡지 않는다.** 아래 배열은 하드코딩 리터럴이고 이 파일은
+// `shared/commands/` 를 읽지 않는다 — `new.md` 를 `ait-new.md` 로 되돌려도 이 테스트는
+// 전부 통과한다. 픽스처를 현재 키로 맞추는 이유는 감지력이 아니라, 테스트가 더 이상
+// 출하되지 않는 이름을 정본처럼 들고 있지 않게 하려는 것뿐이다.
+//
+// 실제 개명 가드는 `scripts/validate-plugin.mjs` 의 `A1/routing-mismatch` 다 —
+// `EXPECTED_CMD_TO_SKILL` 이 `shared/commands/` basename 전수를 열거하고 실제 디렉토리와
+// 양방향 대조하므로, 개명하면 "스냅샷에 있는데 파일 없음" + "파일 있는데 스냅샷에 없음"
+// 두 건이 hard-fail 로 뜬다.
 describe('exposesKey', () => {
   // project 형상(이 드라이버): `.claude/{commands,skills}` → `shared/{commands,skills}` symlink.
   const PROJECT_COMMANDS = ['changeset', 'ait-auth-setup', 'ait-setup-bundle', 'new', 'logs'];
