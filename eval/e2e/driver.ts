@@ -241,8 +241,6 @@ export async function runOnce(opts: DriverOptions): Promise<RunRecord> {
         // 앞에 `<plugin>:`이 붙어 `ait:new`가 된다. 이 드라이버는 project
         // `.claude/commands` 형상이라 접두어 없는 쪽이지만, 같은 코드가 설치
         // 형상에서도 통하도록 `:` suffix 매칭을 함께 허용한다.
-        // skill 도 같은 목록에 오르므로(`ait:plan` 등) stub 없는 verb 도 이 검사를
-        // 통과한다 — SETUP_BUNDLE_COMMAND 가 그 경우다.
         initOk =
           exposesKey(initSlashCommands, DISPATCH_COMMAND) && exposesKey(initSkills, 'new-miniapp');
         if (opts.logInit) {

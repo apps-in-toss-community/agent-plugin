@@ -86,10 +86,8 @@ command 키는 **command 파일의 basename**이다. `"ait new"`(다단어)도 `
 **두 열이 어느 init 필드에 실리나**: init 메시지는 `slash_commands`와 `skills`를 따로 주고
 드라이버는 둘 다 읽는다. 설치 형상에서는 skill 키가 `skills`뿐 아니라 **`slash_commands`에도
 함께** 오르고, 그게 대응 stub이 없는 verb도 그 자체로 호출되는 이유다 — #286이 init dump로
-실측했다(설치 형상 배열에 stub 키 `ait:ait-auth-setup`과 skill 키 `ait:auth-setup`이 나란히
-있었다). 문서화된 verb 18개 중 12개가 그 경로다(#290). project 형상의 `slash_commands`에도
-skill이 함께 오르는지는 측정된 적이 없다 — 드라이버는 그쪽 skill을 별도 `skills` 필드에서
-읽으므로(`exposesKey(initSkills, 'new-miniapp')`) 이 질문에 의존하지 않는다.
+실측했다(설치 형상 배열에 stub 키 `ait:ait-auth-setup`과 skill 키 `ait:auth-setup`이 둘 다
+있었다). 문서화된 verb 18개 중 12개가 그 경로다(#290).
 
 `/ait:new`는 설치 형상에 **실재하는 명령**이다. #286을 닫은 #290이 facet stub 6개를 bare verb로
 개명하면서(`shared/commands/ait-new.md` → `new.md`) 그렇게 됐고, 같은 개명으로 `ait-new`는 어느
@@ -99,8 +97,7 @@ skill이 함께 오르는지는 측정된 적이 없다 — 드라이버는 그�
 이 드라이버는 project 형상이라 접두어 없는 `/new`를 디스패치하고(`driver.ts`의
 `DISPATCH_COMMAND`), init assert도 그 키를 정확히 확인한다(`new` 명령 + `new-miniapp` skill 둘 다
 노출됐는가). 접두어가 붙는 설치 형상에서도 같은 코드가 통하도록 `exposesKey`가 `:` suffix 매칭을
-함께 허용한다. 2단계(`/setup-bundle`)는 bare stub이 없고 **skill 이름으로** 해석된다 —
-`ait-setup-bundle.md` stub은 `ait:ait-setup-bundle`이라 문서 경로가 아니다.
+함께 허용한다.
 
 **어디까지 실측인가**: "키 = basename, 설치 형상은 `ait:` 접두, 설치 형상에서는 skill도
 `slash_commands`에 함께 오름" 규칙은 2026-07-27 실측이다. 개명 후 설치 형상에서 문서화된 verb
