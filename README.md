@@ -4,6 +4,10 @@
 
 AI 코딩 에이전트 안에서 앱인토스 미니앱을 생성·개발·테스트·배포까지 할 수 있게 해주는 커뮤니티 플러그인입니다. 현재 [Claude Code](https://claude.com/claude-code)를 지원하며, Codex 등 다른 에이전트는 후속 Phase에서 추가됩니다.
 
+이 프로젝트는 더 이상 유지보수되지 않습니다. repo는 archive되어 read-only가 되며, 소스와 이슈 기록은 GitHub에 그대로 남습니다. 이 플러그인은 npm 패키지가 아니라 Git repo 자체가 배포 산출물이므로 archive 후에도 `/plugin marketplace add apps-in-toss-community/agent-plugin`으로 설치할 수 있지만, 더 이상 업데이트되지 않습니다. `aitc.dev` 도메인과 그 위에서 서비스하던 사이트도 함께 종료되므로, 문서 링크는 GitHub 소스를 가리키도록 바꿨습니다 — skill이 인쇄하는 커뮤니티 docs 링크는 이제 [`apps-in-toss-community/docs`](https://github.com/apps-in-toss-community/docs)의 소스 파일입니다.
+
+이 repo에서 그 도메인에 의존하던 부분은 두 곳입니다. `/ait:setup-phone-preview`·`/ait:debug`가 안내하는 환경 2(실기기 PWA 미리보기)는 진입점인 launcher PWA가 `https://devtools.aitc.dev/launcher/`에 배포돼 있고 터널 QR / deep-link도 그 주소로 만들어지는데, 대체 호스트가 없습니다. `/ait:auth-setup`이 기본값으로 삼던 공용 oidc-bridge 인스턴스(`oidc-bridge.aitc.dev`)도 함께 내려가며, 남는 경로는 [`oidc-bridge`](https://github.com/apps-in-toss-community/oidc-bridge) 소스를 직접 호스팅하는 self-host입니다. 이미 폰에 설치된 launcher에는 이 사실을 소급 적용할 수 없습니다.
+
 ## 목표
 
 `@ait-co/devtools`, `sdk-example`, `@ait-co/polyfill`, 커뮤니티 docs를 엮어 하나의 통합된 경험을 제공합니다. 현재 제공하는 slash command:
@@ -61,7 +65,7 @@ git config core.hooksPath .githooks
 
 ## 현황
 
-전체 로드맵은 [organization landing page](https://aitc.dev/) 참조.
+관련 repo는 [조직 GitHub](https://github.com/apps-in-toss-community)에서 볼 수 있습니다.
 
 ---
 

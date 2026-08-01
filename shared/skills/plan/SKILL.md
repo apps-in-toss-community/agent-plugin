@@ -203,8 +203,8 @@ SDK 도메인 (필요)
 - 짝 skill: `new-miniapp` (`/ait:new`) — 이 계획대로 빈 프로젝트를 만드는 다음 station.
 - 짝 skill: `docs` (`/ait:docs <topic>`) — 도메인·권한·약관 매핑이 불확실할 때 라이브로 확인하는 로더.
 - 짝 skill: `register` — 약관 동의(`aitcc workspace terms agree`)와 매니페스트 생성을 실제로 수행하는 단계.
-- 약관·권한 패턴 가이드: https://docs.aitc.dev/guides/permissions-pattern
-- 토스 로그인 흐름: https://docs.aitc.dev/guides/auth-flow
-- IAP 결제 흐름: https://docs.aitc.dev/guides/iap-payment-flow
+- 약관·권한 패턴 가이드: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/permissions-pattern.mdx
+- 토스 로그인 흐름: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/auth-flow.mdx
+- IAP 결제 흐름: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/iap-payment-flow.mdx
 - console-cli 약관 명령(`aitcc workspace terms`): https://github.com/apps-in-toss-community/console-cli
-- SDK 도메인 18종을 인터랙티브하게 확인: https://sdk-example.aitc.dev/
+- SDK 도메인 18종을 실증하는 레퍼런스 앱 소스: https://github.com/apps-in-toss-community/sdk-example

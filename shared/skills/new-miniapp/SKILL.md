@@ -260,7 +260,7 @@ pnpm 11을 가정합니다 (`packageManager` 필드). 다른 매니저를 쓰려
   /ait:deploy-key    # Deploy Key 발급 — 처음 배포면 deploy 전에
   /ait:deploy        # 번들을 콘솔에 업로드 (ait build → ait deploy --profile <name>)
 
-문서: https://docs.aitc.dev/  (커뮤니티 docs)
+문서: https://github.com/apps-in-toss-community/docs  (커뮤니티 docs)
 ```
 
 `pnpm install`을 건너뛰었으면 안내에 `pnpm install`을 한 줄 추가.
@@ -341,6 +341,6 @@ pnpm --dir <project_abs_path> dev
 - 짝 skill: `inject-devtools` (기존 프로젝트에 devtools 추가),
   `inject-polyfill` (polyfill 모드 마이그레이션), `design` (등록 이미지 자산 생성), `deploy`.
 - devtools 사용법 / 지원 SDK 버전: https://github.com/apps-in-toss-community/devtools
-- SDK 레퍼런스 앱: https://sdk-example.aitc.dev/ (이 템플릿의 dog-fooded
+- SDK 레퍼런스 앱: https://github.com/apps-in-toss-community/sdk-example (이 템플릿의 dog-fooded
   consumer)
 - 템플릿 디렉토리 정책: `shared/templates/README.md`

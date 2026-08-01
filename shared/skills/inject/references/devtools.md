@@ -211,7 +211,7 @@ module.exports = {
       import '@ait-co/devtools/panel';
   - devtools는 NODE_ENV=development 에서만 활성화됩니다 (production 빌드엔 미포함).
   - 문서: https://github.com/apps-in-toss-community/devtools
-  - 커뮤니티: https://aitc.dev/
+  - 커뮤니티: https://github.com/apps-in-toss-community
 ```
 
 ## devtools facet 하지 말아야 할 것

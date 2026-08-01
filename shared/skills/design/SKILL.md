@@ -282,5 +282,5 @@ UX 매핑:
 
 - 짝 skill: `register` (생성한 자산으로 콘솔 등록 — design 바로 뒤 단계).
 - 짝 skill: `new-miniapp` (greenfield 프로젝트 생성 — 디자인을 입힐 대상이 없을 때 먼저).
-- 커뮤니티 docs — 진입·종료·화면 컨텍스트, swipe-back/PageHeader: https://docs.aitc.dev/guides/navigation-flow
-- 커뮤니티 docs — 상단 네비게이션 바 악세서리 버튼(`partner.addAccessoryButton` 라이프사이클): https://docs.aitc.dev/guides/accessory-button-ux
+- 커뮤니티 docs — 진입·종료·화면 컨텍스트, swipe-back/PageHeader: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/navigation-flow.mdx
+- 커뮤니티 docs — 상단 네비게이션 바 악세서리 버튼(`partner.addAccessoryButton` 라이프사이클): https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/accessory-button-ux.mdx

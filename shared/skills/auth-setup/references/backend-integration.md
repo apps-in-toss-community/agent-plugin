@@ -9,9 +9,9 @@ mini-app은 authorizationCode를 **자신의 백엔드**로 전달하고, 백엔
 ```ts
 // supabase/functions/toss-login/index.ts
 // 필수 환경변수(supabase secrets set으로 설정):
-//   OIDC_BRIDGE_BASE_URL       e.g. https://oidc-bridge.aitc.dev
+//   OIDC_BRIDGE_BASE_URL       self-host bridge 주소 (커뮤니티 공용 인스턴스는 종료됨)
 //   OIDC_BRIDGE_CLIENT_ID      bridge에 등록된 client_id
-//   OIDC_BRIDGE_TENANT_ID      공용 인스턴스만; self-host는 비움 (루트 마운트)
+//   OIDC_BRIDGE_TENANT_ID      tenant-scoped 마운트인 경우만; 루트 마운트는 비움
 //   OIDC_BRIDGE_CLIENT_SECRET  (optional) confidential client만
 
 Deno.serve(async (req) => {
@@ -19,11 +19,11 @@ Deno.serve(async (req) => {
 
   const baseUrl = Deno.env.get('OIDC_BRIDGE_BASE_URL');
   const clientId = Deno.env.get('OIDC_BRIDGE_CLIENT_ID');
-  const tenantId = Deno.env.get('OIDC_BRIDGE_TENANT_ID'); // 공용 인스턴스만; self-host는 비움
+  const tenantId = Deno.env.get('OIDC_BRIDGE_TENANT_ID'); // tenant-scoped 마운트만; 루트 마운트는 비움
   const clientSecret = Deno.env.get('OIDC_BRIDGE_CLIENT_SECRET');
 
-  // 공용 인스턴스는 tenant-scoped dispatcher → /t/<tenantId>/oidc/token
-  // self-host는 루트 마운트 → /oidc/token
+  // tenant-scoped 마운트 → /t/<tenantId>/oidc/token
+  // 루트 마운트(self-host 기본) → /oidc/token
   const tokenUrl = tenantId
     ? `${baseUrl}/t/${tenantId}/oidc/token`
     : `${baseUrl}/oidc/token`;
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
 
 ## bridge token 엔드포인트 요청 형태
 
-`POST /t/<tenantId>/oidc/token  (공용 인스턴스)  ·  POST /oidc/token  (self-host)`
+`POST /oidc/token  (self-host 루트 마운트)  ·  POST /t/<tenantId>/oidc/token  (tenant-scoped 마운트)`
 
 ```jsonc
 POST /t/<tenantId>/oidc/token   // 공용 인스턴스 — tenant-scoped dispatch
@@ -123,14 +123,14 @@ supabase functions deploy toss-login --no-verify-jwt
 supabase secrets set OIDC_BRIDGE_BASE_URL=<bridge-url>
 supabase secrets set OIDC_BRIDGE_CLIENT_ID=<client_id>
 
-# 공용 인스턴스(oidc-bridge.aitc.dev)인 경우만 추가 — self-host는 생략
+# tenant-scoped 마운트인 경우만 추가 — 루트 마운트는 생략
 # supabase secrets set OIDC_BRIDGE_TENANT_ID=<tenantId>
 
 # confidential client인 경우만 추가
 # supabase secrets set OIDC_BRIDGE_CLIENT_SECRET=<client_secret>
 ```
 
-`<bridge-url>`, `<client_id>`, `<tenantId>`, `<client_secret>`은 반드시 실제 발급 값으로 교체한다 — 값을 예시 그대로 두면 런타임 인증이 실패한다. 발급 값은 SKILL.md §2.5 item 1에서 확보한 client_id·tenantId와 bridge URL이다.
+`<bridge-url>`, `<client_id>`, `<tenantId>`, `<client_secret>`은 반드시 실제 발급 값으로 교체한다 — 값을 예시 그대로 두면 런타임 인증이 실패한다. 발급 값은 SKILL.md §2.5 item 1에서 확보한 client_id와 self-host bridge URL이다.
 
 배포가 완료되면 Supabase 대시보드 Edge Functions 탭에서 `toss-login` 함수가 `Active` 상태인지 확인한다.
 
@@ -173,8 +173,7 @@ const { data, error } = await supabase.auth.signInWithIdToken({
 import { OAuthProvider, getAuth, signInWithCredential } from 'firebase/auth';
 
 // Firebase 프로젝트에서 OIDC provider를 등록해야 한다.
-// issuer — 공용 인스턴스: https://oidc-bridge.aitc.dev/t/<tenantId>
-//         self-host:     <bridge-url>  (루트 마운트, tenantId 없음)
+// issuer — self-host: <bridge-url>  (루트 마운트, tenantId 없음)
 const provider = new OAuthProvider('oidc.<your-provider-id>');
 // id_token을 credential로 변환해 그대로 로그인한다.
 const credential = provider.credential({ idToken: id_token });

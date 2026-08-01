@@ -243,8 +243,8 @@ aitcc login은 시스템 Chrome 창을 엽니다 — 열린 창에서 앱인토�
 
 ## 참고
 
-- 커뮤니티 docs — `app status`(클라이언트 derive) vs `app service-status`(서버 권위)·PREPARE vs OPENED·상태별 next-step: https://docs.aitc.dev/guides/operate-mini-app
-- 커뮤니티 docs — 이벤트 로깅 (logs facet 대안 1): https://docs.aitc.dev/guides/event-logging
+- 커뮤니티 docs — `app status`(클라이언트 derive) vs `app service-status`(서버 권위)·PREPARE vs OPENED·상태별 next-step: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/operate-mini-app.mdx
+- 커뮤니티 docs — 이벤트 로깅 (logs facet 대안 1): https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/event-logging.mdx
 - console-cli 명령 레퍼런스: https://github.com/apps-in-toss-community/console-cli
 - 짝 skill: `deploy` (이 skill이 안전하다고 알려준 뒤 deploy로 넘어가는 흐름)
 - 짝 skill: `debug` (logs facet 환경 1: 브라우저 상태·콘솔 오류 캡처 / 환경 3: on-device CDP relay로 배포된 앱의 실 토스 WebView 런타임 관측)

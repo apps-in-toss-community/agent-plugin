@@ -171,7 +171,8 @@ CDP(Chrome DevTools Protocol) relay로 attach해야 관측된다.
 폰 디버깅은 두 환경 중 하나다. 사용자가 어느 환경을 보는지로 가른다:
 
 - **환경 2 (AITC Sandbox App (PWA))** — 토스 앱·검수 없이 실기기 WebKit 엔진을 볼 수 있는
-  launcher PWA(`devtools.aitc.dev/launcher/`). 전제: `/ait:setup-phone-preview`가 `vite.config`에
+  launcher PWA(`devtools.aitc.dev/launcher/` — 이 호스트는 `aitc.dev` 도메인 정리와 함께
+  사라지며 대체 호스트가 없다). 전제: `/ait:setup-phone-preview`가 `vite.config`에
   tunnel 옵션(`tunnel: process.env.AIT_TUNNEL ? { cdp: !!process.env.AIT_TUNNEL_CDP } : false`)을
   주입하고 `dev:phone:cdp` 스크립트를 추가해야 한다(안 돼 있으면 먼저 실행). 이 skill이
   **`pnpm dev:phone:cdp`**(`AIT_TUNNEL=1 AIT_TUNNEL_CDP=1`)로 dev 서버를 자동 기동해
@@ -316,11 +317,10 @@ attach가 완료된 상태(5-D에서 `list_pages`로 페이지가 확인된 후)
 - 환경 3 진입 시나리오 + QR relay 흐름: https://github.com/apps-in-toss-community/devtools/blob/main/docs/scenarios/env-3.md
 - dogfood relay 루프 (candidate 빌드 → QR 스캔 → attach → 관측 사이클): https://github.com/apps-in-toss-community/devtools/blob/main/docs/dogfood-relay-loop.md
 - devtools (mock + panel + unplugin, 브라우저 dev 전용): https://github.com/apps-in-toss-community/devtools
-- devtools live demo: https://devtools.aitc.dev/
 - on-device debug MCP 데몬(`start_debug`/`start_attach` 등 attach 도구): `@ait-co/debugger`(`/mcp/server` + `/mcp/cli` exports, `debugger`·`debugger-test` bin) — plugin manifest `mcpServers."ait-devtools"`가 `npx -y -p @ait-co/debugger debugger`로 기동. server key `ait-devtools`는 유지하되 실제 데몬 패키지는 `@ait-co/debugger`다(Phase 3 분리, 이전에는 devtools repo의 `devtools-mcp` bin이었다): https://github.com/apps-in-toss-community/debugger
 - on-device attach 런타임(WebView 안에서 relay에 붙는 코드 + eruda): `@ait-co/debug-console`(`.` + `/auto` exports) — 환경 3(intoss-private candidate)은 `ait build` production-adjacent 빌드라 devtools unplugin의 dev-only CDP 브리지가 자동 비활성화되므로, attach 표면을 남기려면 미니앱 `dependencies`로 별도 설치해야 한다. 설치·와이어업은 `/ait:inject-debug-console` (`inject` skill의 debug-console facet)이 담당한다.
 - env-2 부트스트랩 설계 근거 (approach B): https://github.com/apps-in-toss-community/devtools/issues/428
-- 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://docs.aitc.dev/guides/navigation-flow
-- 커뮤니티 docs — on-device CDP relay 디버깅 구조·진입 경로: https://docs.aitc.dev/guides/debug-relay
-- 커뮤니티 docs — relay TOTP 인증(터널 URL 유출 차단): https://docs.aitc.dev/guides/relay-auth-totp
+- 커뮤니티 docs — lifecycle 디버깅(swipe-back 등): https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/navigation-flow.mdx
+- 커뮤니티 docs — on-device CDP relay 디버깅 구조·진입 경로: https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/debug-relay.mdx
+- 커뮤니티 docs — relay TOTP 인증(터널 URL 유출 차단): https://github.com/apps-in-toss-community/docs/blob/main/docs/guides/relay-auth-totp.mdx
 - 환경 3겹 설계: umbrella CLAUDE.md §1.1 + meta/three-environments-fidelity.md

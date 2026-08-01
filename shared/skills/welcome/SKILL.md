@@ -49,7 +49,7 @@ Apps in Toss Community 플러그인이 설치됐습니다. (커뮤니티 오픈�
   /ait:inject-devtools  # 기존 프로젝트에 devtools 주입
   /ait:status           # 이미 등록된 앱의 현재 위치 확인
 
-문서: https://docs.aitc.dev/  (커뮤니티 docs)
+문서: https://github.com/apps-in-toss-community/docs  (커뮤니티 docs)
 ```
 
 ## Out of scope
